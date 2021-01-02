@@ -22,7 +22,7 @@ dependencies {
     testImplementation("org.assertj:assertj-core:3.18.1")
 
     implementation("org.eclipse.jgit:org.eclipse.jgit:5.10.0.202012080955-r")
-    implementation("org.slf4j:slf4j-api:2.0.0-alpha1")
+    implementation("org.slf4j:slf4j-api:1.7.30")
 }
 
 gradlePlugin {

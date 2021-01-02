@@ -3,12 +3,12 @@
  */
 package git.semver.plugin.gradle
 
-import java.io.File
+import org.assertj.core.api.Assertions.assertThat
+import org.eclipse.jgit.api.Git
+import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.GradleRunner
+import java.io.File
 import kotlin.test.Test
-import kotlin.test.assertFalse
-import kotlin.test.assertTrue
-import org.assertj.core.api.Assertions.*
 
 /**
  * A simple functional test for the 'git.semver.plugin.gradle.greeting' plugin.
@@ -19,6 +19,7 @@ class GitSemverPluginFunctionalTest {
 
         val projectDir = File("build/functionalTest")
         projectDir.mkdirs()
+        projectDir.resolve(".gitignore").writeText(".*")
         projectDir.resolve("settings.gradle").writeText("include ':sub1'")
         projectDir.resolve("build.gradle").writeText("""
             plugins {
@@ -32,32 +33,47 @@ class GitSemverPluginFunctionalTest {
             allprojects {
               version = semver.version
             }
+            
             task testTask(dependsOn:printVersion) {
-            doLast {
-              println "ProjVer: " + project.version 
+              doLast {
+                 println "ProjVer: " + project.version 
               }
             }
         """)
 
-        var subProjectDir = File("build/functionalTest/sub1")
+        val subProjectDir = File("build/functionalTest/sub1")
         subProjectDir.mkdirs()
         subProjectDir.resolve("build.gradle").writeText("""
             println("Sub1: " + project.version)            
         """.trimIndent())
 
-        // Run the build
-        val runner = GradleRunner.create()
-        runner.forwardOutput()
-        runner.withPluginClasspath()
-        runner.withArguments("--stacktrace")
-        runner.withArguments("testTask")
-        runner.withProjectDir(projectDir)
 
-        val result = runner.build();
+        Git.init().setDirectory(projectDir).call().use {
+            it.add().addFilepattern(".").call()
+            it.commit().setMessage("test: files").call()
+        }
+
+        // Run the build
+        val releaseResult = run(projectDir, "release")
+
+        assertThat(releaseResult.output).doesNotContain("Exception")
+
+        // Run the build
+        val result = run(projectDir, "testTask")
 
         // Verify the result
         assertThat(result.output).containsPattern("Version: \\d+\\.\\d+\\.\\d+")
         assertThat(result.output).containsPattern("ProjVer: \\d+\\.\\d+\\.\\d+")
         //assertThat(result.output).containsPattern("Sub1: \\d+\\.\\d+\\.\\d+")
+    }
+
+    private fun run(projectDir: File, vararg args: String): BuildResult {
+        val runner = GradleRunner.create()
+        runner.forwardOutput()
+        runner.withPluginClasspath()
+        runner.withArguments("--stacktrace")
+        args.iterator().forEach {  runner.withArguments(it) }
+        runner.withProjectDir(projectDir)
+        return runner.build()
     }
 }

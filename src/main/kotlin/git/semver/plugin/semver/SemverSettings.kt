@@ -1,4 +1,4 @@
-package git.semver.plugin.gradle.semver
+package git.semver.plugin.semver
 
 open class SemverSettings {
 
@@ -7,6 +7,9 @@ open class SemverSettings {
     var patchPattern: String ="\\Afix(?:\\(\\w+\\))?:"
     var minorPattern: String ="\\Afeat(?:\\(\\w+\\))?:"
     var majorPattern: String ="\\A\\w+(?:\\(\\w+\\))?!:|^BREAKING[ -]CHANGE:"
+    var releaseCommitTextFormat = "release: v%s\n\n%s"
+    var releaseTagNameFormat = "%s"
+
 
     val releaseRegex: Regex by lazy { releasePattern.toRegex(setOf(RegexOption.IGNORE_CASE, RegexOption.MULTILINE)) }
     val patchRegex: Regex by lazy { patchPattern.toRegex(setOf(RegexOption.IGNORE_CASE, RegexOption.MULTILINE)) }

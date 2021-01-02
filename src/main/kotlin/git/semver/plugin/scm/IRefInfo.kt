@@ -1,4 +1,4 @@
-package git.semver.plugin.gradle.scm
+package git.semver.plugin.scm
 
 interface IRefInfo {
     val text: String

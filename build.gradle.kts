@@ -39,7 +39,7 @@ pluginBundle {
     website = "https://github.com/jmongard/Git.SemVersioning.Gradle"
     vcsUrl = "https://github.com/jmongard/Git.SemVersioning.Gradle"
     description = "Project versioning based on semantic versioning via git tags"
-    tags = listOf("git", "kotlin", "semver", "semantic-versioning", "version", "semantic", "release")
+    tags = listOf("git", "kotlin", "semver", "semantic-versioning", "version", "semantic", "release", "conventional", "conventional-commits")
 
     (plugins) {
         "gitSemverPlugin" {

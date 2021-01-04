@@ -179,11 +179,27 @@ class SemVersion(
         bumpPre = 0
     }
 
-    fun toVersionString(): String {
-        return "${majorVersion}.${minorVersion}.${patchVersion}"
+    fun toVersionString(v2:Boolean = true): String {
+        return getVersionBuilder(v2).toString();
     }
 
     fun toInfoVersionString(commitCountStringFormat: String = "%03d", shaLength: Int = 0, v2: Boolean = true): String {
+        val builder = getVersionBuilder(v2)
+        if (v2) {
+            var metaSeparator = '+'
+            val commitCount = commitCount
+            if (commitCount > 0 && commitCountStringFormat.isNotEmpty()) {
+                builder.append(metaSeparator).append(commitCountStringFormat.format(commitCount))
+                metaSeparator = '.'
+            }
+            if (shaLength > 0) {
+                builder.append(metaSeparator).append("sha.").append(sha.take(shaLength))
+            }
+        }
+        return builder.toString()
+    }
+
+    private fun getVersionBuilder(v2: Boolean): StringBuilder {
         val builder = StringBuilder()
         builder.append(majorVersion).append('.').append(minorVersion).append('.').append(patchVersion)
 
@@ -198,18 +214,7 @@ class SemVersion(
                 builder.append(preReleaseVersion)
             }
         }
-        if (v2) {
-            var metaSeparator = '+'
-            val commitCount = commitCount
-            if (commitCount > 0 && commitCountStringFormat.isNotEmpty()) {
-                builder.append(metaSeparator).append(commitCountStringFormat.format(commitCount))
-                metaSeparator = '.'
-            }
-            if (shaLength > 0) {
-                builder.append(metaSeparator).append("sha.").append(sha.take(shaLength))
-            }
-        }
-        return builder.toString()
+        return builder
     }
 
     override fun toString(): String {

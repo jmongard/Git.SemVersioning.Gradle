@@ -30,7 +30,7 @@ class VersionFinderTest {
         val versions = getVersion(commits, tags)
 
         // then
-        assertEquals("1.3.1", versions.toVersionString())
+        assertEquals("1.3.1-RC", versions.toVersionString())
         assertEquals("1.3.1-RC+003", versions.toInfoVersionString())
     }
 
@@ -44,7 +44,7 @@ class VersionFinderTest {
         val versions = getVersion(commits, tags)
 
         // then
-        assertEquals("1.2.2", versions.toVersionString())
+        assertEquals("1.2.2-SNAPSHOT", versions.toVersionString())
         assertEquals("1.2.2-SNAPSHOT+006", versions.toInfoVersionString())
     }
 
@@ -62,7 +62,7 @@ class VersionFinderTest {
         val versions = getVersion(commits, tags)
 
         // then
-        assertEquals("1.3.2", versions.toVersionString())
+        assertEquals("1.3.2-SNAPSHOT", versions.toVersionString())
         assertEquals("1.3.2-SNAPSHOT+001", versions.toInfoVersionString())
     }
 
@@ -76,7 +76,7 @@ class VersionFinderTest {
         val versions = getVersion(commits, tags)
 
         // then
-        assertEquals("0.0.1", versions.toVersionString())
+        assertEquals("0.0.1-SNAPSHOT", versions.toVersionString())
         assertEquals("0.0.1-SNAPSHOT+001", versions.toInfoVersionString())
     }
 
@@ -104,7 +104,7 @@ class VersionFinderTest {
         val versions = getVersion(commits, tags)
 
         // then
-        assertEquals("1.0.0", versions.toVersionString())
+        assertEquals("1.0.0-Alpha.1", versions.toVersionString())
         assertEquals("1.0.0-Alpha.1", versions.toInfoVersionString())
     }
 
@@ -146,7 +146,8 @@ class VersionFinderTest {
         val version = getVersion(commits, tags)
 
         // then
-        assertEquals("1.0.1", version.toVersionString())
+        assertEquals("1.0.1-RC.3", version.toVersionString())
+        assertEquals("1.0.1-RC3", version.toVersionString(false))
         assertEquals("1.0.1-RC.3+001", version.toInfoVersionString())
     }
 
@@ -267,7 +268,7 @@ class VersionFinderTest {
         versions = getVersion(commits, tags)
 
         // then 
-        assertEquals("1.2.1", versions.toVersionString())
+        assertEquals("1.2.1-SNAPSHOT", versions.toVersionString())
         assertEquals("1.2.1-SNAPSHOT+003", versions.toInfoVersionString())
 
         // given
@@ -277,7 +278,7 @@ class VersionFinderTest {
         versions = getVersion(commits, tags)
 
         // then 
-        assertEquals("1.3.0", versions.toVersionString())
+        assertEquals("1.3.0-RC", versions.toVersionString())
         assertEquals("1.3.0-RC", versions.toInfoVersionString())
 
         // given
@@ -289,7 +290,7 @@ class VersionFinderTest {
         versions = getVersion(commits, tags)
 
         // then 
-        assertEquals("1.3.0", versions.toVersionString())
+        assertEquals("1.3.0-RC", versions.toVersionString())
         assertEquals("1.3.0-RC+003", versions.toInfoVersionString())
 
         // given

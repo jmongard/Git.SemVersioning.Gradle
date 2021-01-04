@@ -47,6 +47,7 @@ class GitProvider(private val settings: SemverSettings) {
                     preRelease
                 )
                 val versionString = version.toInfoVersionString()
+                logger.info("Saving new version: {}", versionString)
                 if (commit) {
                     it.commit().setMessage(settings.releaseCommitTextFormat.format(versionString, message ?: "").trim()).call()
                 }

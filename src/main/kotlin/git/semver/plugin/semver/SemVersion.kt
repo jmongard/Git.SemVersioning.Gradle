@@ -140,8 +140,13 @@ class SemVersion(
     }
 
     fun applyPendingChanges(autoBump: Boolean) {
-        if (!isPendingChanges && autoBump) {
-            bumpPatch = 1
+        if (autoBump && !isPendingChanges) {
+            if (isPreRelease) {
+                bumpPre = 1
+            }
+            else {
+                bumpPatch = 1
+            }
         }
         val preVer = preReleaseVersion
         when {

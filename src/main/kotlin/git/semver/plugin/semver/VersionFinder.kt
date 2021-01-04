@@ -10,26 +10,23 @@ class VersionFinder(private val settings: SemverSettings, private val tags: Map<
 
     fun getVersion(commit: Commit, isDirty: Boolean, defaultPreRelease: String?): SemVersion {
         val semVersion = getSemVersion(commit) ?: SemVersion()
-
-        val isModified = !semVersion.isPreRelease && (semVersion.commitCount > 0 || isDirty)
+        val isModified = semVersion.commitCount > 0 || isDirty
         semVersion.applyPendingChanges(isModified)
 
-        if (isModified) {
+        if (!semVersion.isPreRelease && isModified) {
             semVersion.setPreRelease(defaultPreRelease)
         }
-        logger.debug("Calculated version: {}\n", semVersion)
         return semVersion
     }
 
     fun getReleaseVersion(commit: Commit, newPreRelease: String?): SemVersion {
         val semVersion = getSemVersion(commit) ?: SemVersion()
-        semVersion.applyPendingChanges(!semVersion.isPreRelease)
+        semVersion.applyPendingChanges(true)
         semVersion.commitCount = 0
 
         if (newPreRelease != null) {
             semVersion.setPreRelease(newPreRelease)
         }
-        logger.debug("Release version: {}\n", semVersion)
         return semVersion
     }
 

@@ -29,14 +29,14 @@ open class ReleaseTask @Inject constructor(private val settings: SemverSettings)
         this.message = message
     }
 
-    @Option(option = "commit", description = "Create a release commit (default: true)")
-    fun setCommit(commit: Boolean) {
-        this.commit = commit
+    @Option(option = "no-commit", description = "Don't create a release commit")
+    fun setNoCommit(noCommit: Boolean) {
+        this.commit = !noCommit
     }
 
-    @Option(option = "tag", description = "Create a release tag (default: true)")
-    fun setTag(tag: Boolean) {
-        this.tag = tag
+    @Option(option = "no-tag", description = "Don't create a release tag")
+    fun setNoTag(noTag: Boolean) {
+        this.tag = !noTag
     }
 
     @TaskAction

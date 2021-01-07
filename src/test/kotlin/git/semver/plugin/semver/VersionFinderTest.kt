@@ -2,9 +2,6 @@ package git.semver.plugin.semver
 
 import git.semver.plugin.scm.Commit
 import git.semver.plugin.scm.Tag
-import git.semver.plugin.semver.SemVersion
-import git.semver.plugin.semver.SemverSettings
-import git.semver.plugin.semver.VersionFinder
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -155,14 +152,14 @@ class VersionFinderTest {
     fun `test update from commit pre-release dirty`() {
         assertEquals("1.1.1-Beta.3+001", getVersionFromTagAndPreAndCommitDirty("v1.1.0", "1.1.1-Beta.2", "Commit 1"))
         assertEquals("2.2.3-Alpha+001", getVersionFromTagAndPreAndCommitDirty("v2.2.2", "2.2.3-Alpha", "Commit 1"))
-        assertEquals("2.2.3-Alpha.1+001", getVersionFromTagAndPreAndCommitDirty("v2.2.2", "2.2.3-Alpha.0", "fix: bug"))
+        assertEquals("2.2.3-Alpha.2+001", getVersionFromTagAndPreAndCommitDirty("v2.2.2", "2.2.3-Alpha.1", "fix: bug"))
         assertEquals("2.2.3-Beta.4+001", getVersionFromTagAndPreAndCommitDirty("v2.2.2", "2.2.3-Beta.3", "fix: bug"))
-        assertEquals("3.0.0-Beta.1+001", getVersionFromTagAndPreAndCommitDirty("v2.2.2", "3.0.0-Beta.0", "refactor!: drop some support"))
-        assertEquals("3.0.0-Beta.0+001", getVersionFromTagAndPreAndCommitDirty("v2.2.2", "2.2.3-Beta.0", "refactor!: drop some support"))
-        assertEquals("3.0.0-Beta.1+001", getVersionFromTagAndPreAndCommitDirty("v2.2.2", "3.0.0-Beta.0", "feat: new api\r\n\r\nA message\r\n\r\nBREAKING CHANGE: drop support"))
-        assertEquals("3.0.0-Beta.0+001", getVersionFromTagAndPreAndCommitDirty("v2.2.2", "2.2.3-Beta.0", "feat: new api\r\n\r\nA message\r\n\r\nBREAKING CHANGE: drop support"))
+        assertEquals("3.0.0-Beta.2+001", getVersionFromTagAndPreAndCommitDirty("v2.2.2", "3.0.0-Beta.1", "refactor!: drop some support"))
+        assertEquals("3.0.0-Beta.1+001", getVersionFromTagAndPreAndCommitDirty("v2.2.2", "2.2.3-Beta.1", "refactor!: drop some support"))
+        assertEquals("3.0.0-Beta.2+001", getVersionFromTagAndPreAndCommitDirty("v2.2.2", "3.0.0-Beta.1", "feat: new api\r\n\r\nA message\r\n\r\nBREAKING CHANGE: drop support"))
+        assertEquals("3.0.0-Beta.1+001", getVersionFromTagAndPreAndCommitDirty("v2.2.2", "2.2.3-Beta.1", "feat: new api\r\n\r\nA message\r\n\r\nBREAKING CHANGE: drop support"))
         assertEquals("2.3.0-NEXT.2+001", getVersionFromTagAndPreAndCommitDirty("v2.2.2", "2.3.0-NEXT.1", "feat: new"))
-        assertEquals("2.3.0-NEXT.0+001", getVersionFromTagAndPreAndCommitDirty("v2.2.2", "2.2.3-NEXT.1", "feat: new"))
+        assertEquals("2.3.0-NEXT.1+001", getVersionFromTagAndPreAndCommitDirty("v2.2.2", "2.2.3-NEXT.1", "feat: new"))
         assertEquals("2.3.0-SNAPSHOT+002", getVersionFromTagAndPreAndCommitDirty("v2.2.2", "1.0.0-IGNORED", "feat: new"))
         assertEquals("2.3.0-NEXT+001", getVersionFromTagAndPreAndCommitDirty("v2.2.2", "2.2.3-NEXT", "feat: new"))
     }

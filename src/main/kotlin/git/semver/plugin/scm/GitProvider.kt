@@ -22,14 +22,16 @@ class GitProvider(private val settings: SemverSettings) {
     }
 
     internal fun getSemVersion(startingPath: File): SemVersion {
-        doWithRepository(startingPath) {
-            val versionFinder = VersionFinder(settings, getTags(it.repository))
-            return versionFinder.getVersion(
-                getHeadCommit(it.repository),
-                !isClean(it),
-                settings.defaultPreRelease
-            )
-        }
+        return doWithRepository(startingPath, ::semVersion)
+    }
+
+    internal fun semVersion(it: Git): SemVersion {
+        val versionFinder = VersionFinder(settings, getTags(it.repository))
+        return versionFinder.getVersion(
+            getHeadCommit(it.repository),
+            !isClean(it),
+            settings.defaultPreRelease
+        )
     }
 
     internal fun createRelease(
@@ -37,26 +39,39 @@ class GitProvider(private val settings: SemverSettings) {
         tag: Boolean,
         commit: Boolean,
         preRelease: String?,
-        message: String? = null
+        message: String? = null,
+        noDirtyCheck: Boolean
     ) {
         doWithRepository(startingPath) {
-            if (isClean(it)) {
-                val versionFinder = VersionFinder(settings, getTags(it.repository))
-                val version = versionFinder.getReleaseVersion(
-                    getHeadCommit(it.repository),
-                    preRelease
-                )
-                val versionString = version.toInfoVersionString()
-                logger.info("Saving new version: {}", versionString)
-                if (commit) {
-                    it.commit().setMessage(settings.releaseCommitTextFormat.format(versionString, message ?: "").trim()).call()
-                }
-                if (tag) {
-                    it.tag().setName(settings.releaseTagNameFormat.format(versionString)).setMessage(message).call()
-                }
-            } else {
-                throw IllegalStateException("Local modifications exists")
+            createRelease(it, tag, commit, preRelease, message, noDirtyCheck)
+        }
+    }
+
+    internal fun createRelease(
+        it: Git,
+        tag: Boolean,
+        commit: Boolean,
+        preRelease: String?,
+        message: String? = null,
+        noDirtyCheck: Boolean
+    ) {
+        if (noDirtyCheck || isClean(it)) {
+            val versionFinder = VersionFinder(settings, getTags(it.repository))
+            val version = versionFinder.getReleaseVersion(
+                getHeadCommit(it.repository),
+                preRelease
+            )
+            val versionString = version.toInfoVersionString()
+            logger.info("Saving new version: {}", versionString)
+            if (commit) {
+                it.commit().setMessage(settings.releaseCommitTextFormat.format(versionString, message ?: "").trim())
+                    .call()
             }
+            if (tag) {
+                it.tag().setName(settings.releaseTagNameFormat.format(versionString)).setMessage(message).call()
+            }
+        } else {
+            throw IllegalStateException("Local modifications exists")
         }
     }
 

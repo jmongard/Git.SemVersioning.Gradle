@@ -5,22 +5,22 @@ import org.slf4j.LoggerFactory
 
 class SemVersion(
     var sha: String = "",
-    var majorVersion: Int = 0,
-    var minorVersion: Int = 0,
-    var patchVersion: Int = 0,
+    var major: Int = 0,
+    var minor: Int = 0,
+    var patch: Int = 0,
     preRelease: String? = null,
     revision: Int? = null
 ) : Comparable<SemVersion> {
 
     companion object {
         private val logger = LoggerFactory.getLogger(SemVersion::class.java)
-        private val tagPattern =
+        private val semVersionPattern =
             ("""(?<Major>0|[1-9]\d*)\.(?<Minor>0|[1-9]\d*)(?:\.(?<Patch>0|[1-9]\d*)(?:\.(?<Revision>0|[1-9]\d*))?)?"""
                     + """(?:-(?<PreRelease>(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?"""
                     + """(?:\+(?<BuildMetadata>[0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?""").toRegex()
 
         fun tryParse(refInfo: IRefInfo): SemVersion? {
-            val match = tagPattern.find(refInfo.text) ?: return null
+            val match = semVersionPattern.find(refInfo.text) ?: return null
 
             val version = SemVersion(
                 refInfo.sha,
@@ -40,11 +40,11 @@ class SemVersion(
         }
     }
 
-    private var lastReleaseMajor:Int = majorVersion
-    private var lastReleaseMinor:Int = minorVersion
+    private val lastReleaseMajor: Int = major
+    private val lastReleaseMinor: Int = minor
     var commitCount = 0
-    var preReleasePrefix: String? = null
-    var preReleaseVersion: Int? = null
+    internal var preReleasePrefix: String? = null
+    internal var preReleaseVersion: Int? = null
 
     private var bumpPatch = 0
     private var bumpMinor = 0
@@ -54,6 +54,9 @@ class SemVersion(
     init {
         setPreRelease(preRelease, revision)
     }
+
+    val isSnapshot
+        get() = commitCount > 0
 
     val isPreRelease
         get() = preReleasePrefix != null || preReleaseVersion ?: -1 > 0
@@ -80,24 +83,28 @@ class SemVersion(
     }
 
     override fun compareTo(other: SemVersion): Int {
-        var i = majorVersion.compareTo(other.majorVersion + other.bumpMajor)
+        val other2 = other.major + other.bumpMajor
+        var i = major.compareTo(other2)
+
         if (i == 0) {
-            i = minorVersion.compareTo(if (other.bumpMajor == 0) other.minorVersion + other.bumpMinor else 0)
+            val other1 = if (other.bumpMajor == 0) other.minor + other.bumpMinor else 0
+            i = minor.compareTo(other1)
         }
         if (i == 0) {
-            i = patchVersion.compareTo(if (other.bumpMajor + other.bumpMinor == 0) other.patchVersion + other.bumpPatch else 0)
+            val other1 = if (other.bumpMajor + other.bumpMinor == 0) other.patch + other.bumpPatch else 0
+            i = patch.compareTo(other1)
         }
         if (i == 0) {
-            i = -isPreRelease.compareTo(other.isPreRelease)
+            val other1 = other.isPreRelease || other.isSnapshot
+            i = -isPreRelease.compareTo(other1)
         }
         if (i == 0) {
-            i = (preReleasePrefix ?: "").compareTo(other.preReleasePrefix ?: "")
+            val other1 = other.preReleasePrefix ?: ""
+            i = (preReleasePrefix ?: "").compareTo(other1)
         }
         if (i == 0) {
-            i = (preReleaseVersion ?: 0).compareTo(other.preReleaseVersion ?: 0 + other.bumpPre)
-        }
-        if (i == 0) {
-            i = commitCount.compareTo(other.commitCount)
+            val other1 = if (other.bumpMajor + other.bumpMinor + other.bumpPatch == 0) (other.preReleaseVersion ?: 1) + other.bumpPre else 1
+            i = (preReleaseVersion ?: 1).compareTo(other1)
         }
         return i
     }
@@ -108,26 +115,25 @@ class SemVersion(
 
         when {
             newPreRelease != null -> {
-                if (newPreRelease > this) {
+                if (newPreRelease >= this) {
                     reset()
-                    majorVersion = newPreRelease.majorVersion
-                    minorVersion = newPreRelease.minorVersion
-                    patchVersion = newPreRelease.patchVersion
+                    major = newPreRelease.major
+                    minor = newPreRelease.minor
+                    patch = newPreRelease.patch
                     preReleasePrefix = newPreRelease.preReleasePrefix
                     preReleaseVersion = newPreRelease.preReleaseVersion
                     commitCount = 0
-                }
-                else {
-                    logger.warn("Ignored: {} < {} " , newPreRelease, this)
+                } else {
+                    logger.warn("Ignored: {} < {} ", newPreRelease, this)
                 }
             }
             isPreRelease -> {
                 when {
-                    majorVersion == lastReleaseMajor
+                    major == lastReleaseMajor
                             && settings.majorRegex.containsMatchIn(commit.text) -> bumpMajor = 1
 
-                    majorVersion == lastReleaseMajor
-                            && minorVersion == lastReleaseMinor
+                    major == lastReleaseMajor
+                            && minor == lastReleaseMinor
                             && settings.minorRegex.containsMatchIn(commit.text) -> bumpMinor = 1
 
                     else -> bumpPre = 1
@@ -143,27 +149,26 @@ class SemVersion(
         if (autoBump && !isPendingChanges) {
             if (isPreRelease) {
                 bumpPre = 1
-            }
-            else {
+            } else {
                 bumpPatch = 1
             }
         }
         val preVer = preReleaseVersion
         when {
             bumpMajor > 0 -> {
-                majorVersion += bumpMajor
-                minorVersion = 0
-                patchVersion = 0
-                preReleaseVersion = if (preVer != null) 0 else null
+                major += bumpMajor
+                minor = 0
+                patch = 0
+                preReleaseVersion = if (preVer != null) 1 else null
             }
             bumpMinor > 0 -> {
-                minorVersion += bumpMinor
-                patchVersion = 0
-                preReleaseVersion = if (preVer != null) 0 else null
+                minor += bumpMinor
+                patch = 0
+                preReleaseVersion = if (preVer != null) 1 else null
             }
             bumpPatch > 0 -> {
-                patchVersion += bumpPatch
-                preReleaseVersion = if (preVer != null) 0 else null
+                patch += bumpPatch
+                preReleaseVersion = if (preVer != null) 1 else null
             }
             bumpPre > 0 -> {
                 preReleaseVersion = if (preVer != null) preVer + bumpPre else null
@@ -179,12 +184,23 @@ class SemVersion(
         bumpPre = 0
     }
 
-    fun toVersionString(v2:Boolean = true): String {
-        return getVersionBuilder(v2).toString();
+    fun toVersionString(v2: Boolean = true): String {
+        return toInfoVersionString("", 0, v2)
     }
 
     fun toInfoVersionString(commitCountStringFormat: String = "%03d", shaLength: Int = 0, v2: Boolean = true): String {
-        val builder = getVersionBuilder(v2)
+        val builder = StringBuilder().append(major).append('.').append(minor).append('.').append(patch)
+        if (isPreRelease) {
+            val preReleasePrefix = preReleasePrefix
+            val preReleaseVersion = preReleaseVersion
+            builder.append('-')
+            if (preReleasePrefix != null) {
+                builder.append(if (v2) preReleasePrefix else preReleasePrefix.replace("[^0-9A-Za-z-]".toRegex(), ""))
+            }
+            if (preReleaseVersion != null) {
+                builder.append(preReleaseVersion)
+            }
+        }
         if (v2) {
             var metaSeparator = '+'
             val commitCount = commitCount
@@ -197,24 +213,6 @@ class SemVersion(
             }
         }
         return builder.toString()
-    }
-
-    private fun getVersionBuilder(v2: Boolean): StringBuilder {
-        val builder = StringBuilder()
-        builder.append(majorVersion).append('.').append(minorVersion).append('.').append(patchVersion)
-
-        if (isPreRelease) {
-            val preReleasePrefix = preReleasePrefix
-            val preReleaseVersion = preReleaseVersion
-            builder.append('-')
-            if (preReleasePrefix != null) {
-                builder.append(if (v2) preReleasePrefix else preReleasePrefix.replace("[^0-9A-Za-z-]".toRegex(), ""))
-            }
-            if (preReleaseVersion != null) {
-                builder.append(preReleaseVersion)
-            }
-        }
-        return builder
     }
 
     override fun toString(): String {

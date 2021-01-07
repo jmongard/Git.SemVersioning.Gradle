@@ -1,7 +1,6 @@
 package git.semver.plugin.semver
 
 import git.semver.plugin.scm.Tag
-import git.semver.plugin.semver.SemVersion
 import kotlin.test.*
 
 
@@ -38,9 +37,9 @@ class SemVersionTest {
 
     private fun checkValid(tagName: String, majorVersion: Int, minorVersion: Int, patchVersion: Int, suffix: String?, preRelease: Int?) {
         val version = assertNotNull(SemVersion.tryParse(Tag(tagName, SHA)))
-        assertEquals(majorVersion, version.majorVersion)
-        assertEquals(minorVersion, version.minorVersion)
-        assertEquals(patchVersion, version.patchVersion)
+        assertEquals(majorVersion, version.major)
+        assertEquals(minorVersion, version.minor)
+        assertEquals(patchVersion, version.patch)
         assertEquals(suffix, version.preReleasePrefix)
         assertEquals(preRelease, version.preReleaseVersion)
     }
@@ -58,17 +57,6 @@ class SemVersionTest {
         assertTrue(SemVersion.tryParse(Tag("v1.1.0-RC.2", SHA))!! > SemVersion.tryParse(Tag("v1.1.0-RC.1", SHA))!!)
         assertTrue(SemVersion.tryParse(Tag("v0.2.0-beta.0", SHA))!! > SemVersion.tryParse(Tag("v0.1.1-alpha.1", SHA))!!)
     }
-
-    @Test
-    fun `test SemVer ordering differing commit count`() {
-        val v1 = SemVersion()
-        val v2 = SemVersion()
-        v2.commitCount += 1;
-        assertTrue(v1.compareTo(SemVersion()) == 0)
-        assertTrue(v1 < v2)
-    }
-
-
 
     @Test
     fun testInfoVersionSha() {

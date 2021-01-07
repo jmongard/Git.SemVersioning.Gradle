@@ -2,11 +2,11 @@ package git.semver.plugin.semver
 
 open class SemverSettings {
 
-    var defaultPreRelease: String ="SNAPSHOT"
-    var releasePattern: String ="\\Arelease(?:\\(\\w+\\))?:"
-    var patchPattern: String ="\\Afix(?:\\(\\w+\\))?:"
-    var minorPattern: String ="\\Afeat(?:\\(\\w+\\))?:"
-    var majorPattern: String ="\\A\\w+(?:\\(\\w+\\))?!:|^BREAKING[ -]CHANGE:"
+    var defaultPreRelease: String = "SNAPSHOT"
+    var releasePattern: String = "\\Arelease(?:\\(\\w+\\))?:"
+    var patchPattern: String = "\\Afix(?:\\(\\w+\\))?:"
+    var minorPattern: String = "\\Afeat(?:\\(\\w+\\))?:"
+    var majorPattern: String = "\\A\\w+(?:\\(\\w+\\))?!:|^BREAKING[ -]CHANGE:"
     var releaseCommitTextFormat = "release: v%s\n\n%s"
     var releaseTagNameFormat = "%s"
 

@@ -35,35 +35,6 @@ The plugin will look for [conventional commit](https://www.conventionalcommits.o
 and will increase the corresponding version number. The major, minor or patch number will be grouped together so that 
 the version increases by at most one compared to the previous release that is not a pre-release.
 
-Example of how version is calculated:
-
-| Commit Text                    | Calculated version   | --preRelease=  |
-| ------------------------------ | -------------------- | -------------- |
-| Initial commit                 | 0.0.1-SNAPSHOT+001   |                |
-| release: v0.0.1                | 0.0.1                | undefined      |
-| some changes                   | 0.0.2-SNAPSHOT+001   |                |
-| release: v0.0.2                | 0.0.2                | undefined      |
-| fix: a fix                     | 0.0.3-SNAPSHOT+001   |                |
-| fix: another fix               | 0.0.3-SNAPSHOT+002   |                |
-| release: v0.0.3                | 0.0.3                | undefined      |
-| feat: a feature                | 0.1.0-SNAPSHOT+001   |                |
-| feat: another feature          | 0.1.0-SNAPSHOT+002   |                |
-| feat!: breaking feature        | 1.0.0-SNAPSHOT+003   |                |
-| some changes                   | 1.0.0-SNAPSHOT+004   |                |
-| feat: changes                  | 1.0.0-SNAPSHOT+005   |                |
-| release: v1.0.0                | 1.0.0                | undefined      |
-| some changes                   | 1.0.1-SNAPSHOT+001   |                |
-| release: v1.0.1-alpha.1        | 1.0.1-alpha.1        | "alpha.1"      |
-| some changes                   | 1.0.1-alpha.2+001    |                |
-| release: v1.0.1-alpha.2        | 1.0.1-alpha.2        | undefined      |
-| fix: a fix                     | 1.0.1-alpha.3+001    |                |
-| fix: another fix               | 1.0.1-alpha.3+002    |                |
-| feat: a feature                | 1.1.0-alpha.1+003    |                |
-| release: v1.1.0-alpha.1        | 1.1.0-alpha.1        | undefined      |
-| feat: another feature          | 1.1.0-alpha.2+001    |                |
-| feat!: breaking feature        | 2.0.0-alpha.1+002    |                |
-| release: v2.0.0                | 2.0.0                | ""             |
-
 
 ### Releases
 
@@ -112,8 +83,8 @@ This plugin adds a `printVersion` task, which will echo the project's calculated
 to standard-out using the long format (e.g. 1.0.0-beta.3+004.sha.1c792d5).
 
 ## `releaseVersion`
-The `releaseVersion` task will by default create both a release commit, and a release tag. 
-It is possible to change this behaviour with the following options:
+The `releaseVersion` task will by default create both a release commit, and a release tag. The releaseVersion task will 
+fail with an error if there exists local modification. It is possible to change this behaviour with the following options:
 
  * **--no-tag**: skip creating a tag
  * **--no-commit**: skipp creating a commit
@@ -122,7 +93,35 @@ It is possible to change this behaviour with the following options:
  * **--preRelease**="pre-release": Change the current pre-release. An empty string will promote a pre-release to a release.
    e.g. --preRelease=alpha.1
 
-The releaseVersion task will fail with an error if there exists local modification. Use `--no-dirty` to circumvent this check.
+## Example of how version is calculated
+
+| Commit Text                    | Calculated version   |  Using release task: gradle ...       |
+| ------------------------------ | -------------------- | ------------------------------------- |
+| Initial commit                 | 0.0.1-SNAPSHOT+001   |                                       |
+| release: v0.0.1                | 0.0.1                | releaseVersion                        |
+| some changes                   | 0.0.2-SNAPSHOT+001   |                                       |
+| release: v0.0.2                | 0.0.2                | releaseVersion                        |
+| fix: a fix                     | 0.0.3-SNAPSHOT+001   |                                       |
+| fix: another fix               | 0.0.3-SNAPSHOT+002   |                                       |
+| release: v0.0.3                | 0.0.3                | releaseVersion                        |
+| feat: a feature                | 0.1.0-SNAPSHOT+001   |                                       |
+| feat: another feature          | 0.1.0-SNAPSHOT+002   |                                       |
+| feat!: breaking feature        | 1.0.0-SNAPSHOT+003   |                                       |
+| some changes                   | 1.0.0-SNAPSHOT+004   |                                       |
+| feat: changes                  | 1.0.0-SNAPSHOT+005   |                                       |
+| release: v1.0.0                | 1.0.0                | releaseVersion                        |
+| some changes                   | 1.0.1-SNAPSHOT+001   |                                       |
+| release: v1.0.1-alpha.1        | 1.0.1-alpha.1        | releaseVersion --preRelease="alpha.1" |
+| some changes                   | 1.0.1-alpha.2+001    |                                       |
+| release: v1.0.1-alpha.2        | 1.0.1-alpha.2        | releaseVersion                        |
+| fix: a fix                     | 1.0.1-alpha.3+001    |                                       |
+| fix: another fix               | 1.0.1-alpha.3+002    |                                       |
+| feat: a feature                | 1.1.0-alpha.1+003    |                                       |
+| release: v1.1.0-alpha.1        | 1.1.0-alpha.1        | releaseVersion                        |
+| feat: another feature          | 1.1.0-alpha.2+001    |                                       |
+| feat!: breaking feature        | 2.0.0-alpha.1+002    |                                       |
+| release: v2.0.0                | 2.0.0                | releaseVersion --preRelease=""        |
+
 
 ## Configuration
 

@@ -1,9 +1,11 @@
 package git.semver.plugin.scm
 
+import git.semver.plugin.semver.SemVersion
 import git.semver.plugin.semver.SemverSettings
 import org.eclipse.jgit.api.Git
 import java.io.File
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
@@ -21,13 +23,17 @@ class GitProviderTest {
         val gitDir = File("build/integrationTest2")
         gitDir.mkdirs()
 
-        println("| %-30s | %-20s | %-15s|".format("Commit Text", "Calculated version", "--preRelease="))
-        println("| ------------------------------ | -------------------- | -------------- |")
+        println("| %-30s | %-20s | %-38s|".format("Commit Text", "Calculated version", " Using release task: gradle ..."))
+        println("| ------------------------------ | -------------------- | ------------------------------------- |")
 
         val gitProvider = GitProvider(SemverSettings())
         Git.init().setDirectory(gitDir).call().use {
-            it.checkout().setOrphan(true).setName("master"+System.currentTimeMillis()).call()
-            c(it, "Initial commit", gitProvider)
+            it.commit().setMessage("Initial commit").call()
+            val last = it.log().all().call().last()
+            it.reset().setRef(last.name).call()
+            it.gc().call()
+            printC("Initial commit", gitProvider, it)
+            c(it, "some changes", gitProvider)
             r(gitProvider, it)
             c(it, "some changes", gitProvider)
             r(gitProvider, it)
@@ -47,24 +53,32 @@ class GitProviderTest {
             c(it, "fix: a fix", gitProvider)
             c(it, "fix: another fix", gitProvider)
             c(it, "feat: a feature", gitProvider)
-
             r(gitProvider, it )
             c(it, "feat: another feature", gitProvider)
             c(it, "feat!: breaking feature", gitProvider)
-            r(gitProvider, it, "")
+
+            val actual = r(gitProvider, it, "")
+
+            assertEquals("2.0.0", actual.toVersionString())
         }
     }
 
     private fun c(it: Git, msg: String, gitProvider: GitProvider) {
         it.commit().setMessage(msg).call()
-        println("| %-30s | %-20s | %-15s|".format(msg, gitProvider.semVersion(it).toInfoVersionString(), ""))
+        printC(msg, gitProvider, it)
     }
 
-    private fun r(gitProvider: GitProvider, it: Git, preRelease:String?=null) {
-        gitProvider.createRelease(it, false, commit = true, preRelease = preRelease, noDirtyCheck = false)
-        println("| %-30s | %-20s | %-15s|".format(it.log().setMaxCount(1).call().first().fullMessage,
+    private fun printC(msg: String, gitProvider: GitProvider, it: Git) {
+        println("| %-30s | %-20s | %-38s|".format(msg, gitProvider.semVersion(it).toInfoVersionString(), ""))
+    }
 
-            gitProvider.semVersion(it).toInfoVersionString(), if (preRelease == null) "undefined" else "\"$preRelease\""))
+    private fun r(gitProvider: GitProvider, it: Git, preRelease:String?=null) : SemVersion {
+        gitProvider.createRelease(it, false, commit = true, preRelease = preRelease, noDirtyCheck = false)
+        val semVersion = gitProvider.semVersion(it)
+        println("| %-30s | %-20s | %-38s|".format(it.log().setMaxCount(1).call().first().fullMessage,
+
+        semVersion.toInfoVersionString(), "releaseVersion " + if (preRelease == null) "" else "--preRelease=\"$preRelease\""))
+        return semVersion
     }
 
     @Test

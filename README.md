@@ -1,6 +1,6 @@
-# Git.SemVersioning.Gradle ![Gradle Build](https://github.com/jmongard/Git.SemVersioning.Gradle/workflows/Gradle%20Build/badge.svg)
+# Semantic versioning for Gradle using Git ![Gradle Build](https://github.com/jmongard/Git.SemVersioning.Gradle/workflows/Gradle%20Build/badge.svg)
 
-Gradle plugin for automatically versioning a project with git. 
+Gradle plugin for automatically versioning a project with git using semantic versioning and conventional commits. 
 
 
 ## Usage
@@ -12,12 +12,12 @@ plugins {
     id 'com.github.jmongard.git-semver-plugin' version '<current version>'
 }
 
-//semver { ... } // Add optionally to configure the plugin before getting the version
+//semver { ... } // Optionally add configuration for the plugin before getting the version
 
-//To set the version for the current project only:
+//To set the version for the current project:
 version = semver.version
 
-//Or set set the version of all projects:
+//Or in a multi project build set the version of all projects:
 allprojects {
     version = semver.version
 }
@@ -28,12 +28,12 @@ allprojects {
 
 The versioning system is designed to follow semantic versioning as described by https://semver.org/.
 
-It works by recursively traversing the commit tree until it finds a release tag or commit and then calculating the new 
-version using from there using commit messages.
+It works by recursively traversing the commit tree until it finds a version tag or release commit and then calculating 
+the new version using from there using commit messages.
 
 The plugin will look for [conventional commit](https://www.conventionalcommits.org/) messages (`fix:`, `feat:`, `refactor!:`, ...) 
 and will increase the corresponding version number. The major, minor or patch number will be grouped together so that 
-the version increases by at most one compared to the previous release that is not a pre-release.
+the version increases by at most one compared to the previous release that is not a pre-release version.
 
 
 ### Releases
@@ -44,7 +44,7 @@ The plugin will search the commit tree until it finds a commit it interprets as 
 * Any commit with commit message starting with `release:` 
 
 The version number should consist of three numbers separated by a dot e.g. `1.0.0`. The version number does not need to 
-be at the start of the message so `release: v1.2.3` will be match.
+be at the start of the message e.g. `release: v1.2.3` will be matched.
 
 
 ### Uncommited changes or non release commits
@@ -60,16 +60,19 @@ If the current version is not a pre-release then `-SNAPSHOT` will be added.
 The semantic version is accessible using the `semver` extension. 
 There is several options for getting the version: 
 
-| semver extension property        | release tagged commit  | release with local changes | one commits ahead of pre-release alpha.1 |
-|----------------------------------|------------------------|----------------------------| -----------------------------------------|
-| **semver.version**               | 1.0.1                  | 1.0.2-SNAPSHOT             | 2.0.0-alpha.2                            |
-| **semver.infoVersion**           | 1.0.1                  | 1.0.2-SNAPSHOT             | 2.0.0-alpha.2+001                        |
-| **semver.semVersion.toString()** | 1.0.1+sha.1c792d5      | 1.0.2-SNAPSHOT+sha.1c792d5 | 2.0.0-alpha.2+001.sha.1c792d5            |
+| semver extension property        | example release tagged commit  | example release with local changes | example one commits ahead of pre-release alpha.1 |
+|----------------------------------|--------------------------------|------------------------------------| -------------------------------------------------|
+| `semver.version`                 | 1.0.1                          | 1.0.2-SNAPSHOT                     | 2.0.0-alpha.2                                    |
+| `semver.infoVersion`             | 1.0.1                          | 1.0.2-SNAPSHOT                     | 2.0.0-alpha.2+001                                |
+| `semver.semVersion.toString()`   | 1.0.1+sha.1c792d5              | 1.0.2-SNAPSHOT+sha.1c792d5         | 2.0.0-alpha.2+001.sha.1c792d5                    |
 
 ### Custom version format
 
 There is also the possibility to customize the version string returned using:
 `semver.semVersion.toInfoVersionString(commitCountStringFormat: String, shaLength: Int, version2: Boolean)`
+
+If Version2 flag is set to false, then semVer version one will be used stripping any non alpha-numeric characters from
+the pre-release string and removing the metadata part.
 
 * semver.version == semver.semVersion.toInfoVersionString("", 0, true)
 * semver.infoVersion == semver.semVersion.toInfoVersionString("%03d", 0, true)
@@ -79,8 +82,16 @@ There is also the possibility to customize the version string returned using:
 ## Tasks
 
 ## `printVersion`
-This plugin adds a `printVersion` task, which will echo the project's calculated version
-to standard-out using the long format (e.g. 1.0.0-beta.3+004.sha.1c792d5).
+This plugin adds a printVersion task, which will echo the project's calculated version
+to standard-out.
+
+````shell
+$ gradlew printVersion
+
+> Task :printVersion
+--------------------
+Version: 10.10.0-SNAPSHOT+072.sha.18b3106
+````
 
 ## `releaseVersion`
 The `releaseVersion` task will by default create both a release commit, and a release tag. The releaseVersion task will 
@@ -145,9 +156,9 @@ version = semver.version
 * **defaultPreRelease**: sets the default pre-release to use if there are commits or local modifications.
 * **releasePattern**: used to identify commits thar are used as release markers.
 * **majorPattern, minorPattern and patchPattern**: used to identify conventional commits used for increasing version.
-* **releaseCommitTextFormat**: Pattern used by releaseVersion task for creating release commits. First parameter
+* **releaseCommitTextFormat**: Pattern used by `releaseVersion` task for creating release commits. First parameter
   is the version and second parameter is the message (if given using --message=).
-* **releaseTagNameFormat**: Pattern used by releaseVersion task for creating release tags e.g. `"v%s"` to prefix version
+* **releaseTagNameFormat**: Pattern used by `releaseVersion` task for creating release tags e.g. `"v%s"` to prefix version
   tags with "v".
 
 Patterns is matched using [java regular expressions](https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html) 

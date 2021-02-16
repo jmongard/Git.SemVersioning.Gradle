@@ -9,6 +9,7 @@ open class SemverSettings {
     var majorPattern: String = "\\A\\w+(?:\\(\\w+\\))?!:|^BREAKING[ -]CHANGE:"
     var releaseCommitTextFormat = "release: v%s\n\n%s"
     var releaseTagNameFormat = "%s"
+    var groupVersionIncrements = true
 
 
     val releaseRegex: Regex by lazy { releasePattern.toRegex(setOf(RegexOption.IGNORE_CASE, RegexOption.MULTILINE)) }

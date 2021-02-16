@@ -21,8 +21,8 @@ class VersionFinder(private val settings: SemverSettings, private val tags: Map<
 
     fun getReleaseVersion(commit: Commit, newPreRelease: String?): SemVersion {
         val semVersion = getSemVersion(commit) ?: SemVersion()
-        semVersion.applyPendingChanges(true)
         semVersion.commitCount = 0
+        semVersion.applyPendingChanges(true)
 
         if (newPreRelease != null) {
             semVersion.setPreRelease(newPreRelease)

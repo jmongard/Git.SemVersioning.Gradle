@@ -10,4 +10,10 @@ open class GitSemverPluginExtension(project: Project) : SemverSettings() {
     val semVersion by lazy { GitProvider(this).getSemVersion(gitDirectory) }
     val version by lazy { semVersion.toVersionString() }
     val infoVersion by lazy { semVersion.toInfoVersionString() }
+
+    init {
+        if (project.hasProperty("defaultPreRelease")) {
+            defaultPreRelease = project.property("defaultPreRelease") as String
+        }
+    }
 }

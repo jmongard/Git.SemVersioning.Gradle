@@ -14,7 +14,7 @@ plugins {
 
 //semver { ... } // Optionally add configuration for the plugin before getting the version
 
-//To set the version for the current project:
+//Set the version for the current project:
 version = semver.version
 
 //Or in a multi project build set the version of all projects:
@@ -32,8 +32,12 @@ It works by recursively traversing the commit tree until it finds a version tag 
 the new version using from there using commit messages.
 
 The plugin will look for [conventional commit](https://www.conventionalcommits.org/) messages (`fix:`, `feat:`, `refactor!:`, ...) 
-and will increase the corresponding version number. The major, minor or patch number will be grouped together so that 
-the version increases by at most one compared to the previous release that is not a pre-release version.
+and will increase the corresponding version number.
+
+The plugin has the opinion that you want to group several fixes/features or breaking changes into a single release. 
+Therefor the major, minor or patch number will be increases by at most one compared to the previous release that is 
+not a pre-release version. Set property `groupVersionIncrements = false` if you don't want the version changes to be combined.
+(See [Configuration](#Configuration) reference below.)
 
 
 ### Releases
@@ -104,7 +108,8 @@ fail with an error if there exists local modification. It is possible to change 
  * **--preRelease**="pre-release": Change the current pre-release. An empty string will promote a pre-release to a release.
    e.g. --preRelease=alpha.1
 
-## Example of how version is calculated
+## Example of how version is calculated 
+With setting: `groupVersionIncrements = true`
 
 | Commit Text                    | Calculated version   |  Using release task: gradle ...       |
 | ------------------------------ | -------------------- | ------------------------------------- |
@@ -133,6 +138,35 @@ fail with an error if there exists local modification. It is possible to change 
 | feat!: breaking feature        | 2.0.0-alpha.1+002    |                                       |
 | release: v2.0.0                | 2.0.0                | releaseVersion --preRelease=""        |
 
+With setting: `groupVersionIncrements = false`
+
+| Commit Text                    | Calculated version   |  Using release task: gradle ...       |
+| ------------------------------ | -------------------- | ------------------------------------- |
+| Initial commit                 | 0.0.1-SNAPSHOT+001   |                                       |
+| some changes                   | 0.0.1-SNAPSHOT+002   |                                       |
+| release: v0.0.1                | 0.0.1                | releaseVersion                        |
+| some changes                   | 0.0.2-SNAPSHOT+001   |                                       |
+| release: v0.0.2                | 0.0.2                | releaseVersion                        |
+| fix: a fix                     | 0.0.3-SNAPSHOT+001   |                                       |
+| fix: another fix               | 0.0.4-SNAPSHOT+002   |                                       |
+| release: v0.0.4                | 0.0.4                | releaseVersion                        |
+| feat: a feature                | 0.1.0-SNAPSHOT+001   |                                       |
+| feat: another feature          | 0.2.0-SNAPSHOT+002   |                                       |
+| feat!: breaking feature        | 1.0.0-SNAPSHOT+003   |                                       |
+| some changes                   | 1.0.1-SNAPSHOT+004   |                                       |
+| feat: changes                  | 1.1.0-SNAPSHOT+005   |                                       |
+| release: v1.1.0                | 1.1.0                | releaseVersion                        |
+| some changes                   | 1.1.1-SNAPSHOT+001   |                                       |
+| release: v1.1.1-alpha.1        | 1.1.1-alpha.1        | releaseVersion --preRelease="alpha.1" |
+| some changes                   | 1.1.1-alpha.2+001    |                                       |
+| release: v1.1.1-alpha.2        | 1.1.1-alpha.2        | releaseVersion                        |
+| fix: a fix                     | 1.1.1-alpha.3+001    |                                       |
+| fix: another fix               | 1.1.1-alpha.4+002    |                                       |
+| feat: a feature                | 1.2.0-alpha.1+003    |                                       |
+| release: v1.2.0-alpha.1        | 1.2.0-alpha.1        | releaseVersion                        |
+| feat: another feature          | 1.2.0-alpha.2+001    |                                       |
+| feat!: breaking feature        | 2.0.0-alpha.1+002    |                                       |
+| release: v2.0.0                | 2.0.0                | releaseVersion --preRelease=""        |
 
 ## Configuration
 
@@ -140,6 +174,7 @@ The plugin can be configured using the `semver` extension. This needs to be done
 
 ```groovy
 semver {
+    //Example of each property with their respective default value
     defaultPreRelease = "SNAPSHOT"
     releasePattern = "\\Arelease(?:\\(\\w+\\))?:"
     majorPattern = "\\A\\w+(?:\\(\\w+\\))?!:|^BREAKING[ -]CHANGE:"
@@ -147,6 +182,7 @@ semver {
     patchPattern = "\\Afix(?:\\(\\w+\\))?:"
     releaseCommitTextFormat = "release: v%s\n\n%s"
     releaseTagNameFormat = "%s"
+    groupVersionIncrements = true
 }
 
 //Remember to retrieve the version after plugin has been configured
@@ -158,8 +194,9 @@ version = semver.version
 * **majorPattern, minorPattern and patchPattern**: used to identify conventional commits used for increasing version.
 * **releaseCommitTextFormat**: Pattern used by `releaseVersion` task for creating release commits. First parameter
   is the version and second parameter is the message (if given using --message=).
-* **releaseTagNameFormat**: Pattern used by `releaseVersion` task for creating release tags e.g. `"v%s"` to prefix version
-  tags with "v".
+* **releaseTagNameFormat**: Pattern used by `releaseVersion` task for creating release tags e.g. `"v%s"` to prefix 
+  version tags with "v".
+* **groupVersionIncrements**: Used to disable grouping of version increments so that each commit message counts.
 
 Patterns is matched using [java regular expressions](https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html) 
 with IGNORE_CASE and MULTILINE options enabled.

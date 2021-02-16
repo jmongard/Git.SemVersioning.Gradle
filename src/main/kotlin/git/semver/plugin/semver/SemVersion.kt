@@ -61,9 +61,6 @@ class SemVersion(
     val isPreRelease
         get() = preReleasePrefix != null || preReleaseVersion ?: -1 > 0
 
-    private val isPendingChanges
-        get() = bumpMajor + bumpMinor + bumpPatch + bumpPre > 0
-
     fun setPreRelease(value: String?, defaultPreReleaseVersion: Int? = null) {
         bumpPre = 0
 
@@ -75,11 +72,7 @@ class SemVersion(
 
         val prefix = value.trimEnd { it.isDigit() }
         preReleasePrefix = if (prefix.isNotEmpty()) prefix else null
-        preReleaseVersion = if (prefix.length < value.length) {
-            value.substring(prefix.length).toInt()
-        } else {
-            defaultPreReleaseVersion
-        }
+        preReleaseVersion = if (prefix.length < value.length) value.substring(prefix.length).toInt() else defaultPreReleaseVersion
     }
 
     override fun compareTo(other: SemVersion): Int {
@@ -103,7 +96,8 @@ class SemVersion(
             i = (preReleasePrefix ?: "").compareTo(other1)
         }
         if (i == 0) {
-            val other1 = if (other.bumpMajor + other.bumpMinor + other.bumpPatch == 0) (other.preReleaseVersion ?: 1) + other.bumpPre else 1
+            val other1 = if (other.bumpMajor + other.bumpMinor + other.bumpPatch == 0)
+                    (other.preReleaseVersion ?: 1) + other.bumpPre else 1
             i = (preReleaseVersion ?: 1).compareTo(other1)
         }
         return i
@@ -112,6 +106,10 @@ class SemVersion(
     fun updateFromCommit(commit: IRefInfo, settings: SemverSettings, newPreRelease: SemVersion? = null) {
         sha = commit.sha
         commitCount += 1
+
+        if (!settings.groupVersionIncrements) {
+            applyPendingChanges(false);
+        }
 
         when {
             newPreRelease != null -> {
@@ -124,17 +122,20 @@ class SemVersion(
                     preReleaseVersion = newPreRelease.preReleaseVersion
                     commitCount = 0
                 } else {
-                    logger.warn("Ignored: {} < {} ", newPreRelease, this)
+                    logger.warn("Ignored pre-release with lower version than the current version: {} < {} ",
+                        newPreRelease, this)
                 }
             }
             isPreRelease -> {
                 when {
                     major == lastReleaseMajor
-                            && settings.majorRegex.containsMatchIn(commit.text) -> bumpMajor = 1
+                            && settings.majorRegex.containsMatchIn(commit.text) ->
+                        bumpMajor = 1
 
                     major == lastReleaseMajor
                             && minor == lastReleaseMinor
-                            && settings.minorRegex.containsMatchIn(commit.text) -> bumpMinor = 1
+                            && settings.minorRegex.containsMatchIn(commit.text) ->
+                        bumpMinor = 1
 
                     else -> bumpPre = 1
                 }
@@ -145,33 +146,38 @@ class SemVersion(
         }
     }
 
-    fun applyPendingChanges(autoBump: Boolean) {
-        if (autoBump && !isPendingChanges) {
-            if (isPreRelease) {
-                bumpPre = 1
-            } else {
-                bumpPatch = 1
-            }
-        }
-        val preVer = preReleaseVersion
+    fun applyPendingChanges(forceBumpIfNoChanges: Boolean) {
         when {
             bumpMajor > 0 -> {
                 major += bumpMajor
                 minor = 0
                 patch = 0
-                preReleaseVersion = if (preVer != null) 1 else null
+                if (preReleaseVersion != null) {
+                    preReleaseVersion = 1
+                }
             }
             bumpMinor > 0 -> {
                 minor += bumpMinor
                 patch = 0
-                preReleaseVersion = if (preVer != null) 1 else null
+                if (preReleaseVersion != null) {
+                    preReleaseVersion = 1
+                }
             }
             bumpPatch > 0 -> {
                 patch += bumpPatch
-                preReleaseVersion = if (preVer != null) 1 else null
+                if (preReleaseVersion != null)  {
+                    preReleaseVersion = 1
+                }
             }
             bumpPre > 0 -> {
-                preReleaseVersion = if (preVer != null) preVer + bumpPre else null
+                preReleaseVersion = preReleaseVersion?.plus(bumpPre)
+            }
+            forceBumpIfNoChanges -> {
+                if (isPreRelease) {
+                    preReleaseVersion = preReleaseVersion?.inc()
+                } else {
+                    patch += 1
+                }
             }
         }
         reset()
@@ -216,7 +222,6 @@ class SemVersion(
     }
 
     override fun toString(): String {
-        return toInfoVersionString(shaLength = 7) +
-                if (isPendingChanges) "+($bumpMajor;$bumpMinor;$bumpPatch;$bumpPre)" else ""
+        return toInfoVersionString(shaLength = 7)
     }
 }

@@ -29,7 +29,7 @@ class GitSemverPluginFunctionalTest {
             }
             
             semver {
-              defaultPreRelease='NEXT'
+              groupVersionIncrements = false
             }
             
             allprojects {
@@ -59,8 +59,10 @@ class GitSemverPluginFunctionalTest {
         }
 
         // Run the build - release
-        val releaseResult = run(projectDir, "release")
-        assertThat(releaseResult.output).doesNotContain("FAILED")
+        val releaseResult = run(projectDir, "release", "-PdefaultPreRelease=NEXT")
+        assertThat(releaseResult.output)
+            .doesNotContain("FAILED")
+            .containsPattern("Sub1: \\d+\\.\\d+\\.\\d+-NEXT")
 
         // Run the build - release with options
         val releaseResult2 = run(

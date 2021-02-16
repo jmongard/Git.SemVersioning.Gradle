@@ -7,6 +7,8 @@ import kotlin.test.assertEquals
 
 class VersionFinderTest {
     companion object {
+
+        private const val FIFTH = "0000005"
         private const val FOURTH = "0000004"
         private const val THIRD = "0000003"
         private const val SECOND = "0000002"
@@ -212,6 +214,25 @@ class VersionFinderTest {
     }
 
     @Test
+    fun `test not grouping should count every change`() {
+        val commits = listOf(
+            ZERO to "feat!: A",
+            FIRST to "feat!: B",
+            SECOND to "feat: test",
+            THIRD to "feat: test",
+            FOURTH to "fix: test",
+            FIFTH to "fix: test"
+        )
+        val tags = listOf(
+            Tag("1.0.0", ZERO)
+        )
+
+        val actual = getVersion(tags, asCommits(commits.reversed()), false, false)
+
+        assertEquals("2.2.2-SNAPSHOT+005", actual.toInfoVersionString())
+    }
+
+    @Test
     fun `test preRelease version`() {
         val commits = listOf(
             ZERO to "release: 0.1.0",
@@ -308,9 +329,11 @@ class VersionFinderTest {
     private fun getVersion(
         tags: List<Tag>,
         commits: Sequence<Commit>,
-        dirty: Boolean
+        dirty: Boolean,
+        groupVersions: Boolean = true
     ): SemVersion {
-        return VersionFinder(SemverSettings(), tags.groupBy { it.sha }).getVersion(commits.first(), dirty, "SNAPSHOT")
+        val settings = SemverSettings().apply { groupVersionIncrements = groupVersions }
+        return VersionFinder(settings, tags.groupBy { it.sha }).getVersion(commits.first(), dirty, "SNAPSHOT")
     }
 
     private fun asCommits(shas: List<String>): Sequence<Commit> {

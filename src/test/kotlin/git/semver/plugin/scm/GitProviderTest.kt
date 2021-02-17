@@ -24,13 +24,13 @@ class GitProviderTest {
         gitDir.mkdirs()
 
         println(
-            "| %-30s | %-20s | %-38s|".format(
+            "| %-45s | %-25s | %-20s|".format(
+                "Command",
                 "Commit Text",
-                "Calculated version",
-                " Using release task: gradle ..."
+                "Calculated version"
             )
         )
-        println("| ------------------------------ | -------------------- | ------------------------------------- |")
+        println("| --------------------------------------------- | ------------------------- | ------------------- |")
 
         val gitProvider = GitProvider(SemverSettings().apply { groupVersionIncrements = true })
         Git.init().setDirectory(gitDir).call().use {
@@ -51,6 +51,8 @@ class GitProviderTest {
             commit(it, "feat!: breaking feature", gitProvider)
             commit(it, "some changes", gitProvider)
             commit(it, "feat: changes", gitProvider)
+            commit(it, "feat: changes", gitProvider)
+            commit(it, "fix: a fix", gitProvider)
             release(gitProvider, it)
             commit(it, "some changes", gitProvider)
             release(gitProvider, it, "alpha.1")
@@ -75,18 +77,17 @@ class GitProviderTest {
     }
 
     private fun printC(msg: String, gitProvider: GitProvider, it: Git) {
-        println("| %-30s | %-20s | %-38s|".format(msg, gitProvider.semVersion(it).toInfoVersionString(), ""))
+        println("| %-45s | %-25s | %-20s|".format("git commit -m \"$msg\"", msg, gitProvider.semVersion(it).toInfoVersionString()))
     }
 
     private fun release(gitProvider: GitProvider, it: Git, preRelease: String? = null): SemVersion {
         gitProvider.createRelease(it, false, commit = true, preRelease = preRelease, noDirtyCheck = false)
         val semVersion = gitProvider.semVersion(it)
         println(
-            "| %-30s | %-20s | %-38s|".format(
+            "| %-45s | %-25s | %-20s|".format(
+                "gradle releaseVersion " + if (preRelease == null) "" else "--preRelease=\"$preRelease\"",
                 it.log().setMaxCount(1).call().first().fullMessage,
-
-                semVersion.toInfoVersionString(),
-                "releaseVersion " + if (preRelease == null) "" else "--preRelease=\"$preRelease\""
+                semVersion.toInfoVersionString()
             )
         )
         return semVersion

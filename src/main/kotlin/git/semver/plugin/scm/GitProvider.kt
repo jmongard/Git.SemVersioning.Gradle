@@ -59,7 +59,7 @@ class GitProvider(private val settings: SemverSettings) {
             val versionFinder = VersionFinder(settings, getTags(it.repository))
             val version = versionFinder.getReleaseVersion(
                 getHeadCommit(it.repository),
-                preRelease
+                preRelease?.trimStart('-')
             )
             val versionString = version.toInfoVersionString()
             logger.info("Saving new version: {}", versionString)

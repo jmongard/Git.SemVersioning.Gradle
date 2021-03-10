@@ -10,6 +10,8 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 class GitProviderTest {
+    private val tableStringFormat = "| %-45s | %-25s | %-20s|"
+
     @Test
     fun testGetSemVersion() {
         val actual = gitProvider().getSemVersion(File("."))
@@ -24,7 +26,7 @@ class GitProviderTest {
         gitDir.mkdirs()
 
         println(
-            "| %-45s | %-25s | %-20s|".format(
+            tableStringFormat.format(
                 "Command",
                 "Commit Text",
                 "Calculated version"
@@ -65,7 +67,7 @@ class GitProviderTest {
             commit(it, "feat: another feature", gitProvider)
             commit(it, "feat!: breaking feature", gitProvider)
 
-            val actual = release(gitProvider, it, "")
+            val actual = release(gitProvider, it, "-")
 
             assertEquals("2.0.0", actual.toVersionString())
         }
@@ -76,21 +78,26 @@ class GitProviderTest {
         printC(msg, gitProvider, it)
     }
 
-    private fun printC(msg: String, gitProvider: GitProvider, it: Git) {
-        println("| %-45s | %-25s | %-20s|".format("git commit -m \"$msg\"", msg, gitProvider.semVersion(it).toInfoVersionString()))
-    }
-
     private fun release(gitProvider: GitProvider, it: Git, preRelease: String? = null): SemVersion {
         gitProvider.createRelease(it, false, commit = true, preRelease = preRelease, noDirtyCheck = false)
+        return getSemVersionAndPrint(gitProvider, it,
+            "gradle releaseVersion " + if (preRelease == null) "" else "--preRelease=\"$preRelease\"",
+            it.log().setMaxCount(1).call().first().fullMessage)
+    }
+
+    private fun printC(msg: String, gitProvider: GitProvider, it: Git) {
+        getSemVersionAndPrint(gitProvider, it, "git commit -m \"$msg\"", msg)
+    }
+
+    private fun getSemVersionAndPrint(
+        gitProvider: GitProvider,
+        it: Git,
+        cmd: String,
+        msg: String
+    ) : SemVersion {
         val semVersion = gitProvider.semVersion(it)
-        println(
-            "| %-45s | %-25s | %-20s|".format(
-                "gradle releaseVersion " + if (preRelease == null) "" else "--preRelease=\"$preRelease\"",
-                it.log().setMaxCount(1).call().first().fullMessage,
-                semVersion.toInfoVersionString()
-            )
-        )
-        return semVersion
+        println(tableStringFormat.format(cmd, msg, semVersion.toInfoVersionString()))
+        return semVersion;
     }
 
     @Test

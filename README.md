@@ -139,7 +139,7 @@ With setting: `groupVersionIncrements = true` (default)
 | gradle releaseVersion                         | release: v1.1.0-alpha.1   | 1.1.0-alpha.1       |
 | git commit -m "feat: another feature"         | feat: another feature     | 1.1.0-alpha.2+001   |
 | git commit -m "feat!: breaking feature"       | feat!: breaking feature   | 2.0.0-alpha.1+002   |
-| gradle releaseVersion --preRelease=""         | release: v2.0.0           | 2.0.0               |
+| gradle releaseVersion --preRelease="-"        | release: v2.0.0           | 2.0.0               |
 
 With setting: `groupVersionIncrements = false`
 
@@ -171,7 +171,7 @@ With setting: `groupVersionIncrements = false`
 | gradle releaseVersion                         | release: v1.3.0-alpha.1   | 1.3.0-alpha.1       |
 | git commit -m "feat: another feature"         | feat: another feature     | 1.3.0-alpha.2+001   |
 | git commit -m "feat!: breaking feature"       | feat!: breaking feature   | 2.0.0-alpha.1+002   |
-| gradle releaseVersion --preRelease=""         | release: v2.0.0           | 2.0.0               |
+| gradle releaseVersion --preRelease="-"        | release: v2.0.0           | 2.0.0               |
 
 ## Configuration
 

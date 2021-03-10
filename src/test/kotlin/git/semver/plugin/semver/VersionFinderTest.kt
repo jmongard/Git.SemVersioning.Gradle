@@ -29,8 +29,8 @@ class VersionFinderTest {
         val versions = getVersion(commits, tags)
 
         // then
-        assertEquals("1.3.1-RC", versions.toVersionString())
-        assertEquals("1.3.1-RC+003", versions.toInfoVersionString())
+        assertEquals("1.3.2-RC", versions.toVersionString())
+        assertEquals("1.3.2-RC+003", versions.toInfoVersionString())
     }
 
     @Test
@@ -153,7 +153,7 @@ class VersionFinderTest {
     @Test
     fun `test update from commit pre-release dirty`() {
         assertEquals("1.1.1-Beta.3+001", getVersionFromTagAndPreAndCommitDirty("v1.1.0", "1.1.1-Beta.2", "Commit 1"))
-        assertEquals("2.2.3-Alpha+001", getVersionFromTagAndPreAndCommitDirty("v2.2.2", "2.2.3-Alpha", "Commit 1"))
+        assertEquals("2.2.4-Alpha+001", getVersionFromTagAndPreAndCommitDirty("v2.2.2", "2.2.3-Alpha", "Commit 1"))
         assertEquals("2.2.3-Alpha.2+001", getVersionFromTagAndPreAndCommitDirty("v2.2.2", "2.2.3-Alpha.1", "fix: bug"))
         assertEquals("2.2.3-Beta.4+001", getVersionFromTagAndPreAndCommitDirty("v2.2.2", "2.2.3-Beta.3", "fix: bug"))
         assertEquals("3.0.0-Beta.2+001", getVersionFromTagAndPreAndCommitDirty("v2.2.2", "3.0.0-Beta.1", "refactor!: drop some support"))
@@ -308,8 +308,8 @@ class VersionFinderTest {
         versions = getVersion(commits, tags)
 
         // then 
-        assertEquals("1.3.0-RC", versions.toVersionString())
-        assertEquals("1.3.0-RC+003", versions.toInfoVersionString())
+        assertEquals("1.3.1-RC", versions.toVersionString())
+        assertEquals("1.3.1-RC+003", versions.toInfoVersionString())
 
         // given
         commits.add("9")

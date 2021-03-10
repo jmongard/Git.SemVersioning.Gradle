@@ -108,7 +108,7 @@ class SemVersion(
         commitCount += 1
 
         if (!settings.groupVersionIncrements) {
-            applyPendingChanges(false);
+            applyPendingChanges(false)
         }
 
         when {
@@ -136,6 +136,9 @@ class SemVersion(
                             && minor == lastReleaseMinor
                             && settings.minorRegex.containsMatchIn(commit.text) ->
                         bumpMinor = 1
+
+                    preReleaseVersion == null ->
+                        bumpPatch = 1
 
                     else -> bumpPre = 1
                 }
@@ -173,7 +176,7 @@ class SemVersion(
                 preReleaseVersion = preReleaseVersion?.plus(bumpPre)
             }
             forceBumpIfNoChanges -> {
-                if (isPreRelease) {
+                if (preReleaseVersion ?: -1 >= 0) {
                     preReleaseVersion = preReleaseVersion?.inc()
                 } else {
                     patch += 1

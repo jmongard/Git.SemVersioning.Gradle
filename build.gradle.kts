@@ -9,7 +9,14 @@ plugins {
     // Apply the Kotlin JVM plugin to add support for Kotlin.
     kotlin("jvm") version "1.3.72"
     id("com.gradle.plugin-publish") version "0.12.0"
+    id("com.github.jmongard.git-semver-plugin") version "0.2.0"
 }
+
+semver {
+    releaseTagNameFormat = "v%s"
+}
+
+version = semver.version
 
 repositories {
     jcenter()

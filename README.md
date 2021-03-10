@@ -1,6 +1,6 @@
 # Semantic versioning for Gradle using Git ![Gradle Build](https://github.com/jmongard/Git.SemVersioning.Gradle/workflows/Gradle%20Build/badge.svg)
 
-Gradle plugin for automatically versioning a project with git using semantic versioning and conventional commits. 
+Gradle plugin for automatically versioning a project with git using semantic versioning and conventional commits.
 
 
 ## Usage
@@ -23,6 +23,8 @@ allprojects {
 }
 ```
 
+[For the latest published version see the plugins page at Gradle.org](https://plugins.gradle.org/plugin/com.github.jmongard.git-semver-plugin)
+
 
 ## Versioning
 
@@ -35,7 +37,7 @@ The plugin will look for [conventional commit](https://www.conventionalcommits.o
 and will increase the corresponding version number.
 
 The plugin has the opinion that you want to group several fixes/features or breaking changes into a single release. 
-Therefor the major, minor or patch number will be increases by at most one compared to the previous release that is 
+Therefore, the major, minor or patch number will be increases by at most one compared to the previous release that is 
 not a pre-release version. Set property `groupVersionIncrements = false` if you don't want the version changes to be combined.
 (See [Configuration](#Configuration) reference below.)
 
@@ -70,6 +72,7 @@ There is several options for getting the version:
 | `semver.infoVersion`             | 1.0.1                          | 1.0.2-SNAPSHOT                     | 2.0.0-alpha.2+001                                |
 | `semver.semVersion.toString()`   | 1.0.1+sha.1c792d5              | 1.0.2-SNAPSHOT+sha.1c792d5         | 2.0.0-alpha.2+001.sha.1c792d5                    |
 
+
 ### Custom version format
 
 There is also the possibility to customize the version string returned using:
@@ -97,6 +100,7 @@ $ gradlew printVersion
 Version: 10.10.0-SNAPSHOT+072.sha.18b3106
 ````
 
+
 ## `releaseVersion`
 The `releaseVersion` task will by default create both a release commit, and a release tag. The releaseVersion task will 
 fail with an error if there exists local modification. It is possible to change this behaviour with the following options:
@@ -105,8 +109,11 @@ fail with an error if there exists local modification. It is possible to change 
  * **--no-commit**: skipp creating a commit
  * **--no-dirty**: skipp dirty check
  * **--message**="a message": Add a message text to the tag and/or commit
- * **--preRelease**="pre-release": Change the current pre-release. An empty string will promote a pre-release to a release.
-   e.g. --preRelease=alpha.1
+ * **--preRelease**="pre-release": Change the current pre-release e.g. `--preRelease=alpha.1`.
+   Set the pre-release to "-" e.g. `--preRelease=-` to promote a pre-release to a release.
+   
+  
+
 
 ## Example of how version is calculated 
 With setting: `groupVersionIncrements = true` (default)
@@ -173,13 +180,15 @@ With setting: `groupVersionIncrements = false`
 | git commit -m "feat!: breaking feature"       | feat!: breaking feature   | 2.0.0-alpha.1+002   |
 | gradle releaseVersion --preRelease="-"        | release: v2.0.0           | 2.0.0               |
 
+
 ## Configuration
 
 The plugin can be configured using the `semver` extension. This needs to be done before retrieving the version:
 
 ```groovy
 semver {
-    //Example of each property with their respective default value
+    //Example of each property with their respective default value. 
+    //There is no need to set these unless you want to change the default. 
     defaultPreRelease = "SNAPSHOT"
     releasePattern = "\\Arelease(?:\\(\\w+\\))?:"
     majorPattern = "\\A\\w+(?:\\(\\w+\\))?!:|^BREAKING[ -]CHANGE:"
@@ -195,11 +204,12 @@ version = semver.version
 ```
 
 * **defaultPreRelease**: sets the default pre-release to use if there are commits or local modifications.
-* **releasePattern**: used to identify commits thar are used as release markers.
+* **releasePattern**: used to identify commits that are used as release markers.
 * **majorPattern, minorPattern and patchPattern**: used to identify conventional commits used for increasing version.
-* **releaseCommitTextFormat**: Pattern used by `releaseVersion` task for creating release commits. First parameter
+* **releaseCommitTextFormat**: String format used by `releaseVersion` task for creating release commits. First parameter
   is the version and second parameter is the message (if given using --message=).
-* **releaseTagNameFormat**: Pattern used by `releaseVersion` task for creating release tags e.g. `"v%s"` to prefix 
+  This text should preferably match the `releasePattern`.
+* **releaseTagNameFormat**: String format used by `releaseVersion` task for creating release tags e.g. `"v%s"` to prefix 
   version tags with "v".
 * **groupVersionIncrements**: Used to disable grouping of version increments so that each commit message counts.
 
@@ -209,4 +219,6 @@ with IGNORE_CASE and MULTILINE options enabled.
 
 # Resources
 
+* [Semantic Versioning](https://semver.org/)
+* [Conventional Commit](https://www.conventionalcommits.org/)
 * [Angular Git Commit Guidelines](https://github.com/angular/angular.js/blob/master/DEVELOPERS.md#-git-commit-guidelines)

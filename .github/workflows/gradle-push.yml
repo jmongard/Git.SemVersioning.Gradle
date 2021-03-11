@@ -19,7 +19,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v2
+      with:
+          # Disabling shallow clone is recommended for improving relevancy of reporting
+          fetch-depth: 0
 
     - name: Set up JDK
       uses: actions/setup-java@v1
@@ -39,7 +42,24 @@ jobs:
         key: ${{ runner.os }}-gradlew-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}
         restore-keys: |
           ${{ runner.os }}-gradlew-
-        
+
+    - name: Compile and check with Gradle
+      run: ./gradlew check jacocoTestReport
+
+    - name: SonarCloud Scan
+      uses: sonarsource/sonarcloud-github-action@master
+      env:
+        JAVA_HOME: ""
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      with:
+        args: >
+          -Dsonar.projectKey=jmongard_Git.SemVersioning.Gradle
+          -Dsonar.organization=jmongard
+          -Dsonar.coverage.jacoco.xmlReportPaths=build/reports/jacoco/test/jacocoTestReport.xml
+          -Dsonar.tests=src/test,src/functionalTest
+          -Dsonar.sources=src/main
+
     - name: Build with Gradle
       run: ./gradlew build
 

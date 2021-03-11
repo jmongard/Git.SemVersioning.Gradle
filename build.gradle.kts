@@ -10,6 +10,7 @@ plugins {
     kotlin("jvm") version "1.3.72"
     id("com.gradle.plugin-publish") version "0.12.0"
     id("com.github.jmongard.git-semver-plugin") version "0.2.0"
+    id("jacoco")
 }
 
 semver {
@@ -72,4 +73,13 @@ val functionalTest by tasks.creating(Test::class) {
 val check by tasks.getting(Task::class) {
     // Run the functional tests as part of `check`
     dependsOn(functionalTest)
+}
+
+tasks.jacocoTestReport {
+    // Aggregate all execution data into a single XML report.
+    executionData(fileTree(buildDir).include("/jacoco/*.exec"))
+    reports {
+        xml.isEnabled = true
+        html.isEnabled = false
+    }
 }

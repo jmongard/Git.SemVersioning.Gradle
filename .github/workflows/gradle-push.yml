@@ -52,6 +52,10 @@ jobs:
         JAVA_HOME: ""
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      with:
+        args: >
+          -Dsonar.projectKey=jmongard_Git.SemVersioning.Gradle
+          -Dsonar.organization=jmongard
 
     - name: Build with Gradle
       run: ./gradlew build

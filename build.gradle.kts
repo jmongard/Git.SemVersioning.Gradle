@@ -75,6 +75,10 @@ val check by tasks.getting(Task::class) {
     dependsOn(functionalTest)
 }
 
+jacoco {
+    toolVersion = "0.8.6"
+}
+
 tasks.jacocoTestReport {
     // Aggregate all execution data into a single XML report.
     executionData(fileTree(buildDir).include("/jacoco/*.exec"))

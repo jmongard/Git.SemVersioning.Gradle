@@ -63,6 +63,8 @@ jobs:
     - name: Build with Gradle
       run: ./gradlew build
 
+    - run: git status
+
     - name: Publish gradle plugin
       if: startsWith(github.ref, 'refs/tags/v')
       run: |

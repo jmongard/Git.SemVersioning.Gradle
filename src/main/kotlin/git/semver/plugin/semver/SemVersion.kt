@@ -43,7 +43,7 @@ class SemVersion(
     private val lastReleaseMajor: Int = major
     private val lastReleaseMinor: Int = minor
     var commitCount = 0
-    internal var preReleasePrefix: String? = null
+    internal var preReleasePrefix: String = ""
     internal var preReleaseVersion: Int? = null
 
     private var bumpPatch = 0
@@ -59,19 +59,19 @@ class SemVersion(
         get() = commitCount > 0
 
     val isPreRelease
-        get() = preReleasePrefix != null || preReleaseVersion ?: -1 > 0
+        get() = preReleasePrefix.isNotEmpty() || preReleaseVersion ?: -1 > 0
 
     fun setPreRelease(value: String?, defaultPreReleaseVersion: Int? = null) {
         bumpPre = 0
 
         if (value == null) {
             preReleaseVersion = null
-            preReleasePrefix = null
+            preReleasePrefix = ""
             return
         }
 
         val prefix = value.trimEnd { it.isDigit() }
-        preReleasePrefix = if (prefix.isNotEmpty()) prefix else null
+        preReleasePrefix = prefix
         preReleaseVersion = if (prefix.length < value.length) value.substring(prefix.length).toInt() else defaultPreReleaseVersion
     }
 
@@ -92,8 +92,8 @@ class SemVersion(
             i = -isPreRelease.compareTo(other1)
         }
         if (i == 0) {
-            val other1 = other.preReleasePrefix ?: ""
-            i = (preReleasePrefix ?: "").compareTo(other1)
+            val other1 = other.preReleasePrefix
+            i = preReleasePrefix.compareTo(other1)
         }
         if (i == 0) {
             val other1 = if (other.bumpMajor + other.bumpMinor + other.bumpPatch == 0)
@@ -137,10 +137,8 @@ class SemVersion(
                             && settings.minorRegex.containsMatchIn(commit.text) ->
                         bumpMinor = 1
 
-                    preReleaseVersion == null ->
-                        bumpPatch = 1
-
-                    else -> bumpPre = 1
+                    preReleaseVersion != null ->
+                        bumpPre = 1
                 }
             }
             settings.majorRegex.containsMatchIn(commit.text) -> bumpMajor = 1
@@ -200,15 +198,15 @@ class SemVersion(
     fun toInfoVersionString(commitCountStringFormat: String = "%03d", shaLength: Int = 0, v2: Boolean = true): String {
         val builder = StringBuilder().append(major).append('.').append(minor).append('.').append(patch)
         if (isPreRelease) {
-            val preReleasePrefix = preReleasePrefix
-            val preReleaseVersion = preReleaseVersion
-            builder.append('-')
-            if (preReleasePrefix != null) {
-                builder.append(if (v2) preReleasePrefix else preReleasePrefix.replace("[^0-9A-Za-z-]".toRegex(), ""))
-            }
-            if (preReleaseVersion != null) {
-                builder.append(preReleaseVersion)
-            }
+            builder
+                .append('-')
+                .append(
+                    if (v2)
+                        preReleasePrefix
+                    else
+                        preReleasePrefix.replace("[^0-9A-Za-z-]".toRegex(), "")
+                )
+                .append(preReleaseVersion ?: "")
         }
         if (v2) {
             var metaSeparator = '+'
@@ -217,7 +215,7 @@ class SemVersion(
                 builder.append(metaSeparator).append(commitCountStringFormat.format(commitCount))
                 metaSeparator = '.'
             }
-            if (shaLength > 0) {
+            if (shaLength > 0 && sha.isNotEmpty()) {
                 builder.append(metaSeparator).append("sha.").append(sha.take(shaLength))
             }
         }

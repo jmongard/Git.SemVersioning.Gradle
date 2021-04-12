@@ -59,7 +59,9 @@ class GitSemverPluginFunctionalTest {
         }
 
         // Run the build - release
-        val releaseResult = run(projectDir, "release", "-PdefaultPreRelease=NEXT")
+        val releaseResult = run(projectDir, "release",
+            "-PdefaultPreRelease=NEXT",
+            "-PnoDirtyCheck=true")
         assertThat(releaseResult.output)
             .doesNotContain("FAILED")
             .containsPattern("Sub1: \\d+\\.\\d+\\.\\d+-NEXT")

@@ -12,8 +12,13 @@ open class GitSemverPluginExtension(project: Project) : SemverSettings() {
     val infoVersion by lazy { semVersion.toInfoVersionString() }
 
     init {
-        if (project.hasProperty("defaultPreRelease")) {
-            defaultPreRelease = project.property("defaultPreRelease") as String
+        val defaultPreReleaseProperty = project.findProperty("defaultPreRelease")
+        if (defaultPreReleaseProperty is String) {
+            defaultPreRelease = defaultPreReleaseProperty
+        }
+        val noDirtyCheckProperty = project.findProperty("noDirtyCheck")
+        if (noDirtyCheckProperty is String) {
+            noDirtyCheck = noDirtyCheckProperty.toBoolean();
         }
     }
 }

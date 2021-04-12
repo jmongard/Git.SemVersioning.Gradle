@@ -10,6 +10,7 @@ open class SemverSettings {
     var releaseCommitTextFormat = "release: v%s\n\n%s"
     var releaseTagNameFormat = "%s"
     var groupVersionIncrements = true
+    var noDirtyCheck = false
 
 
     val releaseRegex: Regex by lazy { releasePattern.toRegex(setOf(RegexOption.IGNORE_CASE, RegexOption.MULTILINE)) }

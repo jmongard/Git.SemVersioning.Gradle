@@ -6,7 +6,7 @@ import org.slf4j.LoggerFactory
 
 class VersionFinder(private val settings: SemverSettings, private val tags: Map<String, List<IRefInfo>>) {
     private val logger = LoggerFactory.getLogger(javaClass)
-    private val visitedCommits = mutableSetOf<String>()
+    private val visitedCommits = mutableSetOf("")
 
     fun getVersion(commit: Commit, isDirty: Boolean, defaultPreRelease: String?): SemVersion {
         val semVersion = getSemVersion(commit) ?: SemVersion()
@@ -22,7 +22,7 @@ class VersionFinder(private val settings: SemverSettings, private val tags: Map<
     fun getReleaseVersion(commit: Commit, newPreRelease: String?): SemVersion {
         val semVersion = getSemVersion(commit) ?: SemVersion()
         semVersion.commitCount = 0
-        semVersion.applyPendingChanges(true)
+        semVersion.applyPendingChanges(!semVersion.isPreRelease || "" != newPreRelease)
 
         if (newPreRelease != null) {
             semVersion.setPreRelease(newPreRelease)
@@ -48,7 +48,7 @@ class VersionFinder(private val settings: SemverSettings, private val tags: Map<
 
             val parentSemVersions = commit.parents.mapNotNull(this::getSemVersion).toList()
             val parentVersion = parentSemVersions.max() ?: SemVersion()
-            parentVersion.commitCount = parentSemVersions.mapNotNull { it.commitCount }.sum();
+            parentVersion.commitCount = parentSemVersions.map { it.commitCount }.sum();
             parentVersion.updateFromCommit(commit, settings, /* pre-release */ version)
 
             logger.debug("Version after commit(\"{}\"), pre-release({}): {}", commit, version, parentVersion)

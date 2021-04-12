@@ -36,11 +36,7 @@ class GitProviderTest {
 
         val gitProvider = GitProvider(SemverSettings().apply { groupVersionIncrements = true })
         Git.init().setDirectory(gitDir).call().use {
-            it.commit().setMessage("Initial commit").call()
-            val last = it.log().all().call().last()
-            it.reset().setRef(last.name).call()
-            it.gc().call()
-            printC("Initial commit", gitProvider, it)
+            initOrReset(it, gitProvider)
             commit(it, "some changes", gitProvider)
             release(gitProvider, it)
             commit(it, "some changes", gitProvider)
@@ -71,6 +67,14 @@ class GitProviderTest {
 
             assertEquals("2.0.0", actual.toVersionString())
         }
+    }
+
+    private fun initOrReset(it: Git, gitProvider: GitProvider) {
+        it.commit().setMessage("Initial commit").call()
+        val last = it.log().all().call().last()
+        it.reset().setRef(last.name).call()
+        it.gc().call()
+        printC("Initial commit", gitProvider, it)
     }
 
     private fun commit(it: Git, msg: String, gitProvider: GitProvider) {
@@ -135,5 +139,53 @@ class GitProviderTest {
         }
     }
 
+    @Test
+    fun testCreateReleaseCommit3() {
+        val gitDir = File("build/integrationTest3")
+        gitDir.mkdirs()
+
+        val gitProvider = gitProvider()
+
+        Git.init().setDirectory(gitDir).call().use {
+            initOrReset(it, gitProvider)
+            release(gitProvider, it, "SNAPSHOT")
+            commit(it, "docs: some documentation", gitProvider)
+            commit(it, "fix: a fix", gitProvider)
+            commit(it, "docs: some documentation", gitProvider)
+            release(gitProvider, it, "-")
+        }
+
+
+        Git.open(gitDir).use {
+            assertTrue(gitProvider.getHeadCommit(it.repository).text.startsWith("release: v0."))
+        }
+    }
+
+    @Test
+    fun testEmptyRepo() {
+        val gitDir = File("build/integrationTest4")
+        gitDir.mkdirs()
+
+        val gitProvider = gitProvider()
+
+        Git.init().setDirectory(gitDir).call().use {
+            assertEquals("0.0.0", gitProvider.getSemVersion(gitDir).toString())
+        }
+    }
+
+    @Test
+    fun testNoDirtyCheck() {
+        val gitDir = File("build/integrationTest5")
+        gitDir.mkdirs()
+
+        val gitProvider = GitProvider(SemverSettings().apply { noDirtyCheck = true })
+
+        Git.init().setDirectory(gitDir).call().use {
+            File(gitDir, "tmp").createNewFile()
+            assertTrue(gitProvider.isClean(it))
+        }
+    }
+
     private fun gitProvider() = GitProvider(SemverSettings())
+
 }

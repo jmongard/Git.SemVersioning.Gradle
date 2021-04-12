@@ -23,15 +23,15 @@ class SemVersionTest {
 
     @Test
     fun `valid version tags`() {
-        checkValid("v1.2", 1, 2, 0, null, null)
+        checkValid("v1.2", 1, 2, 0, "", null)
         checkValid("v1.2-alpha", 1, 2, 0, "alpha", null)
         checkValid("v1.2-alpha5", 1, 2, 0, "alpha", 5)
         checkValid("v1.2-betaV.5", 1, 2, 0, "betaV.", 5)
         checkValid("v1.2.0-beta.5", 1, 2, 0, "beta.", 5)
         checkValid("v1.2.3-beta.5", 1, 2, 3, "beta.", 5)
-        checkValid("v1.2.3-5", 1, 2, 3, null, 5)
+        checkValid("v1.2.3-5", 1, 2, 3, "", 5)
         checkValid("v1.2.3-alpha.beta", 1, 2, 3, "alpha.beta", null)
-        checkValid("1.2.3.4", 1, 2, 3, null, null)
+        checkValid("1.2.3.4", 1, 2, 3, "", null)
         checkValid("v9.5.0.41-rc", 9, 5, 0, "rc", 41)
     }
 

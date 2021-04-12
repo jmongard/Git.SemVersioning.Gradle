@@ -22,7 +22,9 @@ class GitProvider(private val settings: SemverSettings) {
     }
 
     internal fun getSemVersion(startingPath: File): SemVersion {
-        return doWithRepository(startingPath, ::semVersion)
+        getRepository(startingPath).use {
+            return semVersion(Git(it))
+        }
     }
 
     internal fun semVersion(it: Git): SemVersion {
@@ -42,8 +44,8 @@ class GitProvider(private val settings: SemverSettings) {
         message: String? = null,
         noDirtyCheck: Boolean
     ) {
-        doWithRepository(startingPath) {
-            createRelease(it, tag, commit, preRelease, message, noDirtyCheck)
+        getRepository(startingPath).use {
+            createRelease(Git(it), tag, commit, preRelease, message, noDirtyCheck)
         }
     }
 
@@ -75,17 +77,13 @@ class GitProvider(private val settings: SemverSettings) {
         }
     }
 
-    private inline fun <T> doWithRepository(startingPath: File, func: (Git) -> T): T {
-        RepositoryBuilder()
-            .setFS(FS.DETECTED)
-            .findGitDir(startingPath)
-            .setMustExist(true)
-            .build().use {
-                return func(Git(it))
-            }
-    }
+    private fun getRepository(startingPath: File) = RepositoryBuilder()
+        .setFS(FS.DETECTED)
+        .findGitDir(startingPath)
+        .setMustExist(true)
+        .build()
 
-    private fun isClean(git: Git): Boolean {
+    fun isClean(git: Git): Boolean {
         val status = git.status().call()
         if (!status.isClean) {
             logger.info("The Git repository is dirty")
@@ -96,7 +94,7 @@ class GitProvider(private val settings: SemverSettings) {
             logger.debug("missing: {}", status.missing)
             logger.debug("modified: {}", status.modified)
         }
-        return status.isClean
+        return status.isClean || settings.noDirtyCheck
     }
 
     private fun getTags(repository: Repository): Map<String, List<Tag>> {
@@ -107,7 +105,7 @@ class GitProvider(private val settings: SemverSettings) {
 
     internal fun getHeadCommit(it: Repository): Commit {
         val revWalk = RevWalk(it)
-        val head = it.resolve("HEAD")
+        val head = it.resolve("HEAD") ?: return Commit("", "", emptySequence())
         val revCommit = revWalk.parseCommit(head)
         revWalk.markStart(revCommit)
         return getCommit(revCommit, revWalk)

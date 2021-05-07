@@ -66,6 +66,34 @@ class VersionFinderTest {
     }
 
     @Test
+    fun multiple_release_tags_branching() {
+        // given
+        val commits = generateCommitList(0..10)
+        val tags = listOf(
+            Tag("v1.2", commits[0]),
+            Tag("v1.3.1-RC", commits[3])
+        )
+
+        val c0 = Commit("msg", commits[0], sequenceOf())
+        val c1 = Commit("msg", commits[1], sequenceOf(c0))
+        val c2 = Commit("msg", commits[2], sequenceOf(c1))
+        val c3 = Commit("msg", commits[3], sequenceOf(c2))
+        val c4 = Commit("msg", commits[4], sequenceOf(c3))
+        val c5 = Commit("msg", commits[5], sequenceOf(c1))
+        val c6 = Commit("msg", commits[6], sequenceOf(c5))
+        val c7 = Commit("msg", commits[7], sequenceOf(c6))
+        val c8 = Commit("msg", commits[8], sequenceOf(c4, c7))
+        val c9 = Commit("msg", commits[9], sequenceOf(c8))
+
+        // when
+        val versions = getVersion(tags, c9, false);
+
+        // then
+        assertEquals("1.3.2-RC", versions.toVersionString())
+        assertEquals("1.3.2-RC+007", versions.toInfoVersionString())
+    }
+
+    @Test
     fun one_commit_no_tags() {
         // given
         val commits = listOf(FIRST)
@@ -177,7 +205,7 @@ class VersionFinderTest {
             Tag(preRelease, SECOND)
         )
 
-        return getVersion(tags, asCommits(commits.reversed()), true).toInfoVersionString()
+        return getVersion(tags, asCommits(commits.reversed()).first(), true).toInfoVersionString()
     }
 
     @Test
@@ -209,8 +237,9 @@ class VersionFinderTest {
     }
 
     private fun getVersionFromTagAndCommits(tagName: String, vararg  commits: String): String {
-        val commitList = commits.mapIndexed { idx, it-> "000%02x".format(idx) to it }.reversed() + Pair(FIRST, "release: $tagName")
-        return getVersion(emptyList(), asCommits(commitList), false).toInfoVersionString()
+        val commitList =
+            commits.mapIndexed { idx, it -> "000%02x".format(idx) to it }.reversed() + Pair(FIRST, "release: $tagName")
+        return getVersion(emptyList(), asCommits(commitList).first(), false).toInfoVersionString()
     }
 
     @Test
@@ -227,7 +256,7 @@ class VersionFinderTest {
             Tag("1.0.0", ZERO)
         )
 
-        val actual = getVersion(tags, asCommits(commits.reversed()), false, false)
+        val actual = getVersion(tags, asCommits(commits.reversed()).first(), false, false)
 
         assertEquals("2.2.2-SNAPSHOT+005", actual.toInfoVersionString())
     }
@@ -245,7 +274,7 @@ class VersionFinderTest {
             Tag("1.0.0-RC.1", FIRST)
         )
 
-        val actual = getVersion(tags, asCommits(commits.reversed()), true)
+        val actual = getVersion(tags, asCommits(commits.reversed()).first(), true)
 
         assertEquals("1.0.0-RC.3+001", actual.toInfoVersionString())
     }
@@ -257,7 +286,11 @@ class VersionFinderTest {
     }
 
     private fun getVersionFromTagAndDirty(tagName: String): String {
-        return getVersion(listOf(Tag(tagName, FIRST)), asCommits(listOf(FIRST to "text")), true).toInfoVersionString()
+        return getVersion(
+            listOf(Tag(tagName, FIRST)),
+            asCommits(listOf(FIRST to "text")).first(),
+            true
+        ).toInfoVersionString()
     }
 
     @Test
@@ -323,17 +356,17 @@ class VersionFinderTest {
     }
 
     private fun getVersion(commits: List<String>, tags: List<Tag>, dirty: Boolean = false): SemVersion {
-        return getVersion(tags, asCommits(commits.reversed()), dirty)
+        return getVersion(tags, asCommits(commits.reversed()).first(), dirty)
     }
 
     private fun getVersion(
         tags: List<Tag>,
-        commits: Sequence<Commit>,
+        commit: Commit,
         dirty: Boolean,
         groupVersions: Boolean = true
     ): SemVersion {
         val settings = SemverSettings().apply { groupVersionIncrements = groupVersions }
-        return VersionFinder(settings, tags.groupBy { it.sha }).getVersion(commits.first(), dirty, "SNAPSHOT")
+        return VersionFinder(settings, tags.groupBy { it.sha }).getVersion(commit, dirty, "SNAPSHOT")
     }
 
     private fun asCommits(shas: List<String>): Sequence<Commit> {

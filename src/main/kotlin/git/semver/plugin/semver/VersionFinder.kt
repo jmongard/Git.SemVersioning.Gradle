@@ -3,10 +3,10 @@ package git.semver.plugin.semver
 import git.semver.plugin.scm.Commit
 import git.semver.plugin.scm.IRefInfo
 import org.slf4j.LoggerFactory
+import java.util.ArrayDeque
 
 class VersionFinder(private val settings: SemverSettings, private val tags: Map<String, List<IRefInfo>>) {
     private val logger = LoggerFactory.getLogger(javaClass)
-    private val visitedCommits = mutableSetOf("")
 
     fun getVersion(commit: Commit, isDirty: Boolean, defaultPreRelease: String?): SemVersion {
         val semVersion = getSemVersion(commit) ?: SemVersion()
@@ -30,32 +30,57 @@ class VersionFinder(private val settings: SemverSettings, private val tags: Map<
         return semVersion
     }
 
-    private fun getSemVersion(commit: Commit): SemVersion? {
-        if (visitedCommits.contains(commit.sha)) {
+    private fun getSemVersion(startCommit: Commit): SemVersion? {
+        if (startCommit.sha.isBlank()) {
             return null
         }
-        visitedCommits.add(commit.sha)
-        try {
-            val version = if (SemVersion.isRelease(commit, settings))
-                SemVersion.tryParse(commit)
-            else
-                tags[commit.sha]?.mapNotNull(SemVersion.Companion::tryParse)?.max()
+        val versions = mutableMapOf<String, SemVersion?>()
+        val commits = ArrayDeque<Pair<Commit, MutableList<String>>>()
+        commits.push(startCommit to ArrayList(1))
 
-            if (version != null && !version.isPreRelease) {
-                logger.debug("Release version found: {}", version)
-                return version
+        while (!commits.isEmpty()) {
+            val peek = commits.peek()
+            val commit = peek.first
+            val parentList = peek.second
+
+            if (!versions.containsKey(commit.sha)) {
+                val version = getSemVersionFromCommit(commit)
+                versions[commit.sha] = version
+                if (version != null && !version.isPreRelease) {
+                    logger.debug("Release version found: {}", version)
+                    commits.pop()
+                } else {
+                    commit.parents.forEach {
+                        parentList.add(it.sha)
+                        commits.push(it to ArrayList(1))
+                    }
+                }
+            } else {
+                val parentSemVersions = parentList.mapNotNull { versions.put(it, null) }.toList()
+                versions[commit.sha] = getMaxVersionFromParents(parentSemVersions, commit, versions[commit.sha])
+                commits.pop();
             }
-
-            val parentSemVersions = commit.parents.mapNotNull(this::getSemVersion).toList()
-            val parentVersion = parentSemVersions.max() ?: SemVersion()
-            parentVersion.commitCount = parentSemVersions.map { it.commitCount }.sum();
-            parentVersion.updateFromCommit(commit, settings, /* pre-release */ version)
-
-            logger.debug("Version after commit(\"{}\"), pre-release({}): {}", commit, version, parentVersion)
-            return parentVersion
-        } catch (e: Exception) {
-            logger.warn("Failed retrieving SemVer for commit: {}", commit.sha, e)
-            return null
         }
+        return versions[startCommit.sha]
+    }
+    
+    private fun getMaxVersionFromParents(
+        parentSemVersions: List<SemVersion>,
+        commit: Commit,
+        preReleaseFromCommit: SemVersion?
+    ): SemVersion {
+        val version = parentSemVersions.max() ?: SemVersion()
+        version.commitCount = parentSemVersions.map { it.commitCount }.sum();
+        version.updateFromCommit(commit, settings, preReleaseFromCommit)
+
+        logger.debug("Version after commit(\"{}\"), pre-release({}): {}", commit, preReleaseFromCommit, version)
+        return version
+    }
+
+    private fun getSemVersionFromCommit(commit: Commit): SemVersion? {
+        return if (SemVersion.isRelease(commit, settings))
+            SemVersion.tryParse(commit)
+        else
+            tags[commit.sha]?.mapNotNull(SemVersion.Companion::tryParse)?.max()
     }
 }

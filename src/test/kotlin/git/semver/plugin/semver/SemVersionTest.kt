@@ -56,6 +56,11 @@ class SemVersionTest {
         assertTrue(SemVersion.tryParse(Tag("v1.1.0-RC2", SHA))!! > SemVersion.tryParse(Tag("v1.1.0-RC1", SHA))!!)
         assertTrue(SemVersion.tryParse(Tag("v1.1.0-RC.2", SHA))!! > SemVersion.tryParse(Tag("v1.1.0-RC.1", SHA))!!)
         assertTrue(SemVersion.tryParse(Tag("v0.2.0-beta.0", SHA))!! > SemVersion.tryParse(Tag("v0.1.1-alpha.1", SHA))!!)
+
+
+        val snapthot = SemVersion.tryParse(Tag("v1.3.1", SHA))!!
+        snapthot.commitCount += 1
+        assertTrue(snapthot > SemVersion.tryParse(Tag("v1.3.1-RC", SHA))!!)
     }
 
     @Test

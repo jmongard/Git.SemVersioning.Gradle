@@ -88,7 +88,7 @@ class SemVersion(
             i = patch.compareTo(other1)
         }
         if (i == 0) {
-            val other1 = other.isPreRelease || other.isSnapshot
+            val other1 = other.isPreRelease
             i = -isPreRelease.compareTo(other1)
         }
         if (i == 0) {
@@ -99,6 +99,10 @@ class SemVersion(
             val other1 = if (other.bumpMajor + other.bumpMinor + other.bumpPatch == 0)
                     (other.preReleaseVersion ?: 1) + other.bumpPre else 1
             i = (preReleaseVersion ?: 1).compareTo(other1)
+        }
+        if (i == 0) {
+            val other1 = other.isSnapshot
+            i = -isSnapshot.compareTo(other1)
         }
         return i
     }

@@ -65,11 +65,11 @@ class GitProvider(private val settings: SemverSettings) {
             )
             val versionString = version.toInfoVersionString()
             logger.info("Saving new version: {}", versionString)
-            if (commit) {
+            if (commit && settings.releaseCommitTextFormat.isNotEmpty()) {
                 it.commit().setMessage(settings.releaseCommitTextFormat.format(versionString, message ?: "").trim())
                     .call()
             }
-            if (tag) {
+            if (tag && settings.releaseTagNameFormat.isNotEmpty()) {
                 it.tag().setName(settings.releaseTagNameFormat.format(versionString)).setMessage(message).call()
             }
         } else {

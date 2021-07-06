@@ -11,6 +11,7 @@ open class SemverSettings {
     var releaseTagNameFormat = "%s"
     var groupVersionIncrements = true
     var noDirtyCheck = false
+    var noAutoBumb = false;
 
 
     val releaseRegex: Regex by lazy { releasePattern.toRegex(setOf(RegexOption.IGNORE_CASE, RegexOption.MULTILINE)) }

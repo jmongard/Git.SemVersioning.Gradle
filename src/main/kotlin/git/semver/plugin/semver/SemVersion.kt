@@ -151,7 +151,7 @@ class SemVersion(
         }
     }
 
-    fun applyPendingChanges(forceBumpIfNoChanges: Boolean) {
+    fun applyPendingChanges(forceBumpIfNoChanges: Boolean) : Boolean {
         when {
             bumpMajor > 0 -> {
                 major += bumpMajor
@@ -184,8 +184,10 @@ class SemVersion(
                     patch += 1
                 }
             }
+            else -> return false
         }
         reset()
+        return true
     }
 
     private fun reset() {

@@ -262,6 +262,25 @@ class VersionFinderTest {
     }
 
     @Test
+    fun `test no auto bump`() {
+        val commits = listOf(
+            ZERO to "feat!: A",
+            FIRST to "feat!: B",
+            SECOND to "feat: test",
+            THIRD to "release: 2.2.0",
+            FOURTH to "docs: test",
+            FIFTH to "docs: test"
+        )
+        val tags = listOf(
+            Tag("1.0.0", ZERO)
+        )
+
+        val actual = getVersion(tags, asCommits(commits.reversed()).first(), false, disableAutoBumb = true)
+
+        assertEquals("2.2.0+002", actual.toInfoVersionString())
+    }
+
+    @Test
     fun `test preRelease version`() {
         val commits = listOf(
             ZERO to "release: 0.1.0",
@@ -363,9 +382,13 @@ class VersionFinderTest {
         tags: List<Tag>,
         commit: Commit,
         dirty: Boolean,
-        groupVersions: Boolean = true
+        groupVersions: Boolean = true,
+        disableAutoBumb: Boolean = false
     ): SemVersion {
-        val settings = SemverSettings().apply { groupVersionIncrements = groupVersions }
+        val settings = SemverSettings().apply {
+            groupVersionIncrements = groupVersions
+            noAutoBumb = disableAutoBumb
+        }
         return VersionFinder(settings, tags.groupBy { it.sha }).getVersion(commit, dirty, "SNAPSHOT")
     }
 

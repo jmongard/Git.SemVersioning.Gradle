@@ -113,8 +113,6 @@ fail with an error if there exists local modification. It is possible to change 
  * **--message**="a message": Add a message text to the tag and/or commit
  * **--preRelease**="pre-release": Change the current pre-release e.g. `--preRelease=alpha.1`.
    Set the pre-release to "-" e.g. `--preRelease=-` to promote a pre-release to a release.
-   
-  
 
 
 ## Example of how version is calculated 
@@ -199,6 +197,8 @@ semver {
     releaseCommitTextFormat = "release: v%s\n\n%s"
     releaseTagNameFormat = "%s"
     groupVersionIncrements = true
+    noDirtyCheck = false
+    noAutoBumb = false
 }
 
 //Remember to retrieve the version after plugin has been configured
@@ -214,6 +214,12 @@ version = semver.version
 * **releaseTagNameFormat**: String format used by `releaseVersion` task for creating release tags e.g. `"v%s"` to prefix 
   version tags with "v".
 * **groupVersionIncrements**: Used to disable grouping of version increments so that each commit message counts.
+* **noDirtyCheck**: Can be used to ignore all local modifications when calculating the version.
+* **noAutoBumb**: If set only commits matching majorPattern, minorPattern or patchPattern will increase the version.
+  The default behaviour for the plugin is to assume you have begun the work on the next release for any commit you do
+  after the last release. The version will be incremented by one if not already incremented by **majorPattern, 
+  minorPattern or patchPattern**.
+  (This option does not apply to the release task.)
 
 Patterns is matched using [java regular expressions](https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html) 
 with IGNORE_CASE and MULTILINE options enabled.

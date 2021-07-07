@@ -8,6 +8,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
+import kotlin.test.assertFalse
 
 class GitProviderTest {
     private val tableStringFormat = "| %-45s | %-25s | %-20s|"
@@ -182,7 +183,32 @@ class GitProviderTest {
 
         Git.init().setDirectory(gitDir).call().use {
             File(gitDir, "tmp").createNewFile()
-            assertTrue(gitProvider.isClean(it))
+            assertFalse(gitProvider.isDirty(it))
+        }
+    }
+
+
+    @Test
+    fun testCreateReleaseCommit3_no_tag_or_commit() {
+        val gitDir = File("build/integrationTest6")
+        gitDir.mkdirs()
+
+        val gitProvider = GitProvider(SemverSettings().apply {
+            releaseCommitTextFormat = ""
+            releaseTagNameFormat = ""
+        })
+
+        Git.init().setDirectory(gitDir).call().use {
+            initOrReset(it, gitProvider)
+            release(gitProvider, it, "SNAPSHOT")
+            commit(it, "docs: some documentation", gitProvider)
+            commit(it, "fix: a fix", gitProvider)
+            commit(it, "docs: some documentation", gitProvider)
+            release(gitProvider, it, "-")
+        }
+
+        Git.open(gitDir).use {
+            assertFalse(gitProvider.getHeadCommit(it.repository).text.startsWith("release: v0."))
         }
     }
 

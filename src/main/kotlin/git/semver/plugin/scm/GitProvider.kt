@@ -31,7 +31,7 @@ class GitProvider(private val settings: SemverSettings) {
         val versionFinder = VersionFinder(settings, getTags(it.repository))
         return versionFinder.getVersion(
             getHeadCommit(it.repository),
-            !isClean(it),
+            isDirty(it),
             settings.defaultPreRelease
         )
     }
@@ -57,23 +57,23 @@ class GitProvider(private val settings: SemverSettings) {
         message: String? = null,
         noDirtyCheck: Boolean
     ) {
-        if (noDirtyCheck || isClean(it)) {
-            val versionFinder = VersionFinder(settings, getTags(it.repository))
-            val version = versionFinder.getReleaseVersion(
-                getHeadCommit(it.repository),
-                preRelease?.trimStart('-')
-            )
-            val versionString = version.toInfoVersionString()
-            logger.info("Saving new version: {}", versionString)
-            if (commit && settings.releaseCommitTextFormat.isNotEmpty()) {
-                it.commit().setMessage(settings.releaseCommitTextFormat.format(versionString, message ?: "").trim())
-                    .call()
-            }
-            if (tag && settings.releaseTagNameFormat.isNotEmpty()) {
-                it.tag().setName(settings.releaseTagNameFormat.format(versionString)).setMessage(message).call()
-            }
-        } else {
+        if (!noDirtyCheck && isDirty(it)) {
             throw IllegalStateException("Local modifications exists")
+        }
+
+        val versionFinder = VersionFinder(settings, getTags(it.repository))
+        val version = versionFinder.getReleaseVersion(
+            getHeadCommit(it.repository),
+            preRelease?.trimStart('-')
+        )
+        val versionString = version.toInfoVersionString()
+        logger.info("Saving new version: {}", versionString)
+        if (commit && settings.releaseCommitTextFormat.isNotEmpty()) {
+            it.commit().setMessage(settings.releaseCommitTextFormat.format(versionString, message ?: "").trim())
+                .call()
+        }
+        if (tag && settings.releaseTagNameFormat.isNotEmpty()) {
+            it.tag().setName(settings.releaseTagNameFormat.format(versionString)).setMessage(message).call()
         }
     }
 
@@ -83,7 +83,7 @@ class GitProvider(private val settings: SemverSettings) {
         .setMustExist(true)
         .build()
 
-    fun isClean(git: Git): Boolean {
+    fun isDirty(git: Git): Boolean {
         val status = git.status().call()
         if (!status.isClean) {
             logger.info("The Git repository is dirty")
@@ -94,7 +94,7 @@ class GitProvider(private val settings: SemverSettings) {
             logger.debug("missing: {}", status.missing)
             logger.debug("modified: {}", status.modified)
         }
-        return status.isClean || settings.noDirtyCheck
+        return !status.isClean && !settings.noDirtyCheck
     }
 
     private fun getTags(repository: Repository): Map<String, List<Tag>> {

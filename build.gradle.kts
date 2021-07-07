@@ -76,7 +76,7 @@ val check by tasks.getting(Task::class) {
 }
 
 jacoco {
-    toolVersion = "0.8.6"
+    toolVersion = "0.8.7"
 }
 
 tasks.jacocoTestReport {

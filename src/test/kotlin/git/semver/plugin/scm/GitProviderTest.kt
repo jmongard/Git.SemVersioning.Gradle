@@ -26,14 +26,7 @@ class GitProviderTest {
         val gitDir = File("build/integrationTest2")
         gitDir.mkdirs()
 
-        println(
-            tableStringFormat.format(
-                "Command",
-                "Commit Text",
-                "Calculated version"
-            )
-        )
-        println("| --------------------------------------------- | ------------------------- | ------------------- |")
+        printHead()
 
         val gitProvider = GitProvider(SemverSettings().apply { groupVersionIncrements = true })
         Git.init().setDirectory(gitDir).call().use {
@@ -70,17 +63,67 @@ class GitProviderTest {
         }
     }
 
+    @Test
+    fun testNoAutoBumpAndNoGroupingCommits_modified() {
+        val gitDir = File("build/integrationTest7")
+        gitDir.mkdirs()
+
+        printHead()
+
+        val gitProvider = GitProvider(SemverSettings().apply { groupVersionIncrements = false; noAutoBumb = true })
+        Git.init().setDirectory(gitDir).call().use {
+            initOrReset(it, gitProvider)
+            commit(it, "release: 0.0.10", gitProvider)
+            commit(it, "fix: test12", gitProvider)
+            val actual = commit(it, "test13", gitProvider)
+
+
+            assertEquals("0.0.11-SNAPSHOT", actual.toVersionString())
+        }
+    }
+
+    @Test
+    fun testNoAutoBumpAndNoGroupingCommits_not_modified() {
+        val gitDir = File("build/integrationTest8")
+        gitDir.mkdirs()
+
+        printHead()
+
+        val gitProvider = GitProvider(SemverSettings().apply { groupVersionIncrements = false; noAutoBumb = true })
+        Git.init().setDirectory(gitDir).call().use {
+            initOrReset(it, gitProvider)
+            commit(it, "release: 0.0.10", gitProvider)
+            val actual = commit(it, "test13", gitProvider)
+
+
+            assertEquals("0.0.10", actual.toVersionString())
+        }
+    }
+
+    private fun printHead() {
+        println("| --------------------------------------------- | ------------------------- | ------------------- |")
+
+        println(
+            tableStringFormat.format(
+                "Command",
+                "Commit Text",
+                "Calculated version"
+            )
+        )
+        println("| --------------------------------------------- | ------------------------- | ------------------- |")
+    }
+
     private fun initOrReset(it: Git, gitProvider: GitProvider) {
         it.commit().setMessage("Initial commit").call()
         val last = it.log().all().call().last()
         it.reset().setRef(last.name).call()
         it.gc().call()
-        printC("Initial commit", gitProvider, it)
+        getSemVersionAndPrint("Initial commit", gitProvider, it)
     }
 
-    private fun commit(it: Git, msg: String, gitProvider: GitProvider) {
+    private fun commit(it: Git, msg: String, gitProvider: GitProvider): SemVersion {
         it.commit().setMessage(msg).call()
-        printC(msg, gitProvider, it)
+        return getSemVersionAndPrint(msg, gitProvider, it)
     }
 
     private fun release(gitProvider: GitProvider, it: Git, preRelease: String? = null): SemVersion {
@@ -90,8 +133,8 @@ class GitProviderTest {
             it.log().setMaxCount(1).call().first().fullMessage)
     }
 
-    private fun printC(msg: String, gitProvider: GitProvider, it: Git) {
-        getSemVersionAndPrint(gitProvider, it, "git commit -m \"$msg\"", msg)
+    private fun getSemVersionAndPrint(msg: String, gitProvider: GitProvider, it: Git): SemVersion {
+        return getSemVersionAndPrint(gitProvider, it, "git commit -m \"$msg\"", msg)
     }
 
     private fun getSemVersionAndPrint(
@@ -107,6 +150,7 @@ class GitProviderTest {
 
     @Test
     fun testCreateReleaseCommit() {
+        printHead()
         val gitDir = File("build/integrationTest")
         gitDir.mkdirs()
 
@@ -142,6 +186,7 @@ class GitProviderTest {
 
     @Test
     fun testCreateReleaseCommit3() {
+        printHead()
         val gitDir = File("build/integrationTest3")
         gitDir.mkdirs()
 
@@ -190,6 +235,7 @@ class GitProviderTest {
 
     @Test
     fun testCreateReleaseCommit3_no_tag_or_commit() {
+        printHead()
         val gitDir = File("build/integrationTest6")
         gitDir.mkdirs()
 

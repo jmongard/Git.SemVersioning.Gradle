@@ -43,6 +43,7 @@ class SemVersion(
     private val lastReleaseMajor: Int = major
     private val lastReleaseMinor: Int = minor
     var commitCount = 0
+    var updated = false
     internal var preReleasePrefix: String = ""
     internal var preReleaseVersion: Int? = null
 
@@ -59,7 +60,7 @@ class SemVersion(
         get() = commitCount > 0
 
     val isPreRelease
-        get() = preReleasePrefix.isNotEmpty() || preReleaseVersion ?: -1 > 0
+        get() = preReleasePrefix.isNotEmpty() || (preReleaseVersion ?: -1) > 0
 
     fun setPreRelease(value: String?, defaultPreReleaseVersion: Int? = null) {
         bumpPre = 0
@@ -160,6 +161,7 @@ class SemVersion(
                 if (preReleaseVersion != null) {
                     preReleaseVersion = 1
                 }
+                updated = true
             }
             bumpMinor > 0 -> {
                 minor += bumpMinor
@@ -167,27 +169,31 @@ class SemVersion(
                 if (preReleaseVersion != null) {
                     preReleaseVersion = 1
                 }
+                updated = true
             }
             bumpPatch > 0 -> {
                 patch += bumpPatch
                 if (preReleaseVersion != null)  {
                     preReleaseVersion = 1
                 }
+                updated = true
             }
             bumpPre > 0 -> {
                 preReleaseVersion = preReleaseVersion?.plus(bumpPre)
+                updated = true
             }
             forceBumpIfNoChanges -> {
-                if (preReleaseVersion ?: -1 >= 0) {
+                if ((preReleaseVersion ?: -1) >= 0) {
                     preReleaseVersion = preReleaseVersion?.inc()
                 } else {
                     patch += 1
                 }
+                updated = true
             }
-            else -> return false
+            else -> return updated
         }
         reset()
-        return true
+        return updated
     }
 
     private fun reset() {

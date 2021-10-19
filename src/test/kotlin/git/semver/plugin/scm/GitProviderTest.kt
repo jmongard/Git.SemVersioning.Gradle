@@ -100,6 +100,46 @@ class GitProviderTest {
         }
     }
 
+    @Test
+    fun test_semver_snapshot_comparison_no_group() {
+        val gitDir = File("build/integrationTest9")
+        gitDir.mkdirs()
+
+        printHead()
+
+        val gitProvider = GitProvider(SemverSettings().apply { groupVersionIncrements = false; noAutoBumb = true })
+        Git.init().setDirectory(gitDir).call().use {
+            initOrReset(it, gitProvider)
+            release(gitProvider, it)
+            commit(it, "fix: update semver plugin", gitProvider)
+            release(gitProvider, it, "SNAPSHOT")
+            commit(it, "fix: update semver plugin", gitProvider)
+            val actual = release(gitProvider, it, "-")
+
+            assertEquals("0.0.2", actual.toVersionString())
+        }
+    }
+
+    @Test
+    fun test_semver_snapshot_comparison_group() {
+        val gitDir = File("build/integrationTest10")
+        gitDir.mkdirs()
+
+        printHead()
+
+        val gitProvider = GitProvider(SemverSettings().apply { groupVersionIncrements = true; noAutoBumb = true })
+        Git.init().setDirectory(gitDir).call().use {
+            initOrReset(it, gitProvider)
+            release(gitProvider, it)
+            commit(it, "fix: update semver plugin", gitProvider)
+            release(gitProvider, it, "SNAPSHOT")
+            commit(it, "fix: update semver plugin", gitProvider)
+            val actual = release(gitProvider, it, "-")
+
+            assertEquals("0.0.2", actual.toVersionString())
+        }
+    }
+
     private fun printHead() {
         println("| --------------------------------------------- | ------------------------- | ------------------- |")
 

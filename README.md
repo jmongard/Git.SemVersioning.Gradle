@@ -19,9 +19,10 @@ plugins {
 //Set the version for the current project:
 version = semver.version
 
-//Or in a multi project build set the version of all projects:
+//Or in a multi project build set the version of all projects (only include the plugin in the root project):
+def ver = semver.version
 allprojects {
-    version = semver.version
+    version = ver
 }
 ```
 

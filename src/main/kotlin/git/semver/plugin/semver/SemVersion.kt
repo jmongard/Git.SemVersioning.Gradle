@@ -8,9 +8,22 @@ class SemVersion(
     var major: Int = 0,
     var minor: Int = 0,
     var patch: Int = 0,
-    preRelease: String? = null,
-    revision: Int? = null
+    var preRelease: Pair<String, Int?> = nullPreRelease,
+    var commitCount: Int = 0,
+    private var bumpPatch: Int = 0,
+    private var bumpMinor: Int = 0,
+    private var bumpMajor: Int = 0,
+    private var bumpPre: Int = 0,
+    private val lastReleaseMajor: Int = major,
+    private val lastReleaseMinor: Int = minor,
+    private var versionChanged: Boolean = false
 ) : Comparable<SemVersion> {
+
+    constructor(v: SemVersion) : this(
+        v.sha, v.major, v.minor, v.patch, v.preRelease, 0,
+        v.bumpPatch, v.bumpMinor, v.bumpMajor, v.bumpPre,
+        v.lastReleaseMajor, v.lastReleaseMinor, v.versionChanged
+    )
 
     companion object {
         private val logger = LoggerFactory.getLogger(SemVersion::class.java)
@@ -27,8 +40,10 @@ class SemVersion(
                 match.groups["Major"]!!.value.toInt(),
                 match.groups["Minor"]!!.value.toInt(),
                 match.groups["Patch"]?.value?.toInt() ?: 0,
-                match.groups["PreRelease"]?.value,
-                match.groups["Revision"]?.value?.toInt()
+                parsePrerelease(
+                    match.groups["PreRelease"]?.value,
+                    match.groups["Revision"]?.value?.toInt()
+                )
             )
 
             logger.debug("Found version: {} in: '{}'", version, refInfo.text)
@@ -38,43 +53,38 @@ class SemVersion(
         fun isRelease(commit: IRefInfo, settings: SemverSettings): Boolean {
             return settings.releaseRegex.containsMatchIn(commit.text)
         }
-    }
 
-    private val lastReleaseMajor: Int = major
-    private val lastReleaseMinor: Int = minor
-    var commitCount = 0
-    var updated = false
-    internal var preReleasePrefix: String = ""
-    internal var preReleaseVersion: Int? = null
+        val nullPreRelease = "" to null
 
-    private var bumpPatch = 0
-    private var bumpMinor = 0
-    private var bumpMajor = 0
-    private var bumpPre = 0
+        fun parsePrerelease(value: String?, defaultPreReleaseVersion: Int?): Pair<String, Int?> {
+            if (value == null) {
+                return nullPreRelease
+            }
 
-    init {
-        setPreRelease(preRelease, revision)
+            val prefix = value.trimEnd { it.isDigit() }
+            return prefix to
+                    if (prefix.length < value.length)
+                        value.substring(prefix.length).toInt()
+                    else
+                        defaultPreReleaseVersion
+        }
     }
 
     val isSnapshot
         get() = commitCount > 0
 
     val isPreRelease
-        get() = preReleasePrefix.isNotEmpty() || (preReleaseVersion ?: -1) > 0
+        get() = preRelease != nullPreRelease
 
-    fun setPreRelease(value: String?, defaultPreReleaseVersion: Int? = null) {
-        bumpPre = 0
+    fun setPreRelease(value: String?) {
+        preRelease = parsePrerelease(value, null)
+    }
 
-        if (value == null) {
-            preReleaseVersion = null
-            preReleasePrefix = ""
-            return
+    private fun updatePreReleaseNumber(versionFunc: (Int) -> Int) {
+        val preReleaseNumber = preRelease.second
+        if (preReleaseNumber != null) {
+            preRelease = Pair(preRelease.first, versionFunc(preReleaseNumber))
         }
-
-        val prefix = value.trimEnd { it.isDigit() }
-        preReleasePrefix = prefix
-        preReleaseVersion =
-            if (prefix.length < value.length) value.substring(prefix.length).toInt() else defaultPreReleaseVersion
     }
 
     override fun compareTo(other: SemVersion): Int {
@@ -89,7 +99,7 @@ class SemVersion(
             i = -isPreReleaseOrUpdated().compareTo(other.isPreReleaseOrUpdated())
         }
         if (i == 0) {
-            i = preReleasePrefix.compareTo(other.preReleasePrefix)
+            i = preRelease.first.compareTo(other.preRelease.first)
         }
         if (i == 0) {
             i = comparablePreReleaseVersion().compareTo(other.comparablePreReleaseVersion())
@@ -109,55 +119,57 @@ class SemVersion(
         if (bumpMajor + bumpMinor == 0) patch + bumpPatch else 0
 
     private fun comparablePreReleaseVersion() =
-        if (bumpMajor + bumpMinor + bumpPatch == 0) (preReleaseVersion ?: 1) + bumpPre else 1
+        if (bumpMajor + bumpMinor + bumpPatch == 0) (preRelease.second ?: 1) + bumpPre else 1
 
     private fun isPreReleaseOrUpdated() =
-        isPreRelease || updated || bumpMajor + bumpMinor + bumpPatch > 0
+        isPreRelease || versionChanged || bumpMajor + bumpMinor + bumpPatch > 0
 
-    fun updateFromCommit(commit: IRefInfo, settings: SemverSettings, newPreRelease: SemVersion? = null) {
+    fun updateFromCommit(commit: IRefInfo, settings: SemverSettings, givenVersion: SemVersion?): Boolean {
         sha = commit.sha
+
+        if (givenVersion != null) {
+            if (givenVersion >= this) {
+                reset()
+                major = givenVersion.major
+                minor = givenVersion.minor
+                patch = givenVersion.patch
+                preRelease = givenVersion.preRelease
+                commitCount = 0
+                return false
+            } else {
+                logger.warn("Ignored given version lower than the current version: {} < {} ", givenVersion, this)
+            }
+        }
+
         commitCount += 1
+        return checkCommitText(settings, commit.text)
+    }
 
-        if (!settings.groupVersionIncrements) {
-            applyPendingChanges(false)
-        }
-
+    private fun checkCommitText(
+        settings: SemverSettings,
+        text: String
+    ): Boolean {
         when {
-            newPreRelease != null -> {
-                if (newPreRelease >= this) {
-                    reset()
-                    major = newPreRelease.major
-                    minor = newPreRelease.minor
-                    patch = newPreRelease.patch
-                    preReleasePrefix = newPreRelease.preReleasePrefix
-                    preReleaseVersion = newPreRelease.preReleaseVersion
-                    commitCount = 0
-                } else {
-                    logger.warn(
-                        "Ignored pre-release with lower version than the current version: {} < {} ",
-                        newPreRelease, this
-                    )
+            settings.majorRegex.containsMatchIn(text) ->
+                if (!isPreRelease || major == lastReleaseMajor) {
+                    bumpMajor = 1
                 }
-            }
-            isPreRelease -> {
-                when {
-                    major == lastReleaseMajor
-                            && settings.majorRegex.containsMatchIn(commit.text) ->
-                        bumpMajor = 1
 
-                    major == lastReleaseMajor
-                            && minor == lastReleaseMinor
-                            && settings.minorRegex.containsMatchIn(commit.text) ->
-                        bumpMinor = 1
-
-                    preReleaseVersion != null ->
-                        bumpPre = 1
+            settings.minorRegex.containsMatchIn(text) ->
+                if (!isPreRelease || major == lastReleaseMajor && minor == lastReleaseMinor) {
+                    bumpMinor = 1
                 }
-            }
-            settings.majorRegex.containsMatchIn(commit.text) -> bumpMajor = 1
-            settings.minorRegex.containsMatchIn(commit.text) -> bumpMinor = 1
-            settings.patchRegex.containsMatchIn(commit.text) -> bumpPatch = 1
+
+            settings.patchRegex.containsMatchIn(text) ->
+                if (!isPreRelease) {
+                    bumpPatch = 1
+                } else if (preRelease.second != null) {
+                    bumpPre = 1
+                }
+
+            else -> return false
         }
+        return true
     }
 
     fun applyPendingChanges(forceBumpIfNoChanges: Boolean): Boolean {
@@ -166,38 +178,37 @@ class SemVersion(
                 major += bumpMajor
                 minor = 0
                 patch = 0
-                if (preReleaseVersion != null) {
-                    preReleaseVersion = 1
-                }
+                updatePreReleaseNumber { 1 }
             }
+
             bumpMinor > 0 -> {
                 minor += bumpMinor
                 patch = 0
-                if (preReleaseVersion != null) {
-                    preReleaseVersion = 1
-                }
+                updatePreReleaseNumber { 1 }
             }
+
             bumpPatch > 0 -> {
                 patch += bumpPatch
-                if (preReleaseVersion != null) {
-                    preReleaseVersion = 1
-                }
+                updatePreReleaseNumber { 1 }
             }
+
             bumpPre > 0 -> {
-                preReleaseVersion = preReleaseVersion?.plus(bumpPre)
+                updatePreReleaseNumber { it + bumpPre }
             }
+
             forceBumpIfNoChanges -> {
-                if ((preReleaseVersion ?: -1) >= 0) {
-                    preReleaseVersion = preReleaseVersion?.inc()
+                if (preRelease.second != null) {
+                    updatePreReleaseNumber { it + 1 }
                 } else {
                     patch += 1
                 }
             }
-            else -> return updated
+
+            else -> return versionChanged
         }
         reset()
-        updated = true
-        return updated
+        versionChanged = true
+        return true
     }
 
     private fun reset() {
@@ -218,11 +229,11 @@ class SemVersion(
                 .append('-')
                 .append(
                     if (v2)
-                        preReleasePrefix
+                        preRelease.first
                     else
-                        preReleasePrefix.replace("[^0-9A-Za-z-]".toRegex(), "")
+                        preRelease.first.replace("[^0-9A-Za-z-]".toRegex(), "")
                 )
-                .append(preReleaseVersion ?: "")
+                .append(preRelease.second ?: "")
         }
         if (v2) {
             var metaSeparator = '+'

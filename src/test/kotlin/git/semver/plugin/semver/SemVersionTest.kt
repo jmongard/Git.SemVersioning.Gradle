@@ -40,8 +40,8 @@ class SemVersionTest {
         assertEquals(majorVersion, version.major)
         assertEquals(minorVersion, version.minor)
         assertEquals(patchVersion, version.patch)
-        assertEquals(suffix, version.preReleasePrefix)
-        assertEquals(preRelease, version.preReleaseVersion)
+        assertEquals(suffix, version.preRelease.first)
+        assertEquals(preRelease, version.preRelease.second)
     }
 
     @Test

@@ -9,7 +9,7 @@ plugins {
     // Apply the Kotlin JVM plugin to add support for Kotlin.
     kotlin("jvm") version "1.3.72"
     id("com.gradle.plugin-publish") version "0.12.0"
-    id("com.github.jmongard.git-semver-plugin") version "0.4.0"
+    id("com.github.jmongard.git-semver-plugin") version "0.4.2"
     id("jacoco")
 }
 
@@ -27,10 +27,11 @@ dependencies {
     implementation(kotlin("stdlib-jdk8"))
     testImplementation(kotlin("test-junit"))
 
-    testImplementation("org.assertj:assertj-core:3.21.0")
+    testImplementation("org.assertj:assertj-core:3.23.1")
 
-    implementation("org.eclipse.jgit:org.eclipse.jgit:5.13.0.202109080827-r")
-    implementation("org.slf4j:slf4j-api:1.7.32")
+    implementation("org.eclipse.jgit:org.eclipse.jgit:5.13.1.202206130422-r")
+    implementation("org.eclipse.jgit:org.eclipse.jgit.gpg.bc:5.13.1.202206130422-r")
+    implementation("org.slf4j:slf4j-api:1.7.36")
 }
 
 gradlePlugin {

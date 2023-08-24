@@ -109,8 +109,8 @@ The `releaseVersion` task will by default create both a release commit, and a re
 fail with an error if there exists local modification. It is possible to change this behaviour with the following options:
 
  * **--no-tag**: skip creating a tag
- * **--no-commit**: skipp creating a commit
- * **--no-dirty**: skipp dirty check
+ * **--no-commit**: skip creating a commit
+ * **--no-dirty**: skip dirty check
  * **--message**="a message": Add a message text to the tag and/or commit
  * **--preRelease**="pre-release": Change the current pre-release e.g. `--preRelease=alpha.1`.
    Set the pre-release to "-" e.g. `--preRelease=-` to promote a pre-release to a release.

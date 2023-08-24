@@ -11,7 +11,7 @@ class VersionFinder(private val settings: SemverSettings, private val tags: Map<
     fun getVersion(commit: Commit, isDirty: Boolean, defaultPreRelease: String?): SemVersion {
         val semVersion = getSemVersion(commit)
         val isModified = semVersion.isSnapshot || isDirty
-        val updated = semVersion.applyPendingChanges(isModified && !settings.noAutoBumb)
+        val updated = semVersion.applyPendingChanges(isModified && !settings.noAutoBump)
 
         if (!semVersion.isPreRelease && updated) {
             semVersion.setPreRelease(defaultPreRelease)

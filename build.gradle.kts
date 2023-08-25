@@ -3,7 +3,7 @@ plugins {
     `java-gradle-plugin`
 
     // Apply the Kotlin JVM plugin to add support for Kotlin.
-    kotlin("jvm") version "1.3.72"
+    kotlin("jvm") version "1.9.10"
     id("com.gradle.plugin-publish") version "1.2.1"
     id("com.github.jmongard.git-semver-plugin") version "0.4.2"
     id("jacoco")

@@ -64,6 +64,7 @@ val check by tasks.getting(Task::class) {
 }
 
 tasks.jacocoTestReport {
+    dependsOn(functionalTest)
     // Aggregate all execution data into a single XML report.
     executionData(fileTree(project.layout.buildDirectory).include("/jacoco/*.exec"))
     reports {

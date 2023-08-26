@@ -93,7 +93,7 @@ class VersionFinder(private val settings: SemverSettings, private val tags: Map<
         commit: Commit,
         givenVersion: SemVersion?
     ): SemVersion {
-        val version = parentSemVersions.max() ?: versionZero()
+        val version = parentSemVersions.maxOrNull() ?: versionZero()
         version.commitCount = parentSemVersions.map { it.commitCount }.sum()
         version.updateFromCommit(commit, settings, givenVersion)
 

@@ -32,8 +32,9 @@ class GitSemverPluginFunctionalTest {
               groupVersionIncrements = false
             }
             
+            var v = semver.version
             allprojects {
-              version = semver.version
+              version = v
             }
             
             task testTask(dependsOn:printVersion) {
@@ -61,7 +62,8 @@ class GitSemverPluginFunctionalTest {
         // Run the build - release
         val releaseResult = run(projectDir, "release",
             "-PdefaultPreRelease=NEXT",
-            "-PnoDirtyCheck=true")
+            "-PnoDirtyCheck=true",
+            "--stacktrace")
         assertThat(releaseResult.output)
             .doesNotContain("FAILED")
             .containsPattern("Sub1: \\d+\\.\\d+\\.\\d+-NEXT")

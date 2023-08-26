@@ -1,15 +1,11 @@
-/*
- * User Manual available at https://docs.gradle.org/6.7.1/userguide/custom_plugins.html
- */
-
 plugins {
     // Apply the Java Gradle plugin development plugin to add support for developing Gradle plugins
     `java-gradle-plugin`
 
     // Apply the Kotlin JVM plugin to add support for Kotlin.
-    kotlin("jvm") version "1.3.72"
-    id("com.gradle.plugin-publish") version "0.12.0"
-    id("com.github.jmongard.git-semver-plugin") version "0.4.2"
+    kotlin("jvm") version "1.9.10"
+    id("com.gradle.plugin-publish") version "1.2.1"
+    id("com.github.jmongard.git-semver-plugin") version "0.4.3"
     id("jacoco")
 }
 
@@ -35,25 +31,16 @@ dependencies {
 }
 
 gradlePlugin {
-    // Define the plugin
+    website.set("https://github.com/jmongard/Git.SemVersioning.Gradle")
+    vcsUrl = "https://github.com/jmongard/Git.SemVersioning.Gradle"
+
     plugins {
         create("gitSemverPlugin") {
             id = "com.github.jmongard.git-semver-plugin"
-            implementationClass = "git.semver.plugin.gradle.GitSemverPlugin"
-        }
-    }
-}
-
-pluginBundle {
-    website = "https://github.com/jmongard/Git.SemVersioning.Gradle"
-    vcsUrl = "https://github.com/jmongard/Git.SemVersioning.Gradle"
-    description = "Automatic project versioning based on semantic versioning using git tags and conventional commits"
-    tags = listOf("git", "kotlin", "semver", "semantic-versioning", "automatic-versioning", "version", "semantic", "release", "conventional", "conventional-commits")
-
-    (plugins) {
-        "gitSemverPlugin" {
-            // id is captured from java-gradle-plugin configuration
             displayName = "Git Semantic Versioning Plugin"
+            description = "Automatic project versioning based on semantic versioning using git tags and conventional commits"
+            tags = listOf("git", "kotlin", "semver", "semantic-versioning", "automatic-versioning", "version", "semantic", "release", "conventional", "conventional-commits")
+            implementationClass = "git.semver.plugin.gradle.GitSemverPlugin"
         }
     }
 }
@@ -76,15 +63,11 @@ val check by tasks.getting(Task::class) {
     dependsOn(functionalTest)
 }
 
-jacoco {
-    toolVersion = "0.8.7"
-}
-
 tasks.jacocoTestReport {
     // Aggregate all execution data into a single XML report.
-    executionData(fileTree(buildDir).include("/jacoco/*.exec"))
+    executionData(fileTree(project.layout.buildDirectory).include("/jacoco/*.exec"))
     reports {
-        xml.isEnabled = true
-        html.isEnabled = false
+        xml.required = true
+        html.required = false
     }
 }

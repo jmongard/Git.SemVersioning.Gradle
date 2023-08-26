@@ -25,8 +25,8 @@ dependencies {
 
     testImplementation("org.assertj:assertj-core:3.23.1")
 
-    implementation("org.eclipse.jgit:org.eclipse.jgit:5.13.1.202206130422-r")
-    implementation("org.eclipse.jgit:org.eclipse.jgit.gpg.bc:5.13.1.202206130422-r")
+    implementation("org.eclipse.jgit:org.eclipse.jgit:5.13.2.202306221912-r")
+    implementation("org.eclipse.jgit:org.eclipse.jgit.gpg.bc:5.13.2.202306221912-r")
     implementation("org.slf4j:slf4j-api:1.7.36")
 }
 

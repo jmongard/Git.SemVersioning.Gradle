@@ -199,7 +199,7 @@ semver {
     releaseTagNameFormat = "%s"
     groupVersionIncrements = true
     noDirtyCheck = false
-    noAutoBumb = false
+    noAutoBump = false
 }
 
 //Remember to retrieve the version after plugin has been configured
@@ -216,7 +216,7 @@ version = semver.version
   version tags with "v".
 * **groupVersionIncrements**: Used to disable grouping of version increments so that each commit message counts.
 * **noDirtyCheck**: Can be used to ignore all local modifications when calculating the version.
-* **noAutoBumb**: If set only commits matching majorPattern, minorPattern or patchPattern will increase the version.
+* **noAutoBump**: If set only commits matching majorPattern, minorPattern or patchPattern will increase the version.
   The default behaviour for the plugin is to assume you have begun the work on the next release for any commit you do
   after the last release. The version will be incremented by one if not already incremented by **majorPattern, 
   minorPattern or patchPattern**.

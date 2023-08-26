@@ -70,7 +70,7 @@ class GitProviderTest {
 
         printHead()
 
-        val gitProvider = GitProvider(SemverSettings().apply { groupVersionIncrements = false; noAutoBumb = true })
+        val gitProvider = GitProvider(SemverSettings().apply { groupVersionIncrements = false; noAutoBump = true })
         Git.init().setDirectory(gitDir).call().use {
             initOrReset(it, gitProvider)
             commit(it, "release: 0.0.10", gitProvider)
@@ -89,7 +89,7 @@ class GitProviderTest {
 
         printHead()
 
-        val gitProvider = GitProvider(SemverSettings().apply { groupVersionIncrements = false; noAutoBumb = true })
+        val gitProvider = GitProvider(SemverSettings().apply { groupVersionIncrements = false; noAutoBump = true })
         Git.init().setDirectory(gitDir).call().use {
             initOrReset(it, gitProvider)
             commit(it, "release: 0.0.10", gitProvider)
@@ -107,7 +107,7 @@ class GitProviderTest {
 
         printHead()
 
-        val gitProvider = GitProvider(SemverSettings().apply { groupVersionIncrements = false; noAutoBumb = true })
+        val gitProvider = GitProvider(SemverSettings().apply { groupVersionIncrements = false; noAutoBump = true })
         Git.init().setDirectory(gitDir).call().use {
             initOrReset(it, gitProvider)
             release(gitProvider, it)
@@ -127,7 +127,7 @@ class GitProviderTest {
 
         printHead()
 
-        val gitProvider = GitProvider(SemverSettings().apply { groupVersionIncrements = true; noAutoBumb = true })
+        val gitProvider = GitProvider(SemverSettings().apply { groupVersionIncrements = true; noAutoBump = true })
         Git.init().setDirectory(gitDir).call().use {
             initOrReset(it, gitProvider)
             release(gitProvider, it)

@@ -367,7 +367,7 @@ class VersionFinderTest {
             Tag("1.0.0", ZERO)
         )
 
-        val actual = getVersion(tags, asCommits(commits.reversed()).first(), false, disableAutoBumb = true)
+        val actual = getVersion(tags, asCommits(commits.reversed()).first(), false, disableAutoBump = true)
 
         assertEquals("2.2.0+002", actual.toInfoVersionString())
     }
@@ -471,11 +471,11 @@ class VersionFinderTest {
         commit: Commit,
         dirty: Boolean = false,
         groupVersions: Boolean = true,
-        disableAutoBumb: Boolean = false
+        disableAutoBump: Boolean = false
     ): SemVersion {
         val settings = SemverSettings().apply {
             groupVersionIncrements = groupVersions
-            noAutoBumb = disableAutoBumb
+            noAutoBump = disableAutoBump
         }
         return VersionFinder(settings, tags.groupBy { it.sha }).getVersion(commit, dirty, "SNAPSHOT")
     }

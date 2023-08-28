@@ -230,4 +230,4 @@ with IGNORE_CASE and MULTILINE options enabled.
 
 * [Semantic Versioning](https://semver.org/)
 * [Conventional Commit](https://www.conventionalcommits.org/)
-* [Angular Git Commit Guidelines](https://github.com/angular/angular/blob/master/CONTRIBUTING.md#-commit-message-format)
+* [Angular Git Commit Guidelines](https://github.com/angular/angular/blob/main/CONTRIBUTING.md#-commit-message-format)

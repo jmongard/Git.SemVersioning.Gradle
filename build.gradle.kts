@@ -21,8 +21,8 @@ repositories {
 
 dependencies {
     implementation(kotlin("stdlib-jdk8"))
-    testImplementation(kotlin("test-junit"))
-
+    testImplementation(kotlin("test-junit5"))
+    testImplementation("org.junit.jupiter:junit-jupiter-params")
     testImplementation("org.assertj:assertj-core:3.23.1")
 
     implementation("org.eclipse.jgit:org.eclipse.jgit:5.13.2.202306221912-r")
@@ -49,18 +49,26 @@ gradlePlugin {
 val functionalTestSourceSet = sourceSets.create("functionalTest") {
 }
 
-gradlePlugin.testSourceSets(functionalTestSourceSet)
-configurations.getByName("functionalTestImplementation").extendsFrom(configurations.getByName("testImplementation"))
+configurations["functionalTestImplementation"].extendsFrom(configurations["testImplementation"])
+configurations["functionalTestRuntimeOnly"].extendsFrom(configurations["testRuntimeOnly"])
 
 // Add a task to run the functional tests
-val functionalTest by tasks.creating(Test::class) {
+val functionalTest by tasks.registering(Test::class) {
     testClassesDirs = functionalTestSourceSet.output.classesDirs
     classpath = functionalTestSourceSet.runtimeClasspath
+    useJUnitPlatform()
 }
 
-val check by tasks.getting(Task::class) {
+gradlePlugin.testSourceSets.add(functionalTestSourceSet)
+
+tasks.named<Task>("check") {
     // Run the functional tests as part of `check`
     dependsOn(functionalTest)
+}
+
+tasks.named<Test>("test") {
+    // Use JUnit Jupiter for unit tests.
+    useJUnitPlatform()
 }
 
 tasks.jacocoTestReport {

@@ -4,9 +4,9 @@ open class SemverSettings {
 
     var defaultPreRelease: String = "SNAPSHOT"
     var releasePattern: String = "\\Arelease(?:\\(\\w+\\))?:"
-    var patchPattern: String = "\\Afix(?:\\([\\w-]+\\))?:"
-    var minorPattern: String = "\\Afeat(?:\\([\\w-]+\\))?:"
-    var majorPattern: String = "\\A\\w+(?:\\([\\w-]+\\))?!:|^BREAKING[ -]CHANGE:"
+    var patchPattern: String = "\\Afix(?:\\([^()]+\\))?:"
+    var minorPattern: String = "\\Afeat(?:\\([^()]+\\))?:"
+    var majorPattern: String = "\\A\\w+(?:\\([^()]+\\))?!:|^BREAKING[ -]CHANGE:"
     var releaseCommitTextFormat = "release: v%s\n\n%s"
     var releaseTagNameFormat = "%s"
     var groupVersionIncrements = true

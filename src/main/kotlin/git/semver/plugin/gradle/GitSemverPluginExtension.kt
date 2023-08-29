@@ -7,6 +7,8 @@ import java.io.File
 
 open class GitSemverPluginExtension(project: Project) : SemverSettings() {
     var gitDirectory: File = project.projectDir
+    var createReleaseCommit = true
+    var createReleaseTag = true
     val semVersion by lazy { GitProvider(this).getSemVersion(gitDirectory) }
     val version by lazy { semVersion.toVersionString() }
     val infoVersion by lazy { semVersion.toInfoVersionString() }

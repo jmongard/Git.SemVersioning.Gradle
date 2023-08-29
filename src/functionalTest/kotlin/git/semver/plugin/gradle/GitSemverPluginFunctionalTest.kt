@@ -19,7 +19,9 @@ class GitSemverPluginFunctionalTest {
         fun gradleVersions(): List<Arguments> {
             return listOf(
                 Arguments.of("8.3"),
-                Arguments.of("7.6.2")
+                Arguments.of("7.6.2"),
+//                Arguments.of("6.9.4"),
+//                Arguments.of("5.6.4")
             )
         }
     }
@@ -31,6 +33,7 @@ class GitSemverPluginFunctionalTest {
 
         val releaseResult = run(
             projectDir, version, "release",
+            "--tag", "--commit",
             "-PdefaultPreRelease=NEXT",
             "-PnoDirtyCheck=true",
             "--stacktrace"
@@ -95,6 +98,8 @@ class GitSemverPluginFunctionalTest {
                 
                 semver {
                   groupVersionIncrements = false
+                  createReleaseTag = true
+                  createReleaseCommit = true
                 }
                 
                 def v = semver.version

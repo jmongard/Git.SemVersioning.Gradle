@@ -8,15 +8,16 @@ import javax.inject.Inject
 
 
 open class ReleaseTask @Inject constructor(private val settings: GitSemverPluginExtension) : DefaultTask() {
+    private val gitProvider = GitProvider(settings);
     private var preRelease: String? = null
     private var message: String? = null
-    private var tag = true
-    private var commit = true
+    private var tag = settings.createReleaseTag
+    private var commit = settings.createReleaseCommit
     private var noDirtyCheck = false;
 
     init {
         group = GitSemverPlugin.VERSIONING_GROUP
-        description = "Creates a release commit"
+        description = "Creates a release commit and tag"
     }
 
     @Option(option = "preRelease", description = "Set the current preRelease")
@@ -34,9 +35,19 @@ open class ReleaseTask @Inject constructor(private val settings: GitSemverPlugin
         this.commit = !noCommit
     }
 
+    @Option(option = "commit", description = "Create a release commit even if it is disabled in the settings")
+    fun setCommit(commit: Boolean) {
+        this.commit = commit
+    }
+
     @Option(option = "no-tag", description = "Don't create a release tag")
     fun setNoTag(noTag: Boolean) {
         this.tag = !noTag
+    }
+
+    @Option(option = "tag", description = "Create a release tag even if it is disabled in the settings")
+    fun setTag(tag: Boolean) {
+        this.tag = tag
     }
 
     @Option(option = "no-dirty", description = "Don't check if repository is dirty")
@@ -46,6 +57,6 @@ open class ReleaseTask @Inject constructor(private val settings: GitSemverPlugin
 
     @TaskAction
     fun createRelease() {
-        GitProvider(settings).createRelease(settings.gitDirectory, tag, commit, preRelease, message, noDirtyCheck)
+        gitProvider.createRelease(settings.gitDirectory, tag, commit, preRelease, message, noDirtyCheck)
     }
 }

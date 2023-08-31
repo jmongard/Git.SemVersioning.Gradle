@@ -44,7 +44,6 @@ Therefore, the major, minor or patch number will be increases by at most one com
 not a pre-release version. Set property `groupVersionIncrements = false` if you don't want the version changes to be combined.
 (See [Configuration](#Configuration) reference below.)
 
-
 ### Releases
 
 The plugin will search the commit tree until it finds a commit it interprets as a release commit with a version number. 
@@ -108,9 +107,11 @@ Version: 10.10.0-SNAPSHOT+072.sha.18b3106
 The `releaseVersion` task will by default create both a release commit, and a release tag. The releaseVersion task will 
 fail with an error if there exists local modification. It is possible to change this behaviour with the following options:
 
- * **--no-tag**: skip creating a tag
- * **--no-commit**: skip creating a commit
- * **--no-dirty**: skip dirty check
+ * **--no-tag**: skip creating a tag. (Can also be set in settings using `createReleaseTag=false`.)
+ * **--tag**: create a tag (If this has been disabled by the `createReleaseTag=false` option otherwise this is the default.)
+ * **--no-commit**: skip creating a commit. (Can also be set in settings using `createReleaseCommit=false`.)
+ * **--commit**: create a commit (If this has been disabled by the `createReleaseCommit=false` option otherwise this is the default.)
+ * **--no-dirty**: skip dirty check. (Can also be set in settings using `noDirtyCheck=true`.)
  * **--message**="a message": Add a message text to the tag and/or commit
  * **--preRelease**="pre-release": Change the current pre-release e.g. `--preRelease=alpha.1`.
    Set the pre-release to "-" e.g. `--preRelease=-` to promote a pre-release to a release.
@@ -200,6 +201,9 @@ semver {
     groupVersionIncrements = true
     noDirtyCheck = false
     noAutoBump = false
+    gitDirectory = project.projectDir
+    createReleaseCommit = true
+    createReleaseTag = true
 }
 
 //Remember to retrieve the version after plugin has been configured
@@ -221,9 +225,43 @@ version = semver.version
   after the last release. The version will be incremented by one if not already incremented by **majorPattern, 
   minorPattern or patchPattern**.
   (This option does not apply to the release task.)
+* **gitDirectory**: The directory where the git repo can be found. 
+* **createReleaseTag**: If a release tag should be created when running the release task. Setting this to false
+  has the same effect as the --no-tag flag.
+* **createReleaseCommit**: If a release commit should be created when running the release task. Setting this to false
+  has the same effect as the --no-commit flag.
 
 Patterns is matched using [java regular expressions](https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html) 
 with IGNORE_CASE and MULTILINE options enabled.
+
+## Supported Gradle version
+
+This plugin has been tested on Gradle 7.x and 8.x. (Version 0.4.3 and older should work on gradle 6.x and probably 5.x)
+
+## Continues Integration
+The plugin calculates the version using the commit tree. Make sure you check out all commits relevant and not just
+a shallow copy.
+
+### GitHub Actions example
+```yaml
+- uses: actions/checkout@v3
+  with:
+    fetch-depth: 0
+```
+[GitHub Actions example project](https://github.com/jmongard/Git.SemVersioning.Gradle.Actions-Example)
+
+## Limitations
+
+### Version 0.x.x
+There is currently no special handling for version 0.x.x. If you make breaking changes and want to preserve the 0.x.x 
+version create a release commit yourself and set the number as desired e.g.
+```
+git commit -m "release: 0.1.2" --allow-empty 
+```
+
+### Reverts
+The plugin does not handle commits reverting previous commits and referring to the reverted commit in the commit message. 
+Set the version to the correct version after reverting as in the example above. 
 
 
 # Resources

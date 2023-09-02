@@ -14,6 +14,7 @@ semver {
 }
 
 version = semver.version
+group = "com.github.jmongard"
 
 repositories {
     mavenCentral()

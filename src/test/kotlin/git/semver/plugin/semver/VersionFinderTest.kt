@@ -141,6 +141,20 @@ class VersionFinderTest {
     }
 
     @Test
+    fun one_commit_no_version_tags() {
+        // given
+        val commits = listOf(FIRST)
+        val tags = listOf(Tag("dummy", FIRST))
+
+        // when
+        val versions = getVersion(tags, asCommit(commits))
+
+        // then
+        assertEquals("0.0.1-SNAPSHOT", versions.toVersionString())
+        assertEquals("0.0.1-SNAPSHOT+001", versions.toInfoVersionString())
+    }
+
+    @Test
     fun one_commit_one_tag() {
         // given
         val commits = listOf(FIRST)

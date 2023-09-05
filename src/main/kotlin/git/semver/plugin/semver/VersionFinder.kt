@@ -107,6 +107,6 @@ class VersionFinder(private val settings: SemverSettings, private val tags: Map<
         return if (SemVersion.isRelease(commit, settings))
             SemVersion.tryParse(commit)
         else
-            tags[commit.sha]?.mapNotNull(SemVersion.Companion::tryParse)?.max()
+            tags[commit.sha]?.mapNotNull(SemVersion::tryParse)?.maxOrNull()
     }
 }

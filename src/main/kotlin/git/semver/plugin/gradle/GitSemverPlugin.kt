@@ -19,10 +19,28 @@ class GitSemverPlugin: Plugin<Project> {
             task.description = "Prints the current project version";
 
             task.doLast {
-                println("--------------------")
-                println("Version: ${settings.semVersion}")
+                println(settings.version)
             }
         }
+
+        project.tasks.register("printSemVersion") { task ->
+            task.group = VERSIONING_GROUP;
+            task.description = "Prints the current project semantic version";
+
+            task.doLast {
+                println(settings.semVersion)
+            }
+        }
+
+        project.tasks.register("printInfoVersion") { task ->
+            task.group = VERSIONING_GROUP;
+            task.description = "Prints the current project info version";
+
+            task.doLast {
+                println(settings.infoVersion)
+            }
+        }
+
 
         project.tasks.register("releaseVersion", ReleaseTask::class.java, settings)
     }

@@ -6,7 +6,9 @@ import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.GradleRunner
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
+import org.junit.jupiter.params.provider.CsvSource
 import org.junit.jupiter.params.provider.MethodSource
+import org.junit.jupiter.params.provider.NullSource
 import java.io.File
 
 /**
@@ -32,7 +34,7 @@ class GitSemverPluginFunctionalTest {
         val projectDir = setupTestProject()
 
         val releaseResult = run(
-            projectDir, version, "release",
+            projectDir, version, "subProjectVersion", "release",
             "--tag", "--commit",
             "-PdefaultPreRelease=NEXT",
             "-PnoDirtyCheck=true",
@@ -41,7 +43,7 @@ class GitSemverPluginFunctionalTest {
 
         assertThat(releaseResult.output)
             .doesNotContain("FAILED")
-            .containsPattern("Sub1: \\d+\\.\\d+\\.\\d+-NEXT")
+            .containsPattern("SubProjectVersion: \\d+\\.\\d+\\.\\d+-NEXT")
     }
 
     @ParameterizedTest
@@ -50,7 +52,7 @@ class GitSemverPluginFunctionalTest {
         val projectDir = setupTestProject()
 
         val releaseResult2 = run(
-            projectDir, version, "release",
+            projectDir, version, "subProjectVersion", "release",
             "--no-tag", "--no-commit",
             "--preRelease=NEXT.1",
             "--message=test"
@@ -64,23 +66,27 @@ class GitSemverPluginFunctionalTest {
 
     @ParameterizedTest
     @MethodSource("gradleVersions")
-    fun `can run testTask task`(version: String) {
+    @NullSource
+    fun `can run testTask task`(version: String?) {
         val projectDir = setupTestProject()
 
         val result = run(projectDir, version, "testTask")
 
-        assertThat(result.output).containsPattern("Version: \\d+\\.\\d+\\.\\d+")
+        assertThat(result.output).containsPattern("\\d+\\.\\d+\\.\\d+")
         assertThat(result.output).containsPattern("ProjVer: \\d+\\.\\d+\\.\\d+")
     }
 
     @ParameterizedTest
-    @MethodSource("gradleVersions")
-    fun `can run printVersion task`(version: String) {
+    @CsvSource(value = [
+        "printVersion, \\d+\\.\\d+\\.\\d+",
+        "printInfoVersion, \\d+\\.\\d+\\.\\d+-SNAPSHOT\\+\\d{3}",
+        "printSemVersion, \\d+\\.\\d+\\.\\d+-SNAPSHOT\\+\\d{3}\\.sha"])
+    fun `can run printVersion task`(printTask: String, pattern: String) {
         val projectDir = setupTestProject()
 
-        val result = run(projectDir, version, "printVersion")
+        val result = run(projectDir, null, printTask, "-q")
 
-        assertThat(result.output).containsPattern("Version: \\d+\\.\\d+\\.\\d+")
+        assertThat(result.output).containsPattern(pattern)
     }
 
     private fun setupTestProject(): File {
@@ -126,7 +132,11 @@ class GitSemverPluginFunctionalTest {
         subProjectDir.mkdirs()
         subProjectDir.resolve("build.gradle").writeText(
             """
-                println("Sub1: " + project.version)            
+                task subProjectVersion {
+                  doLast {
+                     println "SubProjectVersion: " + project.version 
+                  }
+                }          
             """.trimIndent()
         )
     }
@@ -140,13 +150,13 @@ class GitSemverPluginFunctionalTest {
         }
     }
 
-    private fun run(projectDir: File, gradleVersion: String, vararg args: String): BuildResult {
-        return GradleRunner.create()
+    private fun run(projectDir: File, gradleVersion: String?, vararg args: String): BuildResult {
+        val builder = GradleRunner.create()
             .forwardOutput()
             .withPluginClasspath()
             .withArguments(args.toList())
             .withProjectDir(projectDir)
-            .withGradleVersion(gradleVersion)
-            .build()
+        gradleVersion?.let(builder::withGradleVersion)
+        return builder.build()
     }
 }

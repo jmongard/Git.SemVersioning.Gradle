@@ -97,11 +97,31 @@ to standard-out.
 ````shell
 $ gradlew printVersion
 
-> Task :printVersion
---------------------
-Version: 10.10.0-SNAPSHOT+072.sha.18b3106
+> Task :printSemVersion
+10.10.0-SNAPSHOT
 ````
 
+## `printInfoVersion`
+This plugin adds a printInfoVersion task, which will echo the project's calculated version
+to standard-out including commit count.
+
+````shell
+$ gradlew printInfoVersion
+
+> Task :printSemVersion
+10.10.0-SNAPSHOT+072
+````
+
+## `printSemVersion`
+This plugin adds a printSemVersion task, which will echo the project's calculated version
+to standard-out includning commit count and sha.
+
+````shell
+$ gradlew printSemVersion
+
+> Task :printSemVersion
+10.10.0-SNAPSHOT+072.sha.18b3106
+````
 
 ## `releaseVersion`
 The `releaseVersion` task will by default create both a release commit, and a release tag. The releaseVersion task will 

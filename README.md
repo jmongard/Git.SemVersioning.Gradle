@@ -97,7 +97,7 @@ to standard-out.
 ````shell
 $ gradlew printVersion
 
-> Task :printSemVersion
+> Task :printVersion
 10.10.0-SNAPSHOT
 ````
 
@@ -108,7 +108,7 @@ to standard-out including commit count.
 ````shell
 $ gradlew printInfoVersion
 
-> Task :printSemVersion
+> Task :printInfoVersion
 10.10.0-SNAPSHOT+072
 ````
 

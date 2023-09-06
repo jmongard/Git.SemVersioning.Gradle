@@ -240,6 +240,7 @@ version = semver.version
   version tags with "v".
 * **groupVersionIncrements**: Used to disable grouping of version increments so that each commit message counts.
 * **noDirtyCheck**: Can be used to ignore all local modifications when calculating the version.
+  Disabling dirty check can also be donne from the command line e.g. `gradlew -PnoDirtyCheck=true someOtherTask`.
 * **noAutoBump**: If set only commits matching majorPattern, minorPattern or patchPattern will increase the version.
   The default behaviour for the plugin is to assume you have begun the work on the next release for any commit you do
   after the last release. The patch level (or pre-release level, if the last release was a pre-release) of the version

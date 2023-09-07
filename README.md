@@ -242,8 +242,8 @@ version = semver.version
 * **noDirtyCheck**: Can be used to ignore all local modifications when calculating the version.
 * **noAutoBump**: If set only commits matching majorPattern, minorPattern or patchPattern will increase the version.
   The default behaviour for the plugin is to assume you have begun the work on the next release for any commit you do
-  after the last release. The version will be incremented by one if not already incremented by **majorPattern, 
-  minorPattern or patchPattern**.
+  after the last release. The patch level (or pre-release level, if the last release was a pre-release) of the version
+  will be incremented by one if not already incremented by **majorPattern,  minorPattern or patchPattern**.
   (This option does not apply to the release task.)
 * **gitDirectory**: The directory where the git repo can be found. 
 * **createReleaseTag**: If a release tag should be created when running the release task. Setting this to false

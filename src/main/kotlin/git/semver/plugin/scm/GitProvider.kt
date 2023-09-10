@@ -73,7 +73,9 @@ class GitProvider(private val settings: SemverSettings) {
                 .call()
         }
         if (tag && settings.releaseTagNameFormat.isNotEmpty()) {
-            it.tag().setName(settings.releaseTagNameFormat.format(versionString)).setMessage(message).call()
+            val name = settings.releaseTagNameFormat.format(versionString)
+            it.tag().setName(name).setMessage(message).call()
+            println("New tag: $name")
         }
     }
 

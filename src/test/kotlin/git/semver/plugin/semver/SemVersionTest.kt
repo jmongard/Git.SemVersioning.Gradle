@@ -16,7 +16,7 @@ class SemVersionTest {
     @ParameterizedTest
     @ValueSource(strings = ["foo", "foo", "v1", "v1.", "va1,2", "av1,2", "v1.-2", "v-1,2"])
     fun `test invalid tags`(tagName: String) {
-        assertNull(SemVersion.tryParse(Tag(tagName, SHA)))
+        assertThat(SemVersion.tryParse(Tag(tagName, SHA))).isNull()
     }
 
     @ParameterizedTest
@@ -47,32 +47,32 @@ class SemVersionTest {
         assertThat(version.patch).isEqualTo(patch)
         assertThat(version.preRelease.first).isEqualTo(suffix)
         assertThat(version.preRelease.second).isEqualTo(preRelease)
-
     }
 
-    @Test
-    fun `test SemVer ordering`() {
-        assertTrue(semVersion("v2.0") > semVersion("v1.0"))
-        assertTrue(semVersion("v1.2") > semVersion("v1.1"))
-        assertTrue(semVersion("v1.1.1") > semVersion("v1.1.0"))
-        assertTrue(semVersion("v1.1.0") > semVersion("v1.1.0-RC"))
-        assertTrue(semVersion("v1.1.0-RC.0") > semVersion("v1.1.0-RC"))
-        assertTrue(semVersion("v1.1.0-Beta") > semVersion("v1.1.0-Alpha"))
-        assertTrue(semVersion("v1.1.0-Beta.1") > semVersion("v1.1.0-Alpha.2"))
-        assertTrue(semVersion("v1.1.0-RC2") > semVersion("v1.1.0-RC1"))
-        assertTrue(semVersion("v1.1.0-RC.2") > semVersion("v1.1.0-RC.1"))
-        assertTrue(semVersion("v0.2.0-beta.0") > semVersion("v0.1.1-alpha.1"))
-        assertTrue(semVersion("v11.14.2-net472") > semVersion("11.14.1", 15))
-        assertTrue(semVersion("v1.3.1", 1) > semVersion("v1.3.1-RC"))
-    }
+    @ParameterizedTest
+    @CsvSource(
+        "v2.0, 0, v1.0, 0",
+        "v1.2, 0, v1.1, 0",
+        "v1.1.1, 0, v1.1.0, 0",
+        "v1.1.0, 0, v1.1.0-RC, 0",
+        "v1.1.0-RC.0, 0, v1.1.0-RC, 0",
+        "v1.1.0-Beta, 0, v1.1.0-Alpha, 0",
+        "v1.1.0-Beta.1, 0, v1.1.0-Alpha.2, 0",
+        "v1.1.0-RC2, 0, v1.1.0-RC1, 0",
+        "v1.1.0-RC.2, 0, v1.1.0-RC.1, 0",
+        "v0.2.0-beta.0, 0, v0.1.1-alpha.1, 0",
+        "v11.14.2-net472, 15, 11.14.1, 0",
+        "v1.3.1, 1, v1.3.1-RC, 0",
+        "v1.3.1, 2, v1.3.1, 1"
+    )
+    fun `test SemVer ordering`(version1: String, c1: Int, version2: String, c2: Int) {
+        val a = SemVersion.tryParse(Tag(version1, SHA))!!
+        val b = SemVersion.tryParse(Tag(version2, SHA))!!
+        a.commitCount += c1
+        b.commitCount += c2
 
-    private fun semVersion(v: String, commitCount: Int): SemVersion {
-        val snapthot = semVersion(v)
-        snapthot.commitCount += commitCount
-        return snapthot
+        assertThat(a).isGreaterThan(b)
     }
-
-    private fun semVersion(v: String) = SemVersion.tryParse(Tag(v, SHA))!!
 
     @Test
     fun testInfoVersionSha() {

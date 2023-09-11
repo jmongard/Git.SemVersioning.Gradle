@@ -8,7 +8,7 @@ class SemVersion(
     var major: Int = 0,
     var minor: Int = 0,
     var patch: Int = 0,
-    var preRelease: Pair<String, Int?> = nullPreRelease,
+    var preRelease: PreRelease = PreRelease.noPreRelease,
     var commitCount: Int = 0,
     private var bumpPatch: Int = 0,
     private var bumpMinor: Int = 0,
@@ -43,7 +43,7 @@ class SemVersion(
                 match.groups["Major"]!!.value.toInt(),
                 match.groups["Minor"]!!.value.toInt(),
                 match.groups["Patch"]?.value?.toInt() ?: 0,
-                parsePrerelease(
+                PreRelease.parse(
                     match.groups["PreRelease"]?.value,
                     match.groups["Revision"]?.value?.toInt()
                 )
@@ -57,27 +57,13 @@ class SemVersion(
             return settings.releaseRegex.containsMatchIn(commit.text)
         }
 
-        val nullPreRelease = "" to null
-
-        fun parsePrerelease(value: String?, defaultPreReleaseVersion: Int?): Pair<String, Int?> {
-            if (value == null) {
-                return nullPreRelease
-            }
-
-            val prefix = value.trimEnd { it.isDigit() }
-            return prefix to
-                    if (prefix.length < value.length)
-                        value.substring(prefix.length).toInt()
-                    else
-                        defaultPreReleaseVersion
-        }
     }
 
     val isPreRelease
-        get() = preRelease != nullPreRelease
+        get() = preRelease.isPreRelease
 
     internal fun setPreRelease(value: String?) {
-        preRelease = parsePrerelease(value, null)
+        preRelease = PreRelease.parse(value)
     }
 
     override fun compareTo(other: SemVersion): Int {
@@ -86,8 +72,8 @@ class SemVersion(
             { it.minor },
             { it.patch },
             { !it.isPreReleaseOrUpdated() },
-            { it.preRelease.first },
-            { it.preRelease.second },
+            { it.preRelease.prefix },
+            { it.preRelease.number },
             { it.commitCount }
         )
     }
@@ -140,20 +126,19 @@ class SemVersion(
                 if (!isPreRelease) {
                     bumpPatch += 1
                     bumpPre = 0
-                } else if (preRelease.second != null) {
+                } else if (preRelease.number != null) {
                     bumpPre += 1
                 }
         }
     }
 
     internal fun applyPendingChanges(forceBumpIfNoChanges: Boolean, groupChanges: Boolean): Boolean {
-        if (groupChanges) {
-            applyChangesGrouped()
-        } else {
-            applyChangesNotGrouped()
-        }
-
         if (bumpMajor + bumpMinor + bumpPatch + bumpPre > 0) {
+            if (groupChanges) {
+                applyChangesGrouped()
+            } else {
+                applyChangesNotGrouped()
+            }
             resetPendingChanges()
             return true
         }
@@ -162,8 +147,9 @@ class SemVersion(
             return false
         }
 
-        if (preRelease.second != null) {
-            updatePreReleaseNumber { it + 1 }
+        val preReleaseNumber = preRelease.number
+        if (preReleaseNumber != null) {
+            preRelease = PreRelease(preRelease.prefix, preReleaseNumber + 1)
         } else {
             patch += 1
         }
@@ -221,9 +207,9 @@ class SemVersion(
     }
 
     private fun updatePreReleaseNumber(updateFunction: (Int) -> Int) {
-        val preReleaseNumber = preRelease.second
+        val preReleaseNumber = preRelease.number
         if (preReleaseNumber != null) {
-            preRelease = Pair(preRelease.first, updateFunction(preReleaseNumber))
+            preRelease = PreRelease(preRelease.prefix, updateFunction(preReleaseNumber))
         }
     }
 
@@ -253,11 +239,11 @@ class SemVersion(
                 .append('-')
                 .append(
                     if (v2)
-                        preRelease.first
+                        preRelease.prefix
                     else
-                        preRelease.first.replace("[^0-9A-Za-z-]".toRegex(), "")
+                        preRelease.prefix.replace("[^0-9A-Za-z-]".toRegex(), "")
                 )
-                .append(preRelease.second ?: "")
+                .append(preRelease.number ?: "")
         }
         if (v2) {
             var metaSeparator = '+'
@@ -275,5 +261,27 @@ class SemVersion(
 
     override fun toString(): String {
         return toInfoVersionString(shaLength = 7)
+    }
+
+    class PreRelease(val prefix: String, val number: Int?) {
+        companion object {
+            val noPreRelease = PreRelease("", null)
+
+            internal fun parse(value: String?, defaultPreReleaseVersion: Int? = null): PreRelease {
+                if (value == null) {
+                    return noPreRelease
+                }
+
+                val prefix = value.trimEnd { it.isDigit() }
+                return PreRelease(prefix,
+                    if (prefix.length < value.length)
+                        value.substring(prefix.length).toInt()
+                    else
+                        defaultPreReleaseVersion)
+            }
+        }
+
+        val isPreRelease
+            get() = prefix.isNotEmpty() || number != null
     }
 }

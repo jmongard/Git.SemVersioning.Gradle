@@ -45,8 +45,8 @@ class SemVersionTest {
         assertThat(version.major).isEqualTo(major)
         assertThat(version.minor).isEqualTo(minor)
         assertThat(version.patch).isEqualTo(patch)
-        assertThat(version.preRelease.first).isEqualTo(suffix)
-        assertThat(version.preRelease.second).isEqualTo(preRelease)
+        assertThat(version.preRelease.prefix).isEqualTo(suffix)
+        assertThat(version.preRelease.number).isEqualTo(preRelease)
     }
 
     @ParameterizedTest

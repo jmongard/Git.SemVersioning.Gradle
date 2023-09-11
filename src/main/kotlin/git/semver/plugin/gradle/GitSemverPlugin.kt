@@ -1,5 +1,6 @@
 package git.semver.plugin.gradle
 
+import git.semver.plugin.scm.GitProvider
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 
@@ -38,6 +39,28 @@ class GitSemverPlugin: Plugin<Project> {
 
             task.doLast {
                 println(settings.infoVersion)
+            }
+        }
+
+        project.tasks.register("printChangeLog") { task ->
+            task.group = VERSIONING_GROUP;
+            task.description = "Prints a change log";
+
+            task.doLast {
+                val log = GitProvider(settings).getChangeLog(settings.gitDirectory)
+
+                val groupedByPrefix = log.sorted().distinct().groupBy { it
+                    .substringBefore("\n")
+                    .substringBefore(":","?")
+                    .substringBefore("(") }
+
+                groupedByPrefix.filter { it.key != "?" }.forEach { (prefix, items) ->
+                    println("# $prefix")
+                    items.sorted().forEach { item ->
+                        println(item.trim().lines()
+                            .joinToString("\n    ", "  - "))
+                    }
+                }
             }
         }
 

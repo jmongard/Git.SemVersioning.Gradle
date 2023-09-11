@@ -4,6 +4,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.eclipse.jgit.api.Git
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.GradleRunner
+import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.CsvSource
@@ -89,6 +90,15 @@ class GitSemverPluginFunctionalTest {
         assertThat(result.output).containsPattern(pattern)
     }
 
+    @Test
+    fun `can run printChangeLog task`() {
+        val projectDir = setupTestProject()
+
+        val result = run(projectDir, null, "printChangeLog", "-q")
+
+        assertThat(result.output).containsPattern("- test: added test files")
+    }
+
     private fun setupTestProject(): File {
 
         // Setup the test build
@@ -146,7 +156,7 @@ class GitSemverPluginFunctionalTest {
         // Add the build files to a new git repository
         Git.init().setDirectory(projectDir).call().use {
             it.add().addFilepattern(".").call()
-            it.commit().setMessage("test files").call()
+            it.commit().setMessage("test: added test files").call()
         }
     }
 

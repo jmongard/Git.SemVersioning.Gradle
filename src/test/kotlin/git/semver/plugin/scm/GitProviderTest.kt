@@ -22,6 +22,13 @@ class GitProviderTest {
     }
 
     @Test
+    fun testGetChangeLog() {
+        val actual = gitProvider().getChangeLog(File("."))
+
+        assertNotNull(actual)
+    }
+
+    @Test
     fun testCommits_group() {
         val gitDir = File("build/integrationTest21")
         gitDir.mkdirs()

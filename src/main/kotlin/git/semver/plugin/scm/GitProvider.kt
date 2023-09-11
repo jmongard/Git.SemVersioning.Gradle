@@ -36,6 +36,18 @@ class GitProvider(private val settings: SemverSettings) {
         )
     }
 
+    internal fun getChangeLog(startingPath: File): List<String> {
+        getRepository(startingPath).use {
+            return changeLog(Git(it))
+        }
+    }
+
+    internal fun changeLog(it: Git): List<String> {
+        val versionFinder = VersionFinder(settings, getTags(it.repository))
+        return versionFinder.getChangeLog(
+            getHeadCommit(it.repository))
+    }
+
     internal fun createRelease(
         startingPath: File,
         tag: Boolean,

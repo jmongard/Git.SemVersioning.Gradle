@@ -11,7 +11,7 @@ class VersionFinder(private val settings: SemverSettings, private val tags: Map<
     fun getVersion(commit: Commit, isDirty: Boolean, defaultPreRelease: String?): SemVersion {
         val semVersion = getSemVersion(commit)
         val isModified = semVersion.commitCount > 0 || isDirty
-        val updated = semVersion.applyPendingChanges(isModified && !settings.noAutoBump)
+        val updated = semVersion.applyPendingChanges(isModified && !settings.noAutoBump, settings.groupVersionIncrements)
 
         if (!semVersion.isPreRelease && updated) {
             semVersion.setPreRelease(defaultPreRelease)
@@ -22,7 +22,7 @@ class VersionFinder(private val settings: SemverSettings, private val tags: Map<
     fun getReleaseVersion(commit: Commit, newPreRelease: String?): SemVersion {
         val semVersion = getSemVersion(commit)
         semVersion.commitCount = 0
-        semVersion.applyPendingChanges(!semVersion.isPreRelease || "" != newPreRelease)
+        semVersion.applyPendingChanges(!semVersion.isPreRelease || "" != newPreRelease, settings.groupVersionIncrements)
 
         if (newPreRelease != null) {
             semVersion.setPreRelease(newPreRelease)
@@ -65,7 +65,8 @@ class VersionFinder(private val settings: SemverSettings, private val tags: Map<
             } else {
                 // returning from parent commit
                 val parentSemVersions = currentCommitParentSHAs.mapNotNull { getParentSemVersion(visitedCommitsVersionMap, it) }.toList()
-                visitedCommitsVersionMap[currentCommit.sha] = getMaxVersionFromParents(parentSemVersions, currentCommit, visitedCommitsVersionMap[currentCommit.sha])
+                val previouslyVisitedPreRelease = visitedCommitsVersionMap[currentCommit.sha]
+                visitedCommitsVersionMap[currentCommit.sha] = getMaxVersionFromParents(parentSemVersions, currentCommit, previouslyVisitedPreRelease)
                 // return to previous commit
                 commits.pop()
             }
@@ -79,9 +80,6 @@ class VersionFinder(private val settings: SemverSettings, private val tags: Map<
     ): SemVersion? {
         val parentSemVersion = versionMap[sha]
         if (parentSemVersion != null) {
-            if (!settings.groupVersionIncrements) {
-                parentSemVersion.applyPendingChanges(false)
-            }
             // parentSemVersion will be consumed in next step. Store a copy of it for future reference.
             versionMap[sha] = SemVersion(parentSemVersion)
         }
@@ -91,13 +89,13 @@ class VersionFinder(private val settings: SemverSettings, private val tags: Map<
     private fun getMaxVersionFromParents(
         parentSemVersions: List<SemVersion>,
         commit: Commit,
-        givenVersion: SemVersion?
+        previouslyVisitedPreRelease: SemVersion?
     ): SemVersion {
         val version = parentSemVersions.maxOrNull() ?: versionZero()
         version.mergeChanges(parentSemVersions)
-        version.updateFromCommit(commit, settings, givenVersion)
+        version.updateFromCommit(commit, settings, previouslyVisitedPreRelease)
 
-        logger.debug("Version after commit(\"{}\"), (given version {}): {}", commit, givenVersion, version)
+        logger.debug("Version after commit(\"{}\"), (given version {}): {}", commit, previouslyVisitedPreRelease, version)
         return version
     }
 

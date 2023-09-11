@@ -22,45 +22,66 @@ class GitProviderTest {
     }
 
     @Test
-    fun testCommits() {
-        val gitDir = File("build/integrationTest2")
+    fun testCommits_group() {
+        val gitDir = File("build/integrationTest21")
         gitDir.mkdirs()
 
         printHead()
 
         val gitProvider = GitProvider(SemverSettings().apply { groupVersionIncrements = true })
         Git.init().setDirectory(gitDir).call().use {
-            initOrReset(it, gitProvider)
-            commit(it, "some changes", gitProvider)
-            release(gitProvider, it)
-            commit(it, "some changes", gitProvider)
-            release(gitProvider, it)
-            commit(it, "fix: a fix", gitProvider)
-            commit(it, "fix: another fix", gitProvider)
-            release(gitProvider, it)
-            commit(it, "feat: a feature", gitProvider)
-            commit(it, "feat: another feature", gitProvider)
-            commit(it, "feat!: breaking feature", gitProvider)
-            commit(it, "some changes", gitProvider)
-            commit(it, "feat: changes", gitProvider)
-            commit(it, "feat: changes", gitProvider)
-            commit(it, "fix: a fix", gitProvider)
-            release(gitProvider, it)
-            commit(it, "some changes", gitProvider)
-            release(gitProvider, it, "alpha.1")
-            commit(it, "some changes", gitProvider)
-            release(gitProvider, it)
-            commit(it, "fix: a fix", gitProvider)
-            commit(it, "fix: another fix", gitProvider)
-            commit(it, "feat: a feature", gitProvider)
-            release(gitProvider, it)
-            commit(it, "feat: another feature", gitProvider)
-            commit(it, "feat!: breaking feature", gitProvider)
+            lotsOfCommits(it, gitProvider)
 
             val actual = release(gitProvider, it, "-")
 
             assertEquals("2.0.0", actual.toVersionString())
         }
+    }
+
+    @Test
+    fun testCommits_no_grouping() {
+        val gitDir = File("build/integrationTest22")
+        gitDir.mkdirs()
+
+        printHead()
+
+        val gitProvider = GitProvider(SemverSettings().apply { groupVersionIncrements = false })
+        Git.init().setDirectory(gitDir).call().use {
+            lotsOfCommits(it, gitProvider)
+
+            val actual = release(gitProvider, it, "-")
+
+            assertEquals("2.0.0", actual.toVersionString())
+        }
+    }
+
+    private fun lotsOfCommits(it: Git, gitProvider: GitProvider) {
+        initOrReset(it, gitProvider)
+        commit(it, "build: some changes", gitProvider)
+        release(gitProvider, it)
+        commit(it, "docs: updated readme", gitProvider)
+        release(gitProvider, it)
+        commit(it, "fix: a fix", gitProvider)
+        commit(it, "fix: another fix", gitProvider)
+        release(gitProvider, it)
+        commit(it, "feat: a feature", gitProvider)
+        commit(it, "feat: another feature", gitProvider)
+        commit(it, "feat!: breaking feature", gitProvider)
+        commit(it, "docs: updated readme", gitProvider)
+        commit(it, "feat: changes", gitProvider)
+        commit(it, "feat: changes", gitProvider)
+        commit(it, "fix: a fix", gitProvider)
+        release(gitProvider, it)
+        commit(it, "build: some changes", gitProvider)
+        release(gitProvider, it, "alpha.1")
+        commit(it, "build: some changes", gitProvider)
+        release(gitProvider, it)
+        commit(it, "fix: a fix", gitProvider)
+        commit(it, "fix: another fix", gitProvider)
+        commit(it, "feat: a feature", gitProvider)
+        release(gitProvider, it)
+        commit(it, "feat: another feature", gitProvider)
+        commit(it, "feat!: breaking feature", gitProvider)
     }
 
     @Test

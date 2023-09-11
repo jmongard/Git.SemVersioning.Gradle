@@ -121,8 +121,33 @@ class VersionFinderTest {
         val versions = getVersion(tags, d1, groupVersions = false)
 
         // then
-        assertEquals("0.4.4-SNAPSHOT", versions.toVersionString())
-        assertEquals("0.4.4-SNAPSHOT+009", versions.toInfoVersionString())
+        assertEquals("0.4.6-SNAPSHOT", versions.toVersionString())
+        assertEquals("0.4.6-SNAPSHOT+009", versions.toInfoVersionString())
+    }
+
+    @Test
+    fun prerelease_no_grouping() {
+        // given
+        val tags = listOf(
+            Tag("v0.4.0", "SHA0"),
+            Tag("v0.4.2-Alpha.1", "SHA12"),
+        )
+
+        val a0 = Commit("a msg1", "SHA0", sequenceOf())
+        val a1 = Commit("a msg2", "SHA1", sequenceOf(a0))
+        val a2 = Commit("a msg3", "SHA2", sequenceOf(a1))
+
+        val b0 = Commit("fix: test 11", "SHA11", sequenceOf(a2))
+        val b1 = Commit("fix: test 12", "SHA12", sequenceOf(b0))
+        val b2 = Commit("fix: test 13", "SHA13", sequenceOf(b1))
+        val b3 = Commit("fix: msg", "SHA14", sequenceOf(b2))
+
+        // when
+        val versions = getVersion(tags, b3, groupVersions = false)
+
+        // then
+        assertEquals("0.4.2-Alpha.3", versions.toVersionString())
+        assertEquals("0.4.2-Alpha.3+002", versions.toInfoVersionString())
     }
 
 

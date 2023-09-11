@@ -172,35 +172,35 @@ With setting: `groupVersionIncrements = true` (default)
 
 With setting: `groupVersionIncrements = false`
 
-| Command                                       | Commit Text               | Calculated version  |
+| Command                                       | Commit Text               | Calculated version |
 | --------------------------------------------- | ------------------------- | ------------------- |
-| git commit -m "Initial commit"                | Initial commit            | 0.0.1-SNAPSHOT+001  |
-| git commit -m "some changes"                  | some changes              | 0.0.1-SNAPSHOT+002  |
-| gradle releaseVersion                         | release: v0.0.1           | 0.0.1               |
-| git commit -m "some changes"                  | some changes              | 0.0.2-SNAPSHOT+001  |
-| gradle releaseVersion                         | release: v0.0.2           | 0.0.2               |
-| git commit -m "fix: a fix"                    | fix: a fix                | 0.0.3-SNAPSHOT+001  |
-| git commit -m "fix: another fix"              | fix: another fix          | 0.0.4-SNAPSHOT+002  |
-| gradle releaseVersion                         | release: v0.0.4           | 0.0.4               |
-| git commit -m "feat: a feature"               | feat: a feature           | 0.1.0-SNAPSHOT+001  |
-| git commit -m "feat: another feature"         | feat: another feature     | 0.2.0-SNAPSHOT+002  |
-| git commit -m "feat!: breaking feature"       | feat!: breaking feature   | 1.0.0-SNAPSHOT+003  |
-| git commit -m "some changes"                  | some changes              | 1.0.1-SNAPSHOT+004  |
-| git commit -m "feat: changes"                 | feat: changes             | 1.1.0-SNAPSHOT+005  |
-| git commit -m "feat: changes"                 | feat: changes             | 1.2.0-SNAPSHOT+006  |
-| git commit -m "fix: a fix"                    | fix: a fix                | 1.2.1-SNAPSHOT+007  |
-| gradle releaseVersion                         | release: v1.2.1           | 1.2.1               |
-| git commit -m "some changes"                  | some changes              | 1.2.2-SNAPSHOT+001  |
-| gradle releaseVersion --preRelease="alpha.1"  | release: v1.2.2-alpha.1   | 1.2.2-alpha.1       |
-| git commit -m "some changes"                  | some changes              | 1.2.2-alpha.2+001   |
-| gradle releaseVersion                         | release: v1.2.2-alpha.2   | 1.2.2-alpha.2       |
-| git commit -m "fix: a fix"                    | fix: a fix                | 1.2.2-alpha.3+001   |
-| git commit -m "fix: another fix"              | fix: another fix          | 1.2.2-alpha.4+002   |
-| git commit -m "feat: a feature"               | feat: a feature           | 1.3.0-alpha.1+003   |
-| gradle releaseVersion                         | release: v1.3.0-alpha.1   | 1.3.0-alpha.1       |
-| git commit -m "feat: another feature"         | feat: another feature     | 1.3.0-alpha.2+001   |
-| git commit -m "feat!: breaking feature"       | feat!: breaking feature   | 2.0.0-alpha.1+002   |
-| gradle releaseVersion --preRelease="-"        | release: v2.0.0           | 2.0.0               |
+| git commit -m "Initial commit"                | Initial commit            | 0.0.1-SNAPSHOT+001 |
+| git commit -m "some changes"                  | some changes              | 0.0.1-SNAPSHOT+002 |
+| gradle releaseVersion                         | release: v0.0.1           | 0.0.1              |
+| git commit -m "some changes"                  | some changes              | 0.0.2-SNAPSHOT+001 |
+| gradle releaseVersion                         | release: v0.0.2           | 0.0.2              |
+| git commit -m "fix: a fix"                    | fix: a fix                | 0.0.3-SNAPSHOT+001 |
+| git commit -m "fix: another fix"              | fix: another fix          | 0.0.4-SNAPSHOT+002 |
+| gradle releaseVersion                         | release: v0.0.4           | 0.0.4              |
+| git commit -m "feat: a feature"               | feat: a feature           | 0.1.0-SNAPSHOT+001 |
+| git commit -m "feat: another feature"         | feat: another feature     | 0.2.0-SNAPSHOT+002 |
+| git commit -m "feat!: breaking feature"       | feat!: breaking feature   | 1.0.0-SNAPSHOT+003 |
+| git commit -m "some changes"                  | some changes              | 1.0.0-SNAPSHOT+004 |
+| git commit -m "feat: changes"                 | feat: changes             | 1.1.0-SNAPSHOT+005 |
+| git commit -m "feat: changes"                 | feat: changes             | 1.2.0-SNAPSHOT+006 |
+| git commit -m "fix: a fix"                    | fix: a fix                | 1.2.1-SNAPSHOT+007 |
+| gradle releaseVersion                         | release: v1.2.1           | 1.2.1              |
+| git commit -m "some changes"                  | some changes              | 1.2.2-SNAPSHOT+001 |
+| gradle releaseVersion --preRelease="alpha.1"  | release: v1.2.2-alpha.1   | 1.2.2-alpha.1      |
+| git commit -m "some changes"                  | some changes              | 1.2.2-alpha.2+001  |
+| gradle releaseVersion                         | release: v1.2.2-alpha.2   | 1.2.2-alpha.2      |
+| git commit -m "fix: a fix"                    | fix: a fix                | 1.2.2-alpha.3+001  |
+| git commit -m "fix: another fix"              | fix: another fix          | 1.2.2-alpha.4+002  |
+| git commit -m "feat: a feature"               | feat: a feature           | 1.3.0-alpha.1+003  |
+| gradle releaseVersion                         | release: v1.3.0-alpha.1   | 1.3.0-alpha.1      |
+| git commit -m "feat: another feature"         | feat: another feature     | 1.3.0-alpha.2+001  |
+| git commit -m "feat!: breaking feature"       | feat!: breaking feature   | 2.0.0-alpha.1+002  |
+| gradle releaseVersion --preRelease="-"        | release: v2.0.0           | 2.0.0              |
 
 
 ## Configuration

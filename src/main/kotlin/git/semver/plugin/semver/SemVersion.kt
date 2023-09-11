@@ -15,14 +15,13 @@ class SemVersion(
     private var bumpMajor: Int = 0,
     private var bumpPre: Int = 0,
     private val lastReleaseMajor: Int = major,
-    private val lastReleaseMinor: Int = minor,
-    private var versionChanged: Boolean = false
+    private val lastReleaseMinor: Int = minor
 ) : Comparable<SemVersion> {
 
     constructor(v: SemVersion) : this(
         v.sha, v.major, v.minor, v.patch, v.preRelease, 0,
         v.bumpPatch, v.bumpMinor, v.bumpMajor, v.bumpPre,
-        v.lastReleaseMajor, v.lastReleaseMinor, v.versionChanged
+        v.lastReleaseMajor, v.lastReleaseMinor
     )
 
     companion object {
@@ -77,15 +76,8 @@ class SemVersion(
     val isPreRelease
         get() = preRelease != nullPreRelease
 
-    fun setPreRelease(value: String?) {
+    internal fun setPreRelease(value: String?) {
         preRelease = parsePrerelease(value, null)
-    }
-
-    private fun updatePreReleaseNumber(versionFunc: (Int) -> Int) {
-        val preReleaseNumber = preRelease.second
-        if (preReleaseNumber != null) {
-            preRelease = Pair(preRelease.first, versionFunc(preReleaseNumber))
-        }
     }
 
     override fun compareTo(other: SemVersion): Int {
@@ -101,33 +93,33 @@ class SemVersion(
     }
 
     private fun isPreReleaseOrUpdated() =
-        isPreRelease || versionChanged || bumpMajor + bumpMinor + bumpPatch > 0
+        isPreRelease || bumpMajor + bumpMinor + bumpPatch > 0
 
-    fun updateFromCommit(commit: IRefInfo, settings: SemverSettings, givenVersion: SemVersion?): Boolean {
+    internal fun updateFromCommit(commit: IRefInfo, settings: SemverSettings, preReleaseVersion: SemVersion?) {
         sha = commit.sha
 
-        if (givenVersion != null) {
-            if (givenVersion >= this) {
-                reset()
-                major = givenVersion.major
-                minor = givenVersion.minor
-                patch = givenVersion.patch
-                preRelease = givenVersion.preRelease
+        if (preReleaseVersion != null) {
+            if (preReleaseVersion >= this) {
+                major = preReleaseVersion.major
+                minor = preReleaseVersion.minor
+                patch = preReleaseVersion.patch
+                preRelease = preReleaseVersion.preRelease
                 commitCount = 0
-                return false
+                resetPendingChanges()
+                return
             } else {
-                logger.warn("Ignored given version lower than the current version: {} < {} ", givenVersion, this)
+                logger.warn("Ignored given version lower than the current version: {} < {} ", preReleaseVersion, this)
             }
         }
 
         commitCount += 1
-        return checkCommitText(settings, commit.text)
+        checkCommitText(settings, commit.text)
     }
 
     private fun checkCommitText(
         settings: SemverSettings,
         text: String
-    ): Boolean {
+    ) {
         when {
             settings.majorRegex.containsMatchIn(text) ->
                 if (!isPreRelease || major == lastReleaseMajor) {
@@ -151,52 +143,91 @@ class SemVersion(
                 } else if (preRelease.second != null) {
                     bumpPre += 1
                 }
+        }
+    }
 
-            else -> return false
+    internal fun applyPendingChanges(forceBumpIfNoChanges: Boolean, groupChanges: Boolean): Boolean {
+        if (groupChanges) {
+            applyChangesGrouped()
+        } else {
+            applyChangesNotGrouped()
+        }
+
+        if (bumpMajor + bumpMinor + bumpPatch + bumpPre > 0) {
+            resetPendingChanges()
+            return true
+        }
+
+        if (!forceBumpIfNoChanges) {
+            return false
+        }
+
+        if (preRelease.second != null) {
+            updatePreReleaseNumber { it + 1 }
+        } else {
+            patch += 1
         }
         return true
     }
 
-    fun applyPendingChanges(forceBumpIfNoChanges: Boolean): Boolean {
+    private fun applyChangesNotGrouped() {
+        if (bumpMajor > 0) {
+            updateMajor(bumpMajor)
+        }
+        if (bumpMinor > 0) {
+            updateMinor(bumpMinor)
+        }
+        if (bumpPatch > 0) {
+            updatePatch(bumpPatch)
+        }
+        if (bumpPre > 0) {
+            updatePreReleaseNumber { it + bumpPre }
+        }
+    }
+
+    private fun applyChangesGrouped() {
         when {
             bumpMajor > 0 -> {
-                major += 1 //bumpMajor
-                minor = 0
-                patch = 0
-                updatePreReleaseNumber { 1 }
+                updateMajor(1)
             }
-
             bumpMinor > 0 -> {
-                minor += 1// bumpMinor
-                patch = 0
-                updatePreReleaseNumber { 1 }
+                updateMinor(1)
             }
-
             bumpPatch > 0 -> {
-                patch += 1// bumpPatch
-                updatePreReleaseNumber { 1 }
+                updatePatch(1)
             }
-
             bumpPre > 0 -> {
-                updatePreReleaseNumber { it + 1 } //bumpPre
+                updatePreReleaseNumber { it + 1 }
             }
-
-            forceBumpIfNoChanges -> {
-                if (preRelease.second != null) {
-                    updatePreReleaseNumber { it + 1 }
-                } else {
-                    patch += 1
-                }
-            }
-
-            else -> return versionChanged
         }
-        reset()
-        versionChanged = true
-        return true
     }
 
-    fun mergeChanges(versions: List<SemVersion>) {
+    private fun updateMajor(i: Int) {
+        major += i
+        minor = 0
+        patch = 0
+        updatePreReleaseNumber { 1 }
+    }
+
+    private fun updateMinor(i: Int) {
+        minor += i
+        patch = 0
+        updatePreReleaseNumber { 1 }
+    }
+
+    private fun updatePatch(i: Int) {
+        patch += i
+        updatePreReleaseNumber { 1 }
+    }
+
+    private fun updatePreReleaseNumber(updateFunction: (Int) -> Int) {
+        val preReleaseNumber = preRelease.second
+        if (preReleaseNumber != null) {
+            preRelease = Pair(preRelease.first, updateFunction(preReleaseNumber))
+        }
+    }
+
+    internal fun mergeChanges(versions: List<SemVersion>) {
         this.commitCount = versions.map { it.commitCount }.sum()
         this.bumpPatch = versions.map { it.bumpPatch }.sum()
         this.bumpMinor = versions.map { it.bumpMinor }.sum()
@@ -204,7 +235,7 @@ class SemVersion(
         this.bumpPre = versions.map { it.bumpPre }.sum()
     }
 
-    private fun reset() {
+    private fun resetPendingChanges() {
         bumpMajor = 0
         bumpMinor = 0
         bumpPatch = 0

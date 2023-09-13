@@ -17,9 +17,9 @@ class ChangeLogFormatter {
                 builder.appendLine(it)
             }
 
-            val breakingHeading = settings.changeLogHeadings.getOrDefault(BREAKING, "")
+            val breakingChangeHeading = settings.changeLogHeadings.getOrDefault(BREAKING, "")
             log.filter { settings.majorRegex.containsMatchIn(it) }.takeIf { it.isNotEmpty() }?.let {
-                formatLogItems(builder, breakingHeading, it)
+                formatLogItems(builder, breakingChangeHeading, it)
             }
 
             val otherHeading = settings.changeLogHeadings.getOrDefault(OTHER, "")

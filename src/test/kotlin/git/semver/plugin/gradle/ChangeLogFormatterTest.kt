@@ -23,14 +23,15 @@ class ChangeLogFormatterTest {
 
         val settings = SemverSettings()
         val changeLog = listOf(
-            "fix(#5)!: A breaking change",
+            "fix(#1): Bugfix 1",
             "fix(#1): Bugfix 1",
             "fix(deps): Bugfix broken deps",
-            "fix(#1): Bugfix 1",
             "feat(#2): A feature",
-            "build(deps): a build change",
+            "fix(#5)!: A breaking change",
+            "build(deps): A build change",
             "release: 1.2.3-alpha",
-            "ci: a ci change"
+            "test: Added some tests",
+            "ci: A CI change"
         )
 
         val actual = ChangeLogFormatter.formatLog(settings, changeLog)
@@ -38,11 +39,16 @@ class ChangeLogFormatterTest {
         println(actual)
         assertThat(actual)
             .startsWith("# What's Changed")
-            .contains("## Bug Fixes")
-            .contains("Bugfix 1")
+            .containsOnlyOnce("Bugfix 1")
             .contains("## Breaking Changes")
             .contains("A breaking change")
+            .contains("## Bug Fixes")
+            .contains("- deps: A build change")
+            .contains("- A CI change")
+            .contains("## Tests")
+            .contains("- Added some tests")
             .contains("## New Features")
+            .contains("- #2: A feature")
             .doesNotContain("1.2.3")
     }
 }

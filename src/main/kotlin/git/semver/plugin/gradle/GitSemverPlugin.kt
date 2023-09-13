@@ -1,7 +1,5 @@
 package git.semver.plugin.gradle
 
-import git.semver.plugin.scm.GitProvider
-import git.semver.plugin.semver.SemverSettings
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 

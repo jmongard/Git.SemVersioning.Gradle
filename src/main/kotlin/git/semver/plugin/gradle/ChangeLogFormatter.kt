@@ -12,15 +12,14 @@ class ChangeLogFormatter(private val settings: SemverSettings) {
     }
 
     internal fun formatLog(changeLog: List<String>): String {
-        val log = changeLog.sorted().distinct()
 
         val builder = StringBuilder()
         settings.changeLogHeadings[HEADING]?.let {
             builder.appendLine(it)
         }
 
-        val groupedByHeading = mutableMapOf<String, MutableList<String>>()
-        log.forEach { addChange(it, groupedByHeading) }
+        val groupedByHeading = mutableMapOf<String, MutableSet<String>>()
+        changeLog.forEach { addChange(it, groupedByHeading) }
         groupedByHeading.toSortedMap().forEach { (prefix, items) ->
             formatLogItems(builder, prefix, items)
         }
@@ -30,7 +29,7 @@ class ChangeLogFormatter(private val settings: SemverSettings) {
 
     private fun addChange(
         it: String,
-        groupedByHeading: MutableMap<String, MutableList<String>>
+        groupedByHeading: MutableMap<String, MutableSet<String>>
     ) {
         if (settings.majorRegex.containsMatchIn(it)) {
             add(groupedByHeading, settings.changeLogHeadings[BREAKING], it)
@@ -39,17 +38,17 @@ class ChangeLogFormatter(private val settings: SemverSettings) {
 
         val match = settings.changeLogRegex.find(it);
         if (match != null) {
-            val scope = getHeading(match.groups["Scope"])
+            val scope = matchValue(match, "Scope")?.let { settings.changeLogHeadings[it] }
             if (scope != null) {
                 add(groupedByHeading, scope, it)
                 return
             }
 
-            val type = getHeading(match.groups["Type"])
+            val type = matchValue(match, "Type")?.let { settings.changeLogHeadings[it] }
             if (type != null) {
                 add(groupedByHeading, type,
-                    (match.groups["Scope"]?.value?.let { s -> "$s: " } ?: "") +
-                            (match.groups["Message"]?.value?.trim() ?: it))
+                    (matchValue(match, "Scope")?.let { s -> "$s: " } ?: "") +
+                            (matchValue(match, "Message")?.trim() ?: it))
                 return
             }
 
@@ -60,22 +59,22 @@ class ChangeLogFormatter(private val settings: SemverSettings) {
         add(groupedByHeading, settings.changeLogHeadings[NO_TYPE], it)
     }
 
+    private fun matchValue(match: MatchResult, id: String) = match.groups[id]?.value
+
     private fun add(
-        groupedByHeading: MutableMap<String, MutableList<String>>,
+        groupedByHeading: MutableMap<String, MutableSet<String>>,
         category: String?,
         message: String
     ) {
         category?.let {
-            groupedByHeading.computeIfAbsent(it) { mutableListOf() }.add(message)
+            groupedByHeading.computeIfAbsent(it) { mutableSetOf() }.add(message)
         }
     }
-
-    private fun getHeading(matchGroup: MatchGroup?) = matchGroup?.value?.let { settings.changeLogHeadings[it] }
 
     private fun formatLogItems(
         sb: StringBuilder,
         heading: String,
-        changeLog: List<String>
+        changeLog: Set<String>
     ) {
         if (heading.isEmpty()) {
             return;

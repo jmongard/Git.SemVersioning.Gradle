@@ -1,7 +1,7 @@
 package git.semver.plugin.gradle
 
 import git.semver.plugin.semver.SemverSettings
-
+import java.util.TreeMap
 
 class ChangeLogFormatter(private val settings: SemverSettings) {
     companion object {
@@ -23,12 +23,13 @@ class ChangeLogFormatter(private val settings: SemverSettings) {
     private val otherType = settings.changeLogTexts[OTHER_TYPE]
 
     internal fun formatLog(changeLog: List<String>): String {
+        val groupedByHeading = TreeMap<String, MutableSet<String>>()
+        changeLog.forEach { addChange(it, groupedByHeading) }
+
         val builder = StringBuilder()
         addText(builder, HEADER)
 
-        val groupedByHeading = mutableMapOf<String, MutableSet<String>>()
-        changeLog.forEach { addChange(it, groupedByHeading) }
-        groupedByHeading.toSortedMap().forEach { (prefix, items) ->
+        groupedByHeading.forEach { (prefix, items) ->
             builder.appendLine(prefix)
             items.sorted().forEach { item ->
                 builder.appendLine(item.trim().lines().joinToString(separator, this.prefix, postfix))
@@ -50,28 +51,28 @@ class ChangeLogFormatter(private val settings: SemverSettings) {
         text: String,
         resultMap: MutableMap<String, MutableSet<String>>
     ) {
-        fun getValue(match: MatchResult, id: String) = match.groups[id]?.value
-        fun add(category: String?, message: String) {
+        fun addChange(category: String?, message: String) {
             if (!category.isNullOrEmpty()) {
                 resultMap.computeIfAbsent(category) { mutableSetOf() }.add(message)
             }
         }
+        fun getValue(match: MatchResult, id: String) = match.groups[id]?.value
 
         if (settings.majorRegex.containsMatchIn(text)) {
-            add(breakingChange, text)
+            addChange(breakingChange, text)
             return
         }
 
         val match = settings.changeLogRegex.find(text);
         if (match == null) {
-            add(missingType, text)
+            addChange(missingType, text)
             return
         }
 
         val scope = getValue(match, "Scope")
         val scopeHeading = scope?.let { settings.changeLogTexts[it] }
         if (scopeHeading != null) {
-            add(scopeHeading, text)
+            addChange(scopeHeading, text)
             return
         }
 
@@ -79,11 +80,11 @@ class ChangeLogFormatter(private val settings: SemverSettings) {
         if (typeHeading != null) {
             val messageText = getValue(match, "Message")
             val scopeText = scope?.let { s -> "$s: " }.orEmpty()
-            add(typeHeading, scopeText + (messageText ?: text).trim())
+            addChange(typeHeading, scopeText + (messageText ?: text).trim())
             return
         }
 
-        add(otherType, text)
+        addChange(otherType, text)
     }
 
 }

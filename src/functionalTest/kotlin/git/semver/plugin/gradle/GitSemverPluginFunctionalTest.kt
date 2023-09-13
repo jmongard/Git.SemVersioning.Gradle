@@ -96,7 +96,7 @@ class GitSemverPluginFunctionalTest {
 
         val result = run(projectDir, null, "printChangeLog", "-q")
 
-        assertThat(result.output).containsPattern("- test: added test files")
+        assertThat(result.output).containsPattern("added test files")
     }
 
     private fun setupTestProject(): File {

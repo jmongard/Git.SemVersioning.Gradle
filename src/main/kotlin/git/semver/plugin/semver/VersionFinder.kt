@@ -86,7 +86,7 @@ class VersionFinder(private val settings: SemverSettings, private val tags: Map<
                 visitedCommits[currentCommit.sha] =
                     getMaxVersionFromParents(parentSemVersions, currentCommit, preReleaseVersion)
 
-                addToChangeLog(preReleaseVersion, currentCommit, changeLog)
+                addToChangeLog(currentCommit, changeLog, parentSemVersions)
 
                 // return to previous commit
                 commits.pop()
@@ -96,11 +96,11 @@ class VersionFinder(private val settings: SemverSettings, private val tags: Map<
     }
 
     private fun addToChangeLog(
-        preReleaseVersion: SemVersion?,
         currentCommit: Commit,
-        changeLog: MutableList<String>?
+        changeLog: MutableList<String>?,
+        parentSemVersions: List<SemVersion>
     ) {
-        if (preReleaseVersion == null || !SemVersion.isRelease(currentCommit, settings)) {
+        if (parentSemVersions.size <= 1) {
             changeLog?.add(currentCommit.text)
         }
     }

@@ -31,7 +31,8 @@ class ChangeLogFormatterTest {
             "build(deps): A build change",
             "release: 1.2.3-alpha",
             "test: Added some tests",
-            "ci: A CI change"
+            "ci: A CI change",
+            "xyz: Some other change"
         )
 
         val actual = ChangeLogFormatter(settings).formatLog(changeLog)
@@ -48,6 +49,7 @@ class ChangeLogFormatterTest {
             .contains("- Added some tests")
             .contains("## New Features")
             .contains("- #2: A feature")
+            .contains("- xyz: Some other change")
             .doesNotContain("1.2.3")
     }
 }

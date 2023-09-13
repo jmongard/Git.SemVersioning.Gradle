@@ -22,14 +22,15 @@ class ChangeLogFormatter(val settings: SemverSettings) {
             formatLogItems(builder, settings.changeLogHeadings[BREAKING], it)
         }
 
+        val otherHeading = settings.changeLogHeadings[OTHER]
         val groupedByHeading = log
             .mapNotNull { settings.changeLogRegex.find(it) }
             .groupBy({
                 getHeading(it.groups["Scope"])
                     ?: getHeading(it.groups["Type"])
-                    ?: settings.changeLogHeadings[OTHER]
+                    ?: otherHeading
             }, {
-                if (getHeading(it.groups["Scope"]) != null)
+                if (getHeading(it.groups["Scope"]) != null || getHeading(it.groups["Type"]) == null)
                     it.value.trim()
                 else
                     (it.groups["Scope"]?.value?.let { scope -> "$scope: " } ?: "") +

@@ -23,6 +23,7 @@ open class SemverSettings {
         "refactor" to "## Refactorings",
         "release" to "",
         ChangeLogFormatter.OTHER to "## Other Changes \uD83D\uDCA1",
+        ChangeLogFormatter.NO_TYPE to "## Other Changes \uD83D\uDCA1",
         ChangeLogFormatter.BREAKING to "## Breaking Changes \uD83D\uDEE0",
         ChangeLogFormatter.HEADING to "# What's Changed"
     )

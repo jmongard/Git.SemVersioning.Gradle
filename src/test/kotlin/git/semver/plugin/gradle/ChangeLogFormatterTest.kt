@@ -14,7 +14,7 @@ class ChangeLogFormatterTest {
 
         val settings = SemverSettings()
 
-        val actual = ChangeLogFormatter.formatLog(settings, listOf())
+        val actual = ChangeLogFormatter(settings).formatLog(listOf())
 
         assertThat(actual).startsWith("# What's Changed")
     }
@@ -34,8 +34,7 @@ class ChangeLogFormatterTest {
             "ci: A CI change"
         )
 
-        val actual = ChangeLogFormatter.formatLog(settings, changeLog)
-
+        val actual = ChangeLogFormatter(settings).formatLog(changeLog)
         println(actual)
         assertThat(actual)
             .startsWith("# What's Changed")
@@ -43,7 +42,7 @@ class ChangeLogFormatterTest {
             .contains("## Breaking Changes")
             .contains("A breaking change")
             .contains("## Bug Fixes")
-            .contains("- deps: A build change")
+            .contains("- build(deps): A build change")
             .contains("- A CI change")
             .contains("## Tests")
             .contains("- Added some tests")

@@ -49,7 +49,7 @@ class GitSemverPlugin: Plugin<Project> {
             task.description = "Prints a change log";
 
             task.doLast {
-                println(ChangeLogFormatter.formatLog(settings, settings.changeLog))
+                println(ChangeLogFormatter(settings).formatLog(settings.changeLog))
             }
         }
 

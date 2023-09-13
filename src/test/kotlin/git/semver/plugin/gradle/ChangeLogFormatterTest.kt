@@ -11,7 +11,6 @@ import kotlin.test.assertNotNull
 
 class ChangeLogFormatterTest {
     @Test fun format_log_empty() {
-
         val settings = SemverSettings()
 
         val actual = ChangeLogFormatter(settings).formatLog(listOf())
@@ -20,24 +19,11 @@ class ChangeLogFormatterTest {
     }
 
     @Test fun format_log_with_breaking_changes() {
-
         val settings = SemverSettings()
-        val changeLog = listOf(
-            "fix(#1): Bugfix 1",
-            "fix(#1): Bugfix 1",
-            "fix(deps): Bugfix broken deps",
-            "feat(#2): A feature",
-            "fix(#5)!: A breaking change",
-            "build(deps): A build change",
-            "release: 1.2.3-alpha",
-            "test: Added some tests",
-            "ci: A CI change",
-            "xyz: Some other change",
-            "An uncategorized change"
-        )
+        val changeLog = createChangeLog()
 
         val actual = ChangeLogFormatter(settings).formatLog(changeLog)
-        println(actual)
+
         assertThat(actual)
             .startsWith("# What's Changed")
             .containsOnlyOnce("Bugfix 1")
@@ -53,5 +39,33 @@ class ChangeLogFormatterTest {
             .contains("- xyz: Some other change")
             .contains("- An uncategorized change")
             .doesNotContain("1.2.3")
+        println(actual)
+    }
+
+    @Test fun format_log_with_cleared_settings() {
+        val settings = SemverSettings()
+        settings.changeLogTexts.clear();
+        val changeLog = createChangeLog()
+
+        val actual = ChangeLogFormatter(settings).formatLog(changeLog)
+
+        assertThat(actual).isEmpty()
+    }
+
+    private fun createChangeLog(): List<String> {
+        val changeLog = listOf(
+            "fix(#1): Bugfix 1",
+            "fix(#1): Bugfix 1",
+            "fix(deps): Bugfix broken deps",
+            "feat(#2): A feature",
+            "fix(#5)!: A breaking change",
+            "build(deps): A build change",
+            "release: 1.2.3-alpha",
+            "test: Added some tests",
+            "ci: A CI change",
+            "xyz: Some other change",
+            "An uncategorized change"
+        )
+        return changeLog
     }
 }

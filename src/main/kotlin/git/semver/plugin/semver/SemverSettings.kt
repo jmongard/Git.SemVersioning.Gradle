@@ -4,14 +4,14 @@ import git.semver.plugin.gradle.ChangeLogFormatter
 
 open class SemverSettings {
 
-    var defaultPreRelease: String = "SNAPSHOT"
-    var releasePattern: String = "\\Arelease(?:\\(\\w+\\))?:"
-    var patchPattern: String = "\\Afix(?:\\([^()]+\\))?:"
-    var minorPattern: String = "\\Afeat(?:\\([^()]+\\))?:"
-    var majorPattern: String = "\\A\\w+(?:\\([^()]+\\))?!:|^BREAKING[ -]CHANGE:"
+    var defaultPreRelease = "SNAPSHOT"
+    var releasePattern = "\\Arelease(?:\\(\\w+\\))?:"
+    var patchPattern = "\\Afix(?:\\([^()]+\\))?:"
+    var minorPattern = "\\Afeat(?:\\([^()]+\\))?:"
+    var majorPattern = "\\A\\w+(?:\\([^()]+\\))?!:|^BREAKING[ -]CHANGE:"
 
-    var changeLogPattern: String = "\\A(?<Type>\\w+)(?:\\((?<Scope>[^()]+)\\))?:(?<Message>(?:.|\n)*)"
-    var changeLogTexts: Map<String, String> = mutableMapOf(
+    var changeLogPattern = "\\A(?<Type>\\w+)(?:\\((?<Scope>[^()]+)\\))?:(?<Message>(?:.|\n)*)"
+    var changeLogTexts = mutableMapOf(
         ChangeLogFormatter.OTHER_TYPE to "## Other Changes \uD83D\uDCA1",
         ChangeLogFormatter.MISSING_TYPE to "## Other Changes \uD83D\uDCA1",
         ChangeLogFormatter.BREAKING_CHANGE to "## Breaking Changes \uD83D\uDEE0",

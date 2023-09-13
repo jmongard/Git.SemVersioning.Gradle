@@ -3,11 +3,11 @@ package git.semver.plugin.gradle
 import git.semver.plugin.semver.SemverSettings
 
 
-class ChangeLogFormatter(val settings: SemverSettings) {
+class ChangeLogFormatter(private val settings: SemverSettings) {
     companion object {
         const val HEADING = "#"
         const val OTHER = "*"
-        const val NO_TYPE = "?"
+        const val NO_TYPE = "-"
         const val BREAKING = "!"
     }
 
@@ -47,9 +47,9 @@ class ChangeLogFormatter(val settings: SemverSettings) {
 
             val type = getHeading(match.groups["Type"])
             if (type != null) {
-                add(groupedByHeading, type, (match.groups["Scope"]?.value?.let { s -> "$s: " } ?: "") +
-                        (match.groups["Message"]?.value?.trim() ?: it)
-                )
+                add(groupedByHeading, type,
+                    (match.groups["Scope"]?.value?.let { s -> "$s: " } ?: "") +
+                            (match.groups["Message"]?.value?.trim() ?: it))
                 return
             }
 

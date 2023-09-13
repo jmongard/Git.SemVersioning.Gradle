@@ -3,6 +3,7 @@
  */
 package git.semver.plugin.gradle
 
+import git.semver.plugin.semver.SemverSettings
 import org.assertj.core.api.Assertions.assertThat
 import org.gradle.testfixtures.ProjectBuilder
 import kotlin.test.Test
@@ -19,42 +20,9 @@ class GitSemverPluginTest {
 
         // Verify the result
         assertThat(project.tasks.findByName("printVersion")).isNotNull();
-    }
-
-    @Test fun format_log_empty() {
-
-        val project = ProjectBuilder.builder().build()
-
-        val actual = GitSemverPlugin.formatLog(GitSemverPluginExtension(project), listOf())
-
-        assertThat(actual).startsWith("# What's Changed")
-    }
-
-    @Test fun format_log_with_breaking_changes() {
-
-        val project = ProjectBuilder.builder().build()
-        val settings = GitSemverPluginExtension(project)
-        val changeLog = listOf(
-            "fix(#5)!: A breaking change",
-            "fix(#1): Bugfix 1",
-            "fix(deps): Bugfix broken deps",
-            "fix(#1): Bugfix 1",
-            "feat(#2): A feature",
-            "build(deps): a build change",
-            "release: 1.2.3-alpha",
-            "ci: a ci change"
-        )
-
-        val actual = GitSemverPlugin.formatLog(settings, changeLog)
-
-        println(actual)
-        assertThat(actual)
-            .startsWith("# What's Changed")
-            .contains("## Bug Fixes")
-            .contains("Bugfix 1")
-            .contains("## Breaking Changes")
-            .contains("A breaking change")
-            .contains("## New Features")
-            .doesNotContain("1.2.3")
+        assertThat(project.tasks.findByName("printSemVersion")).isNotNull();
+        assertThat(project.tasks.findByName("printInfoVersion")).isNotNull();
+        assertThat(project.tasks.findByName("printChangeLog")).isNotNull();
+        assertThat(project.tasks.findByName("releaseVersion")).isNotNull();
     }
 }

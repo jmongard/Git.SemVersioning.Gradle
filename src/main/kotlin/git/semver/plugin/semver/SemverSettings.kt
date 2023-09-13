@@ -1,5 +1,7 @@
 package git.semver.plugin.semver
 
+import git.semver.plugin.gradle.ChangeLogFormatter
+
 open class SemverSettings {
 
     var defaultPreRelease: String = "SNAPSHOT"
@@ -9,19 +11,19 @@ open class SemverSettings {
     var majorPattern: String = "\\A\\w+(?:\\([^()]+\\))?!:|^BREAKING[ -]CHANGE:"
     var changeLogPattern: String = "\\A(?<Type>\\w+)(?:\\((?<Scope>[^()]+)\\))?:(?<Message>(?:.|\n)*)"
     var changeLogHeadings: Map<String, String> = mutableMapOf(
-        "fix" to "Bug Fixes \uD83D\uDC1E",
-        "feat" to "New Features \uD83C\uDF89",
-        "test" to "Tests ✅",
-        "docs" to "Docs \uD83D\uDCD6",
-        "build" to "Build \uD83D\uDC18 & CI ⚙\uFE0F",
-        "ci" to "Build \uD83D\uDC18 & CI ⚙\uFE0F",
-        "chore" to "Chores",
-        "perf" to "Performance Enhancements",
-        "refactor" to "Refactorings",
+        "fix" to "## Bug Fixes \uD83D\uDC1E",
+        "feat" to "## New Features \uD83C\uDF89",
+        "test" to "## Tests ✅",
+        "docs" to "## Docs \uD83D\uDCD6",
+        "build" to "## Build \uD83D\uDC18 & CI ⚙\uFE0F",
+        "ci" to "## Build \uD83D\uDC18 & CI ⚙\uFE0F",
+        "chore" to "## Chores",
+        "perf" to "## Performance Enhancements",
+        "refactor" to "## Refactorings",
         "release" to "",
-        "?" to "Other Changes \uD83D\uDCA1",
-        "!" to "Breaking Changes \uD83D\uDEE0",
-        "#" to "What's Changed"
+        ChangeLogFormatter.OTHER to "## Other Changes \uD83D\uDCA1",
+        ChangeLogFormatter.BREAKING to "## Breaking Changes \uD83D\uDEE0",
+        ChangeLogFormatter.HEADING to "# What's Changed"
     )
 
     var releaseCommitTextFormat = "release: v%s\n\n%s"

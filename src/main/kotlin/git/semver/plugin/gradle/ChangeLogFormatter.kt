@@ -10,8 +10,8 @@ class ChangeLogFormatter(private val settings: SemverSettings) {
         const val OTHER_TYPE = "*"
         const val MISSING_TYPE = "-"
         const val BREAKING_CHANGE = "!"
-        const val CHANGE_PREFIX = ">"
-        const val CHANGE_POSTFIX = "<"
+        const val CHANGE_PREFIX = "^"
+        const val CHANGE_POSTFIX = "$"
         const val CHANGE_LINE_SEPARATOR = "\\"
     }
 
@@ -29,22 +29,16 @@ class ChangeLogFormatter(private val settings: SemverSettings) {
         val builder = StringBuilder()
         addText(builder, HEADER)
 
-        groupedByHeading.forEach { (prefix, items) ->
-            builder.appendLine(prefix)
+        groupedByHeading.forEach { (heading, items) ->
+            builder.appendLine(heading)
             items.sorted().forEach { item ->
-                builder.appendLine(item.trim().lines().joinToString(separator, this.prefix, postfix))
+                builder.appendLine(item.trim().lines().joinToString(separator, prefix, postfix))
             }
             builder.appendLine()
         }
 
         addText(builder, FOOTER)
         return builder.trim().toString()
-    }
-
-    private fun addText(builder: StringBuilder, text: String) {
-        settings.changeLogTexts[text]?.let {
-            builder.appendLine(it).appendLine()
-        }
     }
 
     private fun addChange(
@@ -85,6 +79,12 @@ class ChangeLogFormatter(private val settings: SemverSettings) {
         }
 
         addChange(otherType, text)
+    }
+
+    private fun addText(builder: StringBuilder, text: String) {
+        settings.changeLogTexts[text]?.let {
+            builder.appendLine(it).appendLine()
+        }
     }
 
 }

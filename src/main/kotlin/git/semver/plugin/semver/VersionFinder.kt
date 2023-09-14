@@ -9,7 +9,7 @@ class VersionFinder(private val settings: SemverSettings, private val tags: Map<
     private val logger = LoggerFactory.getLogger(javaClass)
 
     fun getVersion(commit: Commit, isDirty: Boolean, defaultPreRelease: String?): SemVersion {
-        val semVersion = startFindVersion(commit)
+        val semVersion = findVersion(commit)
         val isModified = semVersion.commitCount > 0 || isDirty
         val updated = semVersion.applyPendingChanges(isModified && !settings.noAutoBump, settings.groupVersionIncrements)
 
@@ -20,7 +20,7 @@ class VersionFinder(private val settings: SemverSettings, private val tags: Map<
     }
 
     fun getReleaseVersion(commit: Commit, newPreRelease: String?): SemVersion {
-        val semVersion = startFindVersion(commit)
+        val semVersion = findVersion(commit)
         semVersion.commitCount = 0
         semVersion.applyPendingChanges(!semVersion.isPreRelease || "" != newPreRelease, settings.groupVersionIncrements)
 
@@ -35,27 +35,30 @@ class VersionFinder(private val settings: SemverSettings, private val tags: Map<
 
         val release = getReleaseSemVersionFromCommit(commit)
         if (isRelease(release)) {
-            findVersions(ArrayDeque(commit.parents.map { newEntry(it) }.toList()), changeLog)
+            findVersion(commit.parents, changeLog)
         } else {
-            findVersions(ArrayDeque(listOf(newEntry(commit))), changeLog)
+            findVersion(commit, changeLog)
         }
         return changeLog
     }
 
-    private fun startFindVersion(startCommit: Commit): SemVersion {
+    private fun findVersion(startCommit: Commit, changeLog: MutableList<String>? = null): SemVersion {
         if (startCommit.sha.isBlank()) {
+            //This is a fake commit created when there exists no real commits
             return versionZero()
         }
-        val versionMap = findVersions(ArrayDeque(listOf(newEntry(startCommit))))
-        return versionMap[startCommit.sha] ?: versionZero()
+        return findVersion(sequenceOf(startCommit), changeLog)
     }
 
-    private fun findVersions(
-        commits: ArrayDeque<Pair<Commit, MutableList<String>>>,
-        changeLog: MutableList<String>? = null
-    ): MutableMap<String, SemVersion?> {
+    private fun findVersion(
+        commitsList: Sequence<Commit>,
+        changeLog: MutableList<String>?
+    ): SemVersion {
+
+        var lastFoundVersion = versionZero()
         // This code is a recursive algoritm rewritten as iterative to avoid stack overflow exception.
         // Unfortunately that makes it hard to understand.
+        val commits = ArrayDeque(commitsList.map { it to ArrayList<String>(1) }.toList())
         val visitedCommits = mutableMapOf<String, SemVersion?>()
         while (commits.isNotEmpty()) {
             val peek = commits.peek()
@@ -69,18 +72,19 @@ class VersionFinder(private val settings: SemverSettings, private val tags: Map<
                     logger.debug("Release version found: {}", releaseVersion)
                     // Release fond so no need to visit this commit again
                     commits.pop()
+                    lastFoundVersion = releaseVersion!!
                 } else {
                     currentCommit.parents.forEach {
                         currentParentList.add(it.sha)
                         if (!visitedCommits.containsKey(it.sha)) {
                             // prepare to visit parent commit
-                            commits.push(newEntry(it))
+                            commits.push(it to ArrayList(1))
                         }
                     }
                 }
             } else {
                 // Second time we visit this commit after visiting parent commits
-                commits.pop()
+                addToChangeLog(currentCommit, changeLog, currentParentList.size > 1)
 
                 // Check if we found a preRelease version first time we visited this commit
                 val preReleaseVersion = visitedCommits[currentCommit.sha]
@@ -94,11 +98,12 @@ class VersionFinder(private val settings: SemverSettings, private val tags: Map<
                 maxVersionFromParents.mergeChanges(parentSemVersions)
                 maxVersionFromParents.updateFromCommit(currentCommit, settings, preReleaseVersion)
                 visitedCommits[currentCommit.sha] = maxVersionFromParents
-
-                addToChangeLog(currentCommit, changeLog, currentParentList.size > 1)
+                
+                commits.pop()
+                lastFoundVersion = maxVersionFromParents
             }
         }
-        return visitedCommits
+        return lastFoundVersion
     }
 
     private fun addToChangeLog(
@@ -115,9 +120,6 @@ class VersionFinder(private val settings: SemverSettings, private val tags: Map<
 
     private fun isRelease(releaseVersion: SemVersion?) =
         releaseVersion != null && !releaseVersion.isPreRelease
-
-    private fun newEntry(commit: Commit): Pair<Commit, ArrayList<String>> =
-        commit to ArrayList(1)
 
     private fun versionZero() = SemVersion()
 

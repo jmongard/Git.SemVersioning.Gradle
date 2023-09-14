@@ -123,6 +123,18 @@ $ gradlew printSemVersion
 10.10.0-SNAPSHOT+072.sha.18b3106
 ````
 
+## `printChangeLog`
+This plugin adds a printChangeLog task, which will format the commit message for the current version
+and output them to standard-out.
+
+````shell
+$ gradlew printChangeLog
+
+> Task :printChangeLog
+\# What's Changed
+...
+````
+
 ## `releaseVersion`
 The `releaseVersion` task will by default create both a release commit, and a release tag. The releaseVersion task will 
 fail with an error if there exists local modification. It is possible to change this behaviour with the following options:

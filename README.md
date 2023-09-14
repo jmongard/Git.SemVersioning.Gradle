@@ -224,10 +224,10 @@ semver {
     //Example of each property with their respective default value. 
     //There is no need to set these unless you want to change the default. 
     defaultPreRelease = "SNAPSHOT"
-    releasePattern = "\\Arelease(?:\\(\\w+\\))?:"
-    majorPattern = "\\A\\w+(?:\\(\\w+\\))?!:|^BREAKING[ -]CHANGE:"
-    minorPattern = "\\Afeat(?:\\(\\w+\\))?:"
-    patchPattern = "\\Afix(?:\\(\\w+\\))?:"
+    releasePattern = "\\Arelease(?:\\([^()]+\\))?:"
+    majorPattern = "\\A\\w+(?:\\([^()]+\\))?!:|^BREAKING[ -]CHANGE:"
+    minorPattern = "\\Afeat(?:\\([^()]+\\))?:"
+    patchPattern = "\\Afix(?:\\([^()]+\\))?:"
     releaseCommitTextFormat = "release: v%s\n\n%s"
     releaseTagNameFormat = "%s"
     groupVersionIncrements = true

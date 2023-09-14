@@ -62,15 +62,15 @@ class VersionFinder(private val settings: SemverSettings, private val tags: Map<
             val currentCommit = peek.first
             val currentParentList = peek.second
             if (!visitedCommits.containsKey(currentCommit.sha)) {
-                // unvisited commit
+                // First time we visit this commit
                 val releaseVersion = getReleaseSemVersionFromCommit(currentCommit)
                 visitedCommits[currentCommit.sha] = releaseVersion
                 if (isRelease(releaseVersion)) {
                     logger.debug("Release version found: {}", releaseVersion)
-                    // return to previous commit
+                    // Release fond so no need to visit this commit again
                     commits.pop()
                 } else {
-                    currentCommit.parents.forEach<Commit> {
+                    currentCommit.parents.forEach {
                         currentParentList.add(it.sha)
                         if (!visitedCommits.containsKey(it.sha)) {
                             // prepare to visit parent commit
@@ -79,17 +79,23 @@ class VersionFinder(private val settings: SemverSettings, private val tags: Map<
                     }
                 }
             } else {
-                // returning from parent commit
-                val parentSemVersions =
-                    currentParentList.mapNotNull { getParentSemVersion(visitedCommits, it) }.toList()
-                val preReleaseVersion = visitedCommits[currentCommit.sha]
-                visitedCommits[currentCommit.sha] =
-                    getMaxVersionFromParents(parentSemVersions, currentCommit, preReleaseVersion)
-
-                addToChangeLog(currentCommit, changeLog, parentSemVersions)
-
-                // return to previous commit
+                // Second time we visit this commit after visiting parent commits
                 commits.pop()
+
+                // Check if we found a preRelease version first time we visited this commit
+                val preReleaseVersion = visitedCommits[currentCommit.sha]
+
+                // Get and clear the semVersions for the parents so that they are not counted twice
+                val parentSemVersions = currentParentList
+                    .mapNotNull { visitedCommits.put(it, null) }
+                    .toList()
+
+                val maxVersionFromParents = parentSemVersions.maxOrNull() ?: versionZero()
+                maxVersionFromParents.mergeChanges(parentSemVersions)
+                maxVersionFromParents.updateFromCommit(currentCommit, settings, preReleaseVersion)
+                visitedCommits[currentCommit.sha] = maxVersionFromParents
+
+                addToChangeLog(currentCommit, changeLog, currentParentList.size > 1)
             }
         }
         return visitedCommits
@@ -98,43 +104,20 @@ class VersionFinder(private val settings: SemverSettings, private val tags: Map<
     private fun addToChangeLog(
         currentCommit: Commit,
         changeLog: MutableList<String>?,
-        parentSemVersions: List<SemVersion>
+        isMergeCommit: Boolean
     ) {
-        if (parentSemVersions.size <= 1) {
-            changeLog?.add(currentCommit.text)
+        if (isMergeCommit) {
+            //Ignore merge commits
+            return
         }
+        changeLog?.add(currentCommit.text)
     }
 
     private fun isRelease(releaseVersion: SemVersion?) =
         releaseVersion != null && !releaseVersion.isPreRelease
 
-    private fun newEntry(startCommit: Commit): Pair<Commit, ArrayList<String>> =
-        startCommit to ArrayList(1)
-
-    private fun getParentSemVersion(
-        versionMap: MutableMap<String, SemVersion?>,
-        sha: String
-    ): SemVersion? {
-        val parentSemVersion = versionMap[sha]
-        if (parentSemVersion != null) {
-            // parentSemVersion will be consumed in next step. Store a copy of it for future reference.
-            versionMap[sha] = SemVersion(parentSemVersion)
-        }
-        return parentSemVersion
-    }
-
-    private fun getMaxVersionFromParents(
-        parentSemVersions: List<SemVersion>,
-        commit: Commit,
-        previouslyVisitedPreRelease: SemVersion?
-    ): SemVersion {
-        val version = parentSemVersions.maxOrNull() ?: versionZero()
-        version.mergeChanges(parentSemVersions)
-        version.updateFromCommit(commit, settings, previouslyVisitedPreRelease)
-
-        logger.debug("Version after commit(\"{}\"), (given version {}): {}", commit, previouslyVisitedPreRelease, version)
-        return version
-    }
+    private fun newEntry(commit: Commit): Pair<Commit, ArrayList<String>> =
+        commit to ArrayList(1)
 
     private fun versionZero() = SemVersion()
 

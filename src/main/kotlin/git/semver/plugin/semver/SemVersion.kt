@@ -18,21 +18,15 @@ class SemVersion(
     private val lastReleaseMinor: Int = minor
 ) : Comparable<SemVersion> {
 
-    constructor(v: SemVersion) : this(
-        v.sha, v.major, v.minor, v.patch, v.preRelease, 0,
-        v.bumpPatch, v.bumpMinor, v.bumpMajor, v.bumpPre,
-        v.lastReleaseMajor, v.lastReleaseMinor
-    )
-
     companion object {
         private val logger = LoggerFactory.getLogger(SemVersion::class.java)
-        private const val numeric = "0|[1-9]\\d*"
-        private const val alphaNumeric = "[0-9a-zA-Z-]"
-        private const val preVersion = "(?:$numeric|\\d*[a-zA-Z-]$alphaNumeric*)"
+        private const val NUMERIC = "0|[1-9]\\d*"
+        private const val ALPHA_NUMERIC = "[0-9a-zA-Z-]"
+        private const val PRE_VERSION = "(?:$NUMERIC|\\d*[a-zA-Z-]$ALPHA_NUMERIC*)"
         private val semVersionPattern = (
-                """(?<Major>$numeric)\.(?<Minor>$numeric)(?:\.(?<Patch>$numeric)(?:\.(?<Revision>$numeric))?)?"""
-                        + """(?:-(?<PreRelease>$preVersion(?:\.$preVersion)*))?"""
-                        + """(?:\+(?<BuildMetadata>$alphaNumeric+(?:\.$alphaNumeric+)*))?"""
+                """(?<Major>$NUMERIC)\.(?<Minor>$NUMERIC)(?:\.(?<Patch>$NUMERIC)(?:\.(?<Revision>$NUMERIC))?)?"""
+                        + """(?:-(?<PreRelease>$PRE_VERSION(?:\.$PRE_VERSION)*))?"""
+                        + """(?:\+(?<BuildMetadata>$ALPHA_NUMERIC+(?:\.$ALPHA_NUMERIC+)*))?"""
                 ).toRegex()
 
         fun tryParse(refInfo: IRefInfo): SemVersion? {
@@ -92,6 +86,11 @@ class SemVersion(
                 preRelease = preReleaseVersion.preRelease
                 commitCount = 0
                 resetPendingChanges()
+                logger.debug(
+                    "Version after commit(\"{}\") with pre-release: {}",
+                    commit,
+                    this
+                )
                 return
             } else {
                 logger.warn("Ignored given version lower than the current version: {} < {} ", preReleaseVersion, this)
@@ -100,6 +99,16 @@ class SemVersion(
 
         commitCount += 1
         checkCommitText(settings, commit.text)
+
+        logger.debug(
+            "Version after commit(\"{}\"): {} +({}.{}.{}-{})",
+            commit,
+            this,
+            bumpMajor,
+            bumpMinor,
+            bumpPatch,
+            bumpPre
+        )
     }
 
     private fun checkCommitText(
@@ -214,11 +223,11 @@ class SemVersion(
     }
 
     internal fun mergeChanges(versions: List<SemVersion>) {
-        this.commitCount = versions.map { it.commitCount }.sum()
-        this.bumpPatch = versions.map { it.bumpPatch }.sum()
-        this.bumpMinor = versions.map { it.bumpMinor }.sum()
-        this.bumpMajor = versions.map { it.bumpMajor }.sum()
-        this.bumpPre = versions.map { it.bumpPre }.sum()
+        this.commitCount = versions.sumOf { it.commitCount }
+        this.bumpPatch = versions.sumOf { it.bumpPatch }
+        this.bumpMinor = versions.sumOf { it.bumpMinor }
+        this.bumpMajor = versions.sumOf { it.bumpMajor }
+        this.bumpPre = versions.sumOf { it.bumpPre }
     }
 
     private fun resetPendingChanges() {

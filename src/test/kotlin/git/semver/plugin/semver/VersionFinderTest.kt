@@ -104,7 +104,7 @@ class VersionFinderTest {
         )
 
         val a0 = Commit("a msg1", "SHA0", sequenceOf())
-        val a1 = Commit("a msg2", "SHA1", sequenceOf(a0))
+        val a1 = Commit("feat: a feature", "SHA1", sequenceOf(a0))
         val a2 = Commit("a msg3", "SHA2", sequenceOf(a1))
 
         val b0 = Commit("fix: test 11", "SHA11", sequenceOf(a2))
@@ -121,8 +121,8 @@ class VersionFinderTest {
         val versions = getVersion(tags, d1, groupVersions = false)
 
         // then
-        assertEquals("0.4.6-SNAPSHOT", versions.toVersionString())
-        assertEquals("0.4.6-SNAPSHOT+009", versions.toInfoVersionString())
+        assertEquals("0.5.6-SNAPSHOT", versions.toVersionString())
+        assertEquals("0.5.6-SNAPSHOT+009", versions.toInfoVersionString())
     }
 
     @Test

@@ -65,15 +65,12 @@ class SemVersion(
             { it.major },
             { it.minor },
             { it.patch },
-            { !it.isPreReleaseOrUpdated() },
+            { !it.isPreRelease && !it.hasPendingChanges },
             { it.preRelease.prefix },
             { it.preRelease.number },
             { it.commitCount }
         )
     }
-
-    private fun isPreReleaseOrUpdated() =
-        isPreRelease || bumpMajor + bumpMinor + bumpPatch > 0
 
     internal fun updateFromCommit(commit: IRefInfo, settings: SemverSettings, preReleaseVersion: SemVersion?) {
         sha = commit.sha
@@ -142,7 +139,7 @@ class SemVersion(
     }
 
     internal fun applyPendingChanges(forceBumpIfNoChanges: Boolean, groupChanges: Boolean): Boolean {
-        if (bumpMajor + bumpMinor + bumpPatch + bumpPre > 0) {
+        if (hasPendingChanges) {
             if (groupChanges) {
                 applyChangesGrouped()
             } else {
@@ -191,7 +188,7 @@ class SemVersion(
             bumpPatch > 0 -> {
                 updatePatch(1)
             }
-            bumpPre > 0 -> {
+            else -> { // bumpPre > 0
                 updatePreReleaseNumber { it + 1 }
             }
         }
@@ -229,6 +226,9 @@ class SemVersion(
         this.bumpMajor = versions.sumOf { it.bumpMajor }
         this.bumpPre = versions.sumOf { it.bumpPre }
     }
+
+    private val hasPendingChanges
+        get() = bumpMajor + bumpMinor + bumpPatch + bumpPre > 0
 
     private fun resetPendingChanges() {
         bumpMajor = 0

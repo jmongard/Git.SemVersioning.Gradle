@@ -5,7 +5,10 @@ package git.semver.plugin.gradle
 
 import git.semver.plugin.semver.SemverSettings
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatCode
 import org.gradle.testfixtures.ProjectBuilder
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.ValueSource
 import kotlin.test.Test
 import kotlin.test.assertNotNull
 
@@ -13,16 +16,36 @@ import kotlin.test.assertNotNull
  * A simple unit test for the 'git.semver.plugin.gradle.greeting' plugin.
  */
 class GitSemverPluginTest {
-    @Test fun `plugin registers task`() {
+    @ParameterizedTest
+    @ValueSource(strings = ["printVersion", "printSemVersion", "printInfoVersion", "printChangeLog"])
+    fun `plugin register print tasks`(name: String) {
         // Create a test project and apply the plugin
         val project = ProjectBuilder.builder().build()
         project.plugins.apply("com.github.jmongard.git-semver-plugin")
 
+        val task = project.tasks.findByName(name)
+
         // Verify the result
-        assertThat(project.tasks.findByName("printVersion")).isNotNull();
-        assertThat(project.tasks.findByName("printSemVersion")).isNotNull();
-        assertThat(project.tasks.findByName("printInfoVersion")).isNotNull();
-        assertThat(project.tasks.findByName("printChangeLog")).isNotNull();
-        assertThat(project.tasks.findByName("releaseVersion")).isNotNull();
+        assertThat(task).isNotNull();
+    }
+
+    @Test
+    fun `plugin register release tasks`() {
+        // Create a test project and apply the plugin
+        val project = ProjectBuilder.builder().build()
+        project.plugins.apply("com.github.jmongard.git-semver-plugin")
+
+        val task = project.tasks.findByName("releaseVersion") as ReleaseTask
+
+        assertThat(task).isNotNull()
+        assertThatCode {
+            task.setNoCommit(true)
+            task.setCommit(true)
+            task.setNoTag(true)
+            task.setTag(true)
+            task.setNoDirty(true)
+            task.setPreRelease("alpha1")
+            task.setMessage("A Message")
+        }.doesNotThrowAnyException()
     }
 }

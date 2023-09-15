@@ -27,6 +27,7 @@ class SemVersionTest {
         "v1.2-betaV.5, 1, 2, 0, 'betaV.', 5, true",
         "v1.2.0-beta.5, 1, 2, 0, 'beta.', 5, true",
         "v1.2.3-beta.5, 1, 2, 3, 'beta.', 5, true",
+        "v1.2.3.4-beta, 1, 2, 3, 'beta', 4, true",
         "v1.2.3-5, 1, 2, 3, '', 5, true",
         "v1.2.3-alpha.beta, 1, 2, 3, 'alpha.beta', , true",
         "1.2.3.4, 1, 2, 3, '', , false",

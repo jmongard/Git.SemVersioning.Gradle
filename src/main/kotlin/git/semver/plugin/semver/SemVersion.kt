@@ -31,18 +31,18 @@ class SemVersion(
 
         fun tryParse(refInfo: IRefInfo): SemVersion? {
             val match = semVersionPattern.find(refInfo.text) ?: return null
+            fun getInt(group: String) = match.groups[group]?.value?.toInt()
 
             val version = SemVersion(
                 refInfo.sha,
-                match.groups["Major"]!!.value.toInt(),
-                match.groups["Minor"]!!.value.toInt(),
-                match.groups["Patch"]?.value?.toInt() ?: 0,
+                getInt("Major")!!,
+                getInt("Minor")!!,
+                getInt("Patch") ?: 0,
                 PreRelease.parse(
                     match.groups["PreRelease"]?.value,
-                    match.groups["Revision"]?.value?.toInt()
+                    getInt("Revision")
                 )
             )
-
             logger.debug("Found version: {} in: '{}'", version, refInfo.text)
             return version
         }
@@ -50,7 +50,6 @@ class SemVersion(
         fun isRelease(commit: IRefInfo, settings: SemverSettings): Boolean {
             return settings.releaseRegex.containsMatchIn(commit.text)
         }
-
     }
 
     val isPreRelease
@@ -65,7 +64,7 @@ class SemVersion(
             { it.major },
             { it.minor },
             { it.patch },
-            { !it.isPreRelease && !it.hasPendingChanges },
+            { !it.isPreRelease },
             { it.preRelease.prefix },
             { it.preRelease.number },
             { it.commitCount }

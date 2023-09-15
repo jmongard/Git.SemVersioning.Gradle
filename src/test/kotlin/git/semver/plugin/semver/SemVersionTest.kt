@@ -21,16 +21,16 @@ class SemVersionTest {
 
     @ParameterizedTest
     @CsvSource(
-        "v1.2, 1, 2, 0, '', ",
-        "v1.2-alpha, 1, 2, 0, 'alpha', ",
-        "v1.2-alpha5, 1, 2, 0, 'alpha', 5",
-        "v1.2-betaV.5, 1, 2, 0, 'betaV.', 5",
-        "v1.2.0-beta.5, 1, 2, 0, 'beta.', 5",
-        "v1.2.3-beta.5, 1, 2, 3, 'beta.', 5",
-        "v1.2.3-5, 1, 2, 3, '', 5",
-        "v1.2.3-alpha.beta, 1, 2, 3, 'alpha.beta', ",
-        "1.2.3.4, 1, 2, 3, '', ",
-        "v9.5.0.41-rc, 9, 5, 0, 'rc', 41"
+        "v1.2, 1, 2, 0, '', , false",
+        "v1.2-alpha, 1, 2, 0, 'alpha', , true",
+        "v1.2-alpha5, 1, 2, 0, 'alpha', 5, true",
+        "v1.2-betaV.5, 1, 2, 0, 'betaV.', 5, true",
+        "v1.2.0-beta.5, 1, 2, 0, 'beta.', 5, true",
+        "v1.2.3-beta.5, 1, 2, 3, 'beta.', 5, true",
+        "v1.2.3-5, 1, 2, 3, '', 5, true",
+        "v1.2.3-alpha.beta, 1, 2, 3, 'alpha.beta', , true",
+        "1.2.3.4, 1, 2, 3, '', , false",
+        "v9.5.0.41-rc, 9, 5, 0, 'rc', 41, true"
     )
     fun `valid version tags`(
         versionTag: String,
@@ -38,7 +38,8 @@ class SemVersionTest {
         minor: Int,
         patch: Int,
         suffix: String,
-        preRelease: Int?
+        preRelease: Int?,
+        isPreRelease: Boolean
     ) {
         val version = assertNotNull(SemVersion.tryParse(Tag(versionTag, SHA)))
 
@@ -47,6 +48,7 @@ class SemVersionTest {
         assertThat(version.patch).isEqualTo(patch)
         assertThat(version.preRelease.prefix).isEqualTo(suffix)
         assertThat(version.preRelease.number).isEqualTo(preRelease)
+        assertThat(version.isPreRelease).isEqualTo(isPreRelease)
     }
 
     @ParameterizedTest

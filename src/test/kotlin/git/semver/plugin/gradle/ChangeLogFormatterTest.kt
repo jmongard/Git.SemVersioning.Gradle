@@ -15,7 +15,7 @@ class ChangeLogFormatterTest {
 
         val actual = ChangeLogFormatter(settings).formatLog(listOf())
 
-        assertThat(actual).startsWith("# What's Changed")
+        assertThat(actual).startsWith("## What's Changed")
     }
 
     @Test fun format_log_with_breaking_changes() {
@@ -25,16 +25,16 @@ class ChangeLogFormatterTest {
         val actual = ChangeLogFormatter(settings).formatLog(changeLog)
 
         assertThat(actual)
-            .startsWith("# What's Changed")
+            .startsWith("## What's Changed")
             .containsOnlyOnce("Bugfix 1")
-            .contains("## Breaking Changes")
+            .contains("### Breaking Changes")
             .contains("A breaking change")
-            .contains("## Bug Fixes")
+            .contains("### Bug Fixes")
             .contains("- build(deps): A build change")
             .contains("- A CI change")
-            .contains("## Tests")
+            .contains("### Tests")
             .contains("- Added some tests")
-            .contains("## New Features")
+            .contains("### New Features")
             .contains("- #2: A feature")
             .contains("- xyz: Some other change")
             .contains("- An uncategorized change")

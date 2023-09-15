@@ -2,28 +2,43 @@ package git.semver.plugin.scm
 
 import git.semver.plugin.semver.SemVersion
 import git.semver.plugin.semver.SemverSettings
+import org.assertj.core.api.Assertions.assertThat
 import org.eclipse.jgit.api.Git
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.TestInfo
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.ValueSource
 import java.io.File
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertNotNull
-import kotlin.test.assertTrue
-import kotlin.test.assertFalse
+import kotlin.test.*
 
 class GitProviderTest {
     private val tableStringFormat = "| %-45s | %-25s | %-20s|"
+    private val builder = StringBuilder();
+
+    @BeforeEach
+    fun setUp(testInfo: TestInfo) {
+        builder.appendLine().appendLine(testInfo.displayName)
+    }
+
+    private fun printHead() {
+        builder.appendLine("| --------------------------------------------- | ------------------------- | ------------------- |")
+        builder.appendLine(
+            tableStringFormat.format(
+                "Command",
+                "Commit Text",
+                "Calculated version"
+            )
+        )
+        builder.appendLine("| --------------------------------------------- | ------------------------- | ------------------- |")
+    }
+
+    private fun printFoot() {
+        println(builder)
+    }
 
     @Test
     fun testGetSemVersion() {
         val actual = gitProvider().getSemVersion(File("."))
-
-        assertNotNull(actual)
-        println(actual)
-    }
-
-    @Test
-    fun testGetChangeLog() {
-        val actual = gitProvider().getChangeLog(File("."))
 
         assertNotNull(actual)
     }
@@ -43,6 +58,8 @@ class GitProviderTest {
 
             assertEquals("2.0.0", actual.toVersionString())
         }
+
+        printFoot()
     }
 
     @Test
@@ -59,6 +76,35 @@ class GitProviderTest {
             val actual = release(gitProvider, it, "-")
 
             assertEquals("2.0.0", actual.toVersionString())
+        }
+        printFoot()
+    }
+
+    @Test
+    fun testGetChangeLog() {
+        val actual = gitProvider().getChangeLog(File("."))
+
+        assertNotNull(actual)
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = [true, false])
+    fun changeLog_before_and_after_release(afterRelease: Boolean) {
+        val gitDir = File("build/integrationTest31")
+        gitDir.mkdirs()
+
+        val gitProvider = GitProvider(SemverSettings().apply { groupVersionIncrements = true })
+        Git.init().setDirectory(gitDir).call().use {
+            lotsOfCommits(it, gitProvider)
+            if (afterRelease) {
+                release(gitProvider, it, "-")
+            }
+            val actual = gitProvider().changeLog(it)
+
+            assertThat(actual)
+                .contains("feat: another feature")
+                .contains("feat!: breaking feature")
+                .doesNotContain("docs: updated readme")
         }
     }
 
@@ -108,6 +154,7 @@ class GitProviderTest {
 
             assertEquals("0.0.11-SNAPSHOT", actual.toVersionString())
         }
+        printFoot()
     }
 
     @Test
@@ -126,6 +173,7 @@ class GitProviderTest {
 
             assertEquals("0.0.10", actual.toVersionString())
         }
+        printFoot()
     }
 
     @Test
@@ -146,6 +194,7 @@ class GitProviderTest {
 
             assertEquals("0.0.2", actual.toVersionString())
         }
+        printFoot()
     }
 
     @Test
@@ -166,19 +215,7 @@ class GitProviderTest {
 
             assertEquals("0.0.2", actual.toVersionString())
         }
-    }
-
-    private fun printHead() {
-        println("| --------------------------------------------- | ------------------------- | ------------------- |")
-
-        println(
-            tableStringFormat.format(
-                "Command",
-                "Commit Text",
-                "Calculated version"
-            )
-        )
-        println("| --------------------------------------------- | ------------------------- | ------------------- |")
+        printFoot()
     }
 
     private fun initOrReset(it: Git, gitProvider: GitProvider) {
@@ -212,7 +249,7 @@ class GitProviderTest {
         msg: String
     ) : SemVersion {
         val semVersion = gitProvider.semVersion(it)
-        println(tableStringFormat.format(cmd, msg, semVersion.toInfoVersionString()))
+        builder.appendLine(tableStringFormat.format(cmd, msg, semVersion.toInfoVersionString()))
         return semVersion;
     }
 
@@ -250,6 +287,8 @@ class GitProviderTest {
         Git.open(gitDir).use {
             assertTrue(gitProvider.getHeadCommit(it.repository).text.startsWith("release: v0."))
         }
+
+        printFoot()
     }
 
     @Test
@@ -273,6 +312,7 @@ class GitProviderTest {
         Git.open(gitDir).use {
             assertTrue(gitProvider.getHeadCommit(it.repository).text.startsWith("release: v0."))
         }
+        printFoot()
     }
 
     @Test
@@ -324,6 +364,7 @@ class GitProviderTest {
         Git.open(gitDir).use {
             assertFalse(gitProvider.getHeadCommit(it.repository).text.startsWith("release: v0."))
         }
+        printFoot()
     }
 
     private fun gitProvider() = GitProvider(SemverSettings())

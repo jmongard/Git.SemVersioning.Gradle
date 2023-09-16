@@ -8,12 +8,12 @@ import javax.inject.Inject
 
 
 open class ReleaseTask @Inject constructor(private val settings: GitSemverPluginExtension) : DefaultTask() {
-    private val gitProvider = GitProvider(settings);
+    private val gitProvider = GitProvider(settings)
     private var preRelease: String? = null
     private var message: String? = null
     private var tag = settings.createReleaseTag
     private var commit = settings.createReleaseCommit
-    private var noDirtyCheck = false;
+    private var noDirtyCheck = false
 
     init {
         group = GitSemverPlugin.VERSIONING_GROUP

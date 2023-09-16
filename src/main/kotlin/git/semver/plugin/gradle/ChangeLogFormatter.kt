@@ -1,9 +1,14 @@
 package git.semver.plugin.gradle
 
+import git.semver.plugin.scm.Commit
 import git.semver.plugin.semver.SemverSettings
 import java.util.TreeMap
 
-class ChangeLogFormatter(private val settings: SemverSettings) {
+private const val SCOPE = "Scope"
+private const val TYPE = "Type"
+private const val MESSAGE = "Message"
+
+class ChangeLogFormatter(private val settings: SemverSettings, private val changeLogTexts: MutableMap<String, String>) {
     companion object {
         const val HEADER = "#"
         const val FOOTER = "~"
@@ -15,16 +20,16 @@ class ChangeLogFormatter(private val settings: SemverSettings) {
         const val CHANGE_LINE_SEPARATOR = "\\"
     }
 
-    private val prefix = settings.changeLogTexts[CHANGE_PREFIX].orEmpty()
-    private val separator = settings.changeLogTexts[CHANGE_LINE_SEPARATOR].orEmpty()
-    private val postfix = settings.changeLogTexts[CHANGE_POSTFIX].orEmpty()
-    private val breakingChange = settings.changeLogTexts[BREAKING_CHANGE]
-    private val missingType = settings.changeLogTexts[MISSING_TYPE]
-    private val otherType = settings.changeLogTexts[OTHER_TYPE]
+    private val prefix = changeLogTexts[CHANGE_PREFIX].orEmpty()
+    private val separator = changeLogTexts[CHANGE_LINE_SEPARATOR].orEmpty()
+    private val postfix = changeLogTexts[CHANGE_POSTFIX].orEmpty()
+    private val breakingChange = changeLogTexts[BREAKING_CHANGE]
+    private val missingType = changeLogTexts[MISSING_TYPE]
+    private val otherType = changeLogTexts[OTHER_TYPE]
 
-    internal fun formatLog(changeLog: List<String>): String {
+    internal fun formatLog(changeLog: List<Commit>): String {
         val groupedByHeading = TreeMap<String, MutableSet<String>>()
-        changeLog.forEach { addChange(it, groupedByHeading) }
+        changeLog.forEach { addChange(it.text, groupedByHeading) }
 
         val builder = StringBuilder()
         addText(builder, HEADER)
@@ -45,9 +50,11 @@ class ChangeLogFormatter(private val settings: SemverSettings) {
         text: String,
         resultMap: MutableMap<String, MutableSet<String>>
     ) {
-        fun addChange(category: String?, message: String) {
+        fun addChange(category: String?, message: String, scope: String? = null) {
             if (!category.isNullOrEmpty()) {
-                resultMap.computeIfAbsent(category) { mutableSetOf() }.add(message)
+                resultMap.computeIfAbsent(category) { mutableSetOf() }.add(
+                    scope?.let { "$it: " }.orEmpty() + message.trim()
+                )
             }
         }
         fun getValue(match: MatchResult, id: String) = match.groups[id]?.value
@@ -57,24 +64,23 @@ class ChangeLogFormatter(private val settings: SemverSettings) {
             return
         }
 
-        val match = settings.changeLogRegex.find(text);
+        val match = settings.changeLogRegex.find(text)
         if (match == null) {
             addChange(missingType, text)
             return
         }
 
-        val scope = getValue(match, "Scope")
-        val scopeHeading = scope?.let { settings.changeLogTexts[it] }
+        val scope = getValue(match, SCOPE)
+        val scopeHeading = scope?.let { changeLogTexts[it] }
         if (scopeHeading != null) {
             addChange(scopeHeading, text)
             return
         }
 
-        val typeHeading = getValue(match, "Type")?.let { settings.changeLogTexts[it] }
+        val typeHeading = getValue(match, TYPE)?.let { changeLogTexts[it] }
         if (typeHeading != null) {
-            val messageText = getValue(match, "Message")
-            val scopeText = scope?.let { s -> "$s: " }.orEmpty()
-            addChange(typeHeading, scopeText + (messageText ?: text).trim())
+            val message = getValue(match, MESSAGE).orEmpty()
+            addChange(typeHeading, message, scope)
             return
         }
 
@@ -82,7 +88,7 @@ class ChangeLogFormatter(private val settings: SemverSettings) {
     }
 
     private fun addText(builder: StringBuilder, text: String) {
-        settings.changeLogTexts[text]?.let {
+        changeLogTexts[text]?.let {
             builder.appendLine(it).appendLine()
         }
     }

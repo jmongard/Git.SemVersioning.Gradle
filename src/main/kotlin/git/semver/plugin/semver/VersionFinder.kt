@@ -30,8 +30,8 @@ class VersionFinder(private val settings: SemverSettings, private val tags: Map<
         return semVersion
     }
 
-    fun getChangeLog(commit: Commit): List<String> {
-        val changeLog = mutableListOf<String>()
+    fun getChangeLog(commit: Commit): List<Commit> {
+        val changeLog = mutableListOf<Commit>()
 
         val release = getReleaseSemVersionFromCommit(commit)
         if (isRelease(release)) {
@@ -42,7 +42,7 @@ class VersionFinder(private val settings: SemverSettings, private val tags: Map<
         return changeLog
     }
 
-    private fun findVersion(startCommit: Commit, changeLog: MutableList<String>? = null): SemVersion {
+    private fun findVersion(startCommit: Commit, changeLog: MutableList<Commit>? = null): SemVersion {
         if (startCommit.sha.isBlank()) {
             //This is a fake commit created when there exists no real commits
             return versionZero()
@@ -52,7 +52,7 @@ class VersionFinder(private val settings: SemverSettings, private val tags: Map<
 
     private fun findVersion(
         commitsList: Sequence<Commit>,
-        changeLog: MutableList<String>?
+        changeLog: MutableList<Commit>?
     ): SemVersion {
 
         var lastFoundVersion = versionZero()
@@ -108,14 +108,14 @@ class VersionFinder(private val settings: SemverSettings, private val tags: Map<
 
     private fun addToChangeLog(
         currentCommit: Commit,
-        changeLog: MutableList<String>?,
+        changeLog: MutableList<Commit>?,
         isMergeCommit: Boolean
     ) {
         if (isMergeCommit) {
             //Ignore merge commits
             return
         }
-        changeLog?.add(currentCommit.text)
+        changeLog?.add(currentCommit)
     }
 
     private fun isRelease(releaseVersion: SemVersion?) =

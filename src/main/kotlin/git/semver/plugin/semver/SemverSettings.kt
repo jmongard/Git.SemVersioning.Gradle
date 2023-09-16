@@ -35,7 +35,7 @@ open class SemverSettings {
     var releaseTagNameFormat = "%s"
     var groupVersionIncrements = true
     var noDirtyCheck = false
-    var noAutoBump = false;
+    var noAutoBump = false
 
     internal val releaseRegex: Regex by lazy { releasePattern.toRegex(setOf(RegexOption.IGNORE_CASE, RegexOption.MULTILINE)) }
     internal val patchRegex: Regex by lazy { patchPattern.toRegex(setOf(RegexOption.IGNORE_CASE, RegexOption.MULTILINE)) }

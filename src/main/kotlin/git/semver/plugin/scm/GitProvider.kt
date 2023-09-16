@@ -4,18 +4,17 @@ import git.semver.plugin.semver.SemVersion
 import git.semver.plugin.semver.SemverSettings
 import git.semver.plugin.semver.VersionFinder
 import org.eclipse.jgit.api.Git
+import org.eclipse.jgit.lib.ObjectId
+import org.eclipse.jgit.lib.Ref
 import org.eclipse.jgit.lib.Repository
 import org.eclipse.jgit.lib.RepositoryBuilder
 import org.eclipse.jgit.revwalk.RevCommit
 import org.eclipse.jgit.revwalk.RevWalk
 import org.eclipse.jgit.util.FS
-import org.eclipse.jgit.lib.ObjectId
-import org.eclipse.jgit.lib.Ref
 import org.slf4j.LoggerFactory
 import java.io.File
-import java.lang.IllegalStateException
 
-class GitProvider(private val settings: SemverSettings) {
+internal class GitProvider(private val settings: SemverSettings) {
     companion object {
         private const val REF_PREFIX = "refs/tags/"
         private val logger = LoggerFactory.getLogger(GitProvider::class.java)
@@ -36,13 +35,13 @@ class GitProvider(private val settings: SemverSettings) {
         )
     }
 
-    internal fun getChangeLog(startingPath: File): List<String> {
+    internal fun getChangeLog(startingPath: File): List<Commit> {
         getRepository(startingPath).use {
             return changeLog(Git(it))
         }
     }
 
-    internal fun changeLog(it: Git): List<String> {
+    internal fun changeLog(it: Git): List<Commit> {
         val versionFinder = VersionFinder(settings, getTags(it.repository))
         return versionFinder.getChangeLog(
             getHeadCommit(it.repository))
@@ -69,9 +68,7 @@ class GitProvider(private val settings: SemverSettings) {
         message: String? = null,
         noDirtyCheck: Boolean
     ) {
-        if (!noDirtyCheck && isDirty(it)) {
-            throw IllegalStateException("Local modifications exists")
-        }
+        check(noDirtyCheck || !isDirty(it)) { "Local modifications exists" }
 
         val versionFinder = VersionFinder(settings, getTags(it.repository))
         val version = versionFinder.getReleaseVersion(
@@ -97,7 +94,7 @@ class GitProvider(private val settings: SemverSettings) {
         .setMustExist(true)
         .build()
 
-    fun isDirty(git: Git): Boolean {
+    internal fun isDirty(git: Git): Boolean {
         val status = git.status().call()
         if (!status.isClean) {
             logger.info("The Git repository is dirty")

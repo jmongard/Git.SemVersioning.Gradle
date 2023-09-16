@@ -3,14 +3,12 @@
  */
 package git.semver.plugin.gradle
 
-import git.semver.plugin.semver.SemverSettings
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatCode
 import org.gradle.testfixtures.ProjectBuilder
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
 import kotlin.test.Test
-import kotlin.test.assertNotNull
 
 /**
  * A simple unit test for the 'git.semver.plugin.gradle.greeting' plugin.
@@ -26,7 +24,7 @@ class GitSemverPluginTest {
         val task = project.tasks.findByName(name)
 
         // Verify the result
-        assertThat(task).isNotNull();
+        assertThat(task).isNotNull()
     }
 
     @Test

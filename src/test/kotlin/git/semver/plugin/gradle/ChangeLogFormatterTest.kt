@@ -3,17 +3,16 @@
  */
 package git.semver.plugin.gradle
 
+import git.semver.plugin.scm.Commit
 import git.semver.plugin.semver.SemverSettings
 import org.assertj.core.api.Assertions.assertThat
-import org.gradle.testfixtures.ProjectBuilder
 import kotlin.test.Test
-import kotlin.test.assertNotNull
 
 class ChangeLogFormatterTest {
     @Test fun format_log_empty() {
         val settings = SemverSettings()
 
-        val actual = ChangeLogFormatter(settings).formatLog(listOf())
+        val actual = ChangeLogFormatter(settings, settings.changeLogTexts).formatLog(listOf())
 
         assertThat(actual).startsWith("## What's Changed")
     }
@@ -22,13 +21,14 @@ class ChangeLogFormatterTest {
         val settings = SemverSettings()
         val changeLog = createChangeLog()
 
-        val actual = ChangeLogFormatter(settings).formatLog(changeLog)
+        val actual = ChangeLogFormatter(settings, settings.changeLogTexts).formatLog(changeLog)
 
         assertThat(actual)
             .startsWith("## What's Changed")
             .containsOnlyOnce("Bugfix 1")
             .contains("### Breaking Changes")
-            .contains("A breaking change")
+            .contains("  - fix(#5)!: A breaking change")
+            .contains("    more text")
             .contains("### Bug Fixes")
             .contains("- build(deps): A build change")
             .contains("- A CI change")
@@ -44,21 +44,21 @@ class ChangeLogFormatterTest {
 
     @Test fun format_log_with_cleared_settings() {
         val settings = SemverSettings()
-        settings.changeLogTexts.clear();
+        settings.changeLogTexts.clear()
         val changeLog = createChangeLog()
 
-        val actual = ChangeLogFormatter(settings).formatLog(changeLog)
+        val actual = ChangeLogFormatter(settings, settings.changeLogTexts).formatLog(changeLog)
 
         assertThat(actual).isEmpty()
     }
 
-    private fun createChangeLog(): List<String> {
+    private fun createChangeLog(): List<Commit> {
         val changeLog = listOf(
             "fix(#1): Bugfix 1",
             "fix(#1): Bugfix 1",
             "fix(deps): Bugfix broken deps",
             "feat(#2): A feature",
-            "fix(#5)!: A breaking change",
+            "fix(#5)!: A breaking change\nmore text",
             "build(deps): A build change",
             "release: 1.2.3-alpha",
             "test: Added some tests",
@@ -66,6 +66,6 @@ class ChangeLogFormatterTest {
             "xyz: Some other change",
             "An uncategorized change"
         )
-        return changeLog
+        return changeLog.map { Commit(it,  "", emptySequence()) }
     }
 }

@@ -16,8 +16,8 @@ class GitSemverPlugin: Plugin<Project> {
         val settings = project.extensions.create("semver", GitSemverPluginExtension::class.java, project)
 
         project.tasks.register("printVersion") { task ->
-            task.group = VERSIONING_GROUP;
-            task.description = "Prints the current project version";
+            task.group = VERSIONING_GROUP
+            task.description = "Prints the current project version"
 
             task.doLast {
                 println(settings.version)
@@ -25,8 +25,8 @@ class GitSemverPlugin: Plugin<Project> {
         }
 
         project.tasks.register("printSemVersion") { task ->
-            task.group = VERSIONING_GROUP;
-            task.description = "Prints the current project semantic version";
+            task.group = VERSIONING_GROUP
+            task.description = "Prints the current project semantic version"
 
             task.doLast {
                 println(settings.semVersion)
@@ -34,8 +34,8 @@ class GitSemverPlugin: Plugin<Project> {
         }
 
         project.tasks.register("printInfoVersion") { task ->
-            task.group = VERSIONING_GROUP;
-            task.description = "Prints the current project info version";
+            task.group = VERSIONING_GROUP
+            task.description = "Prints the current project info version"
 
             task.doLast {
                 println(settings.infoVersion)
@@ -43,8 +43,8 @@ class GitSemverPlugin: Plugin<Project> {
         }
 
         project.tasks.register("printChangeLog") { task ->
-            task.group = VERSIONING_GROUP;
-            task.description = "Prints a change log";
+            task.group = VERSIONING_GROUP
+            task.description = "Prints a change log"
 
             task.doLast {
                 println(settings.changeLog)

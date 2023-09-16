@@ -9,13 +9,14 @@ open class GitSemverPluginExtension(project: Project) : SemverSettings() {
     var gitDirectory: File = project.projectDir
     var createReleaseCommit = true
     var createReleaseTag = true
+
     val semVersion by lazy { GitProvider(this).getSemVersion(gitDirectory) }
     val version by lazy { semVersion.toVersionString() }
     val infoVersion by lazy { semVersion.toInfoVersionString() }
 
     val changeLogList by lazy { GitProvider(this).getChangeLog(gitDirectory) }
     val changeLog
-        get() = ChangeLogFormatter(this).formatLog(changeLogList)
+        get() = ChangeLogFormatter(this, changeLogTexts).formatLog(changeLogList)
 
     init {
         val defaultPreReleaseProperty = project.findProperty("defaultPreRelease")
@@ -24,7 +25,7 @@ open class GitSemverPluginExtension(project: Project) : SemverSettings() {
         }
         val noDirtyCheckProperty = project.findProperty("noDirtyCheck")
         if (noDirtyCheckProperty is String) {
-            noDirtyCheck = noDirtyCheckProperty.toBoolean();
+            noDirtyCheck = noDirtyCheckProperty.toBoolean()
         }
     }
 }

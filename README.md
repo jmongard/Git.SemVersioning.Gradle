@@ -1,6 +1,7 @@
 # Semantic versioning for Gradle using Git 
 [![Gradle Build](https://github.com/jmongard/Git.SemVersioning.Gradle/workflows/Gradle%20Build/badge.svg)](https://github.com/jmongard/Git.SemVersioning.Gradle/actions/workflows/gradle-push.yml)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=jmongard_Git.SemVersioning.Gradle&metric=alert_status)](https://sonarcloud.io/dashboard?id=jmongard_Git.SemVersioning.Gradle)
+[![GitHub tag (with filter)](https://img.shields.io/github/v/tag/jmongard/Git.SemVersioning.Gradle?logo=gradle&label=Release)](https://plugins.gradle.org/plugin/com.github.jmongard.git-semver-plugin)
 
 Gradle plugin for automatically versioning a project with git using semantic versioning and conventional commits.
 

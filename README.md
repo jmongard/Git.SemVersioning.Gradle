@@ -282,13 +282,26 @@ This plugin has been tested on Gradle 7.x and 8.x. (Version 0.4.3 and older shou
 The plugin calculates the version using the commit tree. Make sure you check out all commits relevant and not just
 a shallow copy.
 
-### GitHub Actions example
+[GitHub Actions example project](https://github.com/jmongard/Git.SemVersioning.Gradle.Actions-Example)
+
+### GitHub Actions checkout example
 ```yaml
 - uses: actions/checkout@v3
   with:
     fetch-depth: 0
 ```
-[GitHub Actions example project](https://github.com/jmongard/Git.SemVersioning.Gradle.Actions-Example)
+
+### GitHub Actions create relase example
+```yaml
+  - name: Create GitHub release
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    run: |
+      tag=$(git describe --tags --abbrev=0)
+      version=$(./gradlew -q printVersion)
+       ./gradlew -q printChangeLog | gh release create $tag -d -t "Example Project $version" -F -
+```
+
 
 ## Limitations
 

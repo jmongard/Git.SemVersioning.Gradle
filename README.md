@@ -132,8 +132,14 @@ and output them to standard-out.
 $ gradlew printChangeLog
 
 > Task :printChangeLog
-\# What's Changed
-...
+## What's Changed
+
+### Breaking Changes
+  - fix(#5)!: A breaking change
+
+### Bug Fixes
+  - #1: A bug fix
+  - #2: Another bug fix
 ````
 
 ## `releaseVersion`

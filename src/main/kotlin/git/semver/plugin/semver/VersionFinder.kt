@@ -36,6 +36,7 @@ class VersionFinder(private val settings: SemverSettings, private val tags: Map<
         val release = getReleaseSemVersionFromCommit(commit)
         if (isRelease(release)) {
             findVersion(commit.parents, changeLog)
+            changeLog.add(commit)
         } else {
             findVersion(commit, changeLog)
         }

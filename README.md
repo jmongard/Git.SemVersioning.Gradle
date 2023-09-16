@@ -291,7 +291,7 @@ a shallow copy.
     fetch-depth: 0
 ```
 
-### GitHub Actions create relase example
+### GitHub Actions create release example
 ```yaml
   - name: Create GitHub release
     env:

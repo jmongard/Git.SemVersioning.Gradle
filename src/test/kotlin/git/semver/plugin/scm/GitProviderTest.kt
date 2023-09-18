@@ -351,7 +351,7 @@ class GitProviderTest {
 
         Git.init().setDirectory(gitDir).call().use {
             File(gitDir, "tmp").createNewFile()
-            assertFalse(gitProvider.isDirty(it))
+            assertThat(gitProvider.isNotDirty(it)).isTrue()
         }
     }
 
@@ -382,13 +382,23 @@ class GitProviderTest {
         printFoot()
     }
 
+    @ParameterizedTest
+    @CsvSource(value = [
+        "false, true",
+        "true, false"
+    ])
+    fun checkDirty(noDirtyCheckParam: Boolean, isNotDirty: Boolean) {
+        val provider = GitProvider(SemverSettings())
+
+        assertThatCode { provider.checkDirty(noDirtyCheckParam, isNotDirty) }
+            .doesNotThrowAnyException()
+    }
+
     @Test
-    fun checkDirty() {
-        assertThatCode { GitProvider.checkDirty(false, false) }
-            .doesNotThrowAnyException()
-        assertThatCode { GitProvider.checkDirty(true, true) }
-            .doesNotThrowAnyException()
-        assertThatThrownBy { GitProvider.checkDirty(false, true) }
+    fun checkDirty_throws() {
+        val provider = GitProvider(SemverSettings())
+
+        assertThatThrownBy { provider.checkDirty(noDirtyCheck = false, isNotDirty = false) }
             .isInstanceOf(IllegalStateException::class.java)
     }
 
@@ -398,7 +408,7 @@ class GitProviderTest {
         ", true, false",
         "%s, false, false"])
     fun shouldTag(format: String?, flag: Boolean, expected: Boolean) {
-        assertThat(GitProvider.isFormatEnabled(flag, format.orEmpty())).isEqualTo(expected);
+        assertThat(GitProvider.isFormatEnabled(flag, format.orEmpty())).isEqualTo(expected)
     }
 
     private fun gitProvider() = GitProvider(SemverSettings())

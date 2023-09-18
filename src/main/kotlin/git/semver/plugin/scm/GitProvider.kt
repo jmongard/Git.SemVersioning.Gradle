@@ -19,9 +19,6 @@ internal class GitProvider(private val settings: SemverSettings) {
         private const val REF_PREFIX = "refs/tags/"
         private val logger = LoggerFactory.getLogger(GitProvider::class.java)
 
-        internal fun checkDirty(noDirtyCheck: Boolean, isDirty: Boolean) {
-            check(noDirtyCheck || !isDirty) { "Local modifications exists" }
-        }
         internal fun isFormatEnabled(flag: Boolean, format: String) = flag && format.isNotEmpty()
     }
 
@@ -35,7 +32,7 @@ internal class GitProvider(private val settings: SemverSettings) {
         val versionFinder = VersionFinder(settings, getTags(it.repository))
         return versionFinder.getVersion(
             getHeadCommit(it.repository),
-            isDirty(it),
+            !isNotDirty(it),
             settings.defaultPreRelease
         )
     }
@@ -73,7 +70,7 @@ internal class GitProvider(private val settings: SemverSettings) {
         message: String? = null,
         noDirtyCheck: Boolean
     ) {
-        checkDirty(noDirtyCheck, isDirty(it))
+        checkDirty(noDirtyCheck, isNotDirty(it))
 
         val versionFinder = VersionFinder(settings, getTags(it.repository))
         val version = versionFinder.getReleaseVersion(
@@ -107,18 +104,19 @@ internal class GitProvider(private val settings: SemverSettings) {
         .setMustExist(true)
         .build()
 
-    internal fun isDirty(git: Git): Boolean {
+    internal fun isNotDirty(git: Git): Boolean {
         val status = git.status().call()
-        if (!status.isClean) {
-            logger.info("The Git repository is dirty")
-            logger.debug("added: {}", status.added)
-            logger.debug("changed: {}", status.changed)
-            logger.debug("removed: {}", status.removed)
-            logger.debug("conflicting: {}", status.conflicting)
-            logger.debug("missing: {}", status.missing)
-            logger.debug("modified: {}", status.modified)
+        if (status.isClean) {
+            return true
         }
-        return !status.isClean && !settings.noDirtyCheck
+        logger.info("The Git repository is dirty")
+        logger.debug("added: {}", status.added)
+        logger.debug("changed: {}", status.changed)
+        logger.debug("removed: {}", status.removed)
+        logger.debug("conflicting: {}", status.conflicting)
+        logger.debug("missing: {}", status.missing)
+        logger.debug("modified: {}", status.modified)
+        return settings.noDirtyCheck
     }
 
     private fun getTags(repository: Repository): Map<String, List<Tag>> {
@@ -142,6 +140,10 @@ internal class GitProvider(private val settings: SemverSettings) {
                 yield(getCommit(parent, revWalk))
             }
         })
+    }
+
+    internal fun checkDirty(noDirtyCheck: Boolean, isNotDirty: Boolean) {
+        check(noDirtyCheck || isNotDirty) { "Local modifications exists" }
     }
 
     private fun getObjectIdFromRef(repository: Repository, ref: Ref): ObjectId =

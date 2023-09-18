@@ -18,6 +18,11 @@ internal class GitProvider(private val settings: SemverSettings) {
     companion object {
         private const val REF_PREFIX = "refs/tags/"
         private val logger = LoggerFactory.getLogger(GitProvider::class.java)
+
+        internal fun checkDirty(noDirtyCheck: Boolean, isDirty: Boolean) {
+            check(noDirtyCheck || !isDirty) { "Local modifications exists" }
+        }
+        internal fun isFormatEnabled(flag: Boolean, format: String) = flag && format.isNotEmpty()
     }
 
     internal fun getSemVersion(startingPath: File): SemVersion {
@@ -68,7 +73,7 @@ internal class GitProvider(private val settings: SemverSettings) {
         message: String? = null,
         noDirtyCheck: Boolean
     ) {
-        check(noDirtyCheck || !isDirty(it)) { "Local modifications exists" }
+        checkDirty(noDirtyCheck, isDirty(it))
 
         val versionFinder = VersionFinder(settings, getTags(it.repository))
         val version = versionFinder.getReleaseVersion(
@@ -77,14 +82,22 @@ internal class GitProvider(private val settings: SemverSettings) {
         )
         val versionString = version.toInfoVersionString()
         logger.info("Saving new version: {}", versionString)
-        if (commit && settings.releaseCommitTextFormat.isNotEmpty()) {
-            it.commit().setMessage(settings.releaseCommitTextFormat.format(versionString, message ?: "").trim())
-                .call()
+
+        val isCommit = isFormatEnabled(commit, settings.releaseCommitTextFormat)
+        if (isCommit) {
+            val commitMessage = settings.releaseCommitTextFormat.format(versionString, message.orEmpty())
+            it.commit().setMessage(commitMessage.trim()).call()
         }
-        if (tag && settings.releaseTagNameFormat.isNotEmpty()) {
+
+        val isTag = isFormatEnabled(tag, settings.releaseTagNameFormat)
+        if (isTag) {
             val name = settings.releaseTagNameFormat.format(versionString)
             it.tag().setName(name).setMessage(message).call()
             println("Created new local Git tag: $name")
+        }
+
+        if (!isCommit && !isTag) {
+            println("Dry run - calculated version: $versionString")
         }
     }
 

@@ -2,10 +2,12 @@ package git.semver.plugin.scm
 
 import git.semver.plugin.semver.SemVersion
 import git.semver.plugin.semver.SemverSettings
-import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.*
 import org.eclipse.jgit.api.Git
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.TestInfo
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.CsvSource
 import java.io.File
 import kotlin.test.*
 
@@ -380,6 +382,24 @@ class GitProviderTest {
         printFoot()
     }
 
-    private fun gitProvider() = GitProvider(SemverSettings())
+    @Test
+    fun checkDirty() {
+        assertThatCode { GitProvider.checkDirty(false, false) }
+            .doesNotThrowAnyException()
+        assertThatCode { GitProvider.checkDirty(true, true) }
+            .doesNotThrowAnyException()
+        assertThatThrownBy { GitProvider.checkDirty(false, true) }
+            .isInstanceOf(IllegalStateException::class.java)
+    }
 
+    @ParameterizedTest
+    @CsvSource(value = [
+        "%s, true, true",
+        ", true, false",
+        "%s, false, false"])
+    fun shouldTag(format: String?, flag: Boolean, expected: Boolean) {
+        assertThat(GitProvider.isFormatEnabled(flag, format.orEmpty())).isEqualTo(expected);
+    }
+
+    private fun gitProvider() = GitProvider(SemverSettings())
 }

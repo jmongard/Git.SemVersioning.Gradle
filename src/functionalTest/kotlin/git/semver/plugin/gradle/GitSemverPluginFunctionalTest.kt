@@ -61,7 +61,6 @@ class GitSemverPluginFunctionalTest {
 
         assertThat(releaseResult2.output)
             .doesNotContain("FAILED")
-            .doesNotContain("NEXT")
             .contains("SNAPSHOT")
     }
 

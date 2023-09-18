@@ -32,7 +32,7 @@ internal class GitProvider(private val settings: SemverSettings) {
         val versionFinder = VersionFinder(settings, getTags(it.repository))
         return versionFinder.getVersion(
             getHeadCommit(it.repository),
-            !isNotDirty(it),
+            !isClean(it),
             settings.defaultPreRelease
         )
     }
@@ -70,7 +70,7 @@ internal class GitProvider(private val settings: SemverSettings) {
         message: String? = null,
         noDirtyCheck: Boolean
     ) {
-        checkDirty(noDirtyCheck, isNotDirty(it))
+        checkDirty(noDirtyCheck, isClean(it))
 
         val versionFinder = VersionFinder(settings, getTags(it.repository))
         val version = versionFinder.getReleaseVersion(
@@ -104,12 +104,12 @@ internal class GitProvider(private val settings: SemverSettings) {
         .setMustExist(true)
         .build()
 
-    internal fun isNotDirty(git: Git): Boolean {
+    internal fun isClean(git: Git): Boolean {
         val status = git.status().call()
         if (status.isClean) {
             return true
         }
-        logger.info("The Git repository is dirty")
+        logger.info("The Git repository is dirty. (Check: {})", settings.noDirtyCheck)
         logger.debug("added: {}", status.added)
         logger.debug("changed: {}", status.changed)
         logger.debug("removed: {}", status.removed)

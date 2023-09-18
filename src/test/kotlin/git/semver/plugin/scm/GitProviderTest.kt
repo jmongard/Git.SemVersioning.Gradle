@@ -351,7 +351,7 @@ class GitProviderTest {
 
         Git.init().setDirectory(gitDir).call().use {
             File(gitDir, "tmp").createNewFile()
-            assertThat(gitProvider.isNotDirty(it)).isTrue()
+            assertThat(gitProvider.isClean(it)).isTrue()
         }
     }
 

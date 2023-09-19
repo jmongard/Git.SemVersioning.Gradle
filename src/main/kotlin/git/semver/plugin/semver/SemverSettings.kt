@@ -16,7 +16,7 @@ open class SemverSettings {
         ChangeLogFormatter.MISSING_TYPE to "### Other Changes \uD83D\uDCA1",
         ChangeLogFormatter.BREAKING_CHANGE to "### Breaking Changes \uD83D\uDEE0",
         ChangeLogFormatter.HEADER to "## What's Changed",
-        ChangeLogFormatter.CHANGE_PREFIX to "  - ",
+        ChangeLogFormatter.CHANGE_PREFIX to "- ",
         ChangeLogFormatter.CHANGE_LINE_SEPARATOR to "\n    ",
         ChangeLogFormatter.CHANGE_POSTFIX to "",
         "fix" to "### Bug Fixes \uD83D\uDC1E",

@@ -28,7 +28,6 @@ class ChangeLogFormatterTest {
             .containsOnlyOnce("Bugfix 1")
             .contains("### Breaking Changes")
             .contains("  - fix(#5)!: A breaking change")
-            .contains("    more text")
             .contains("### Bug Fixes")
             .contains("- build(deps): A build change")
             .contains("- A CI change")

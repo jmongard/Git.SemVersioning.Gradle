@@ -31,7 +31,7 @@ class ChangeLogFormatter(private val settings: SemverSettings, private val chang
 
     internal fun formatLog(changeLog: List<Commit>): String {
         val groupedByHeading = TreeMap<String, MutableSet<String>>()
-        changeLog.forEach { addChange(it.text, groupedByHeading) }
+        changeLog.forEach { addChange(it.text.lineSequence().first(), groupedByHeading) }
 
         val builder = StringBuilder()
         addText(builder, HEADER)

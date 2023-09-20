@@ -17,7 +17,7 @@ open class ReleaseTask @Inject constructor(private val settings: GitSemverPlugin
 
     init {
         group = GitSemverPlugin.VERSIONING_GROUP
-        description = "Creates a release commit and tag"
+        description = "Creates a release commit and / or local tag"
     }
 
     @Option(option = "preRelease", description = "Set the current preRelease")

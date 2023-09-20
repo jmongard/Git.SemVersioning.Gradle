@@ -398,7 +398,7 @@ class GitProviderTest {
     fun checkDirty_throws() {
         val provider = GitProvider(SemverSettings())
 
-        assertThatThrownBy { provider.checkDirty(noDirtyCheck = false, isNotDirty = false) }
+        assertThatThrownBy { provider.checkDirty(noDirtyCheck = false, isClean = false) }
             .isInstanceOf(IllegalStateException::class.java)
     }
 

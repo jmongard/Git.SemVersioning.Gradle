@@ -142,8 +142,8 @@ internal class GitProvider(private val settings: SemverSettings) {
         })
     }
 
-    internal fun checkDirty(noDirtyCheck: Boolean, isNotDirty: Boolean) {
-        check(noDirtyCheck || isNotDirty) { "Local modifications exists" }
+    internal fun checkDirty(noDirtyCheck: Boolean, isClean: Boolean) {
+        check(noDirtyCheck || isClean) { "Local modifications exists" }
     }
 
     private fun getObjectIdFromRef(repository: Repository, ref: Ref): ObjectId =

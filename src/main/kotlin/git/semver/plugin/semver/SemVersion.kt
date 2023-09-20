@@ -242,27 +242,24 @@ class SemVersion(
 
     fun toInfoVersionString(commitCountStringFormat: String = "%03d", shaLength: Int = 0, v2: Boolean = true): String {
         val builder = StringBuilder().append(major).append('.').append(minor).append('.').append(patch)
-        if (isPreRelease) {
-            builder
-                .append('-')
-                .append(
-                    if (v2)
-                        preRelease.prefix
-                    else
-                        preRelease.prefix.replace("[^0-9A-Za-z-]".toRegex(), "")
-                )
-                .append(preRelease.number ?: "")
-        }
         if (v2) {
+            if (isPreRelease) {
+                builder.append('-').append(preRelease)
+            }
             var metaSeparator = '+'
-            val commitCount = commitCount
-            if (commitCount > 0 && commitCountStringFormat.isNotEmpty()) {
-                builder.append(metaSeparator).append(commitCountStringFormat.format(commitCount))
+            if (this.commitCount > 0 && commitCountStringFormat.isNotEmpty()) {
+                builder.append(metaSeparator).append(commitCountStringFormat.format(this.commitCount))
                 metaSeparator = '.'
             }
-            if (shaLength > 0 && sha.isNotEmpty()) {
-                builder.append(metaSeparator).append("sha.").append(sha.take(shaLength))
+            val shaTake = sha.take(shaLength)
+            if (shaTake.isNotEmpty()) {
+                builder.append(metaSeparator).append("sha.").append(shaTake)
             }
+        }
+        else if (isPreRelease) {
+            builder.append("-")
+                .append(preRelease.prefix.replace("[^0-9A-Za-z-]".toRegex(), ""))
+                .append (preRelease.number ?: "")
         }
         return builder.toString()
     }
@@ -291,5 +288,7 @@ class SemVersion(
 
         val isPreRelease
             get() = prefix.isNotEmpty() || number != null
+
+        override fun toString() = prefix + (number ?: "");
     }
 }

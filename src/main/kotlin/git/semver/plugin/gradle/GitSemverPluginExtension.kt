@@ -16,7 +16,7 @@ open class GitSemverPluginExtension(project: Project) : SemverSettings() {
 
     val changeLogList by lazy { GitProvider(this).getChangeLog(gitDirectory) }
     val changeLog
-        get() = ChangeLogFormatter(this, changeLogTexts).formatLog(changeLogList)
+        get() = ChangeLogFormatter(this, changeLogSettings).formatLog(changeLogList)
 
     init {
         val defaultPreReleaseProperty = project.findProperty("defaultPreRelease")

@@ -1,6 +1,7 @@
 package git.semver.plugin.gradle
 
 import git.semver.plugin.scm.Commit
+import git.semver.plugin.semver.ChangeLogSettings
 import git.semver.plugin.semver.SemverSettings
 import java.util.TreeMap
 
@@ -8,92 +9,91 @@ private const val SCOPE = "Scope"
 private const val TYPE = "Type"
 private const val MESSAGE = "Message"
 
-class ChangeLogFormatter(private val settings: SemverSettings, private val changeLogTexts: MutableMap<String, String>) {
-    companion object {
-        const val HEADER = "#"
-        const val FOOTER = "~"
-        const val GROUP_START = "#^"
-        const val GROUP_END = "#$"
-        const val OTHER_TYPE = "*"
-        const val MISSING_TYPE = "-"
-        const val BREAKING_CHANGE = "!"
-        const val CHANGE_PREFIX = "^"
-        const val CHANGE_POSTFIX = "$"
-        const val CHANGE_LINE_SEPARATOR = "\\"
-    }
-
-    private val prefix = changeLogTexts[CHANGE_PREFIX].orEmpty()
-    private val separator = changeLogTexts[CHANGE_LINE_SEPARATOR].orEmpty()
-    private val postfix = changeLogTexts[CHANGE_POSTFIX].orEmpty()
-    private val breakingChange = changeLogTexts[BREAKING_CHANGE]
-    private val missingType = changeLogTexts[MISSING_TYPE]
-    private val otherType = changeLogTexts[OTHER_TYPE]
+class ChangeLogFormatter(private val settings: SemverSettings, private val format: ChangeLogSettings) {
 
     internal fun formatLog(changeLog: List<Commit>): String {
+
         val groupedByHeading = TreeMap<String, MutableSet<String>>()
-        changeLog.forEach { addChange(it.text.lineSequence().first(), groupedByHeading) }
+        changeLog.sortedBy { it.text }.groupBy { it.text }.forEach { addCommit(it, groupedByHeading) }
 
         val builder = StringBuilder()
-        addText(builder, HEADER)
+        addStaticText(builder, format.header)
 
         groupedByHeading.forEach { (heading, items) ->
-            addText(builder, GROUP_START)
+            addStaticText(builder, format.groupStart)
             builder.appendLine().appendLine(heading)
-            items.sorted().forEach { item ->
-                builder.appendLine(item.trim().lines().joinToString(separator, prefix, postfix))
+            items.forEach { item ->
+                val changeLineSeparator = format.changeLineSeparator
+                if (changeLineSeparator != null) {
+                    builder.appendLine(
+                        item.trim().lines().joinToString(
+                            changeLineSeparator,
+                            format.changePrefix,
+                            format.changePostfix
+                        )
+                    )
+                } else {
+                    builder
+                        .append(format.changePrefix)
+                        .append(item.trim().lineSequence().first())
+                        .appendLine(format.changePostfix)
+                }
             }
-            addText(builder, GROUP_END)
+            addStaticText(builder, format.groupEnd)
         }
 
-        addText(builder, FOOTER)
+        addStaticText(builder, format.footer)
         return builder.trim().toString()
     }
 
-    private fun addChange(
-        text: String,
+    private fun addCommit(
+        commit: Map.Entry<String, List<Commit>>,
         resultMap: MutableMap<String, MutableSet<String>>
     ) {
-        fun addChange(category: String?, message: String, scope: String? = null) {
+        fun addChangeLogText(category: String?, message: String, scope: String? = null) {
             if (!category.isNullOrEmpty()) {
-                resultMap.computeIfAbsent(category) { mutableSetOf() }.add(
-                    scope?.let { "$it: " }.orEmpty() + message.trim()
-                )
+                resultMap.computeIfAbsent(category) { mutableSetOf() }.add(formatLine(scope, message, commit.value).trim())
             }
         }
-        fun getValue(match: MatchResult, id: String) = match.groups[id]?.value
 
+        val text = commit.key
         if (settings.majorRegex.containsMatchIn(text)) {
-            addChange(breakingChange, text)
+            addChangeLogText(format.breakingChangeHeader, text)
             return
         }
 
         val match = settings.changeLogRegex.find(text)
         if (match == null) {
-            addChange(missingType, text)
+            addChangeLogText(format.missingTypeHeader, text)
             return
         }
 
-        val scope = getValue(match, SCOPE)
-        val scopeHeading = scope?.let { changeLogTexts[it] }
+        val scope = match.groupValue(SCOPE)
+        val scopeHeading = scope?.let { format.headerTexts[it] }
         if (scopeHeading != null) {
-            addChange(scopeHeading, text)
+            addChangeLogText(scopeHeading, text)
             return
         }
 
-        val typeHeading = changeLogTexts[getValue(match, TYPE)]
+        val typeHeading = format.headerTexts[match.groupValue(TYPE)]
         if (typeHeading != null) {
-            val message = getValue(match, MESSAGE)!!
-            addChange(typeHeading, message, scope)
+            val message = match.groupValue(MESSAGE)!!
+            addChangeLogText(typeHeading, message, scope)
             return
         }
 
-        addChange(otherType, text)
+        addChangeLogText(format.otherChangeHeader, text)
     }
 
-    private fun addText(builder: StringBuilder, text: String) {
-        changeLogTexts[text]?.let {
-            builder.appendLine(it)
-        }
-    }
+    private fun formatLine(scope: String?, message: String, commits: List<Commit>) = commits
+        .map { it.sha.take(format.changeShaLength) }
+        .filter { it.isNotEmpty() }
+        .joinToString(" ", "", " ") +
+            scope?.let { "$it: " }.orEmpty() +
+            message
 
+    private fun addStaticText(builder: StringBuilder, text: String?) =
+        text?.let(builder::appendLine)
+
+    private fun MatchResult.groupValue(groupId: String) = this.groups[groupId]?.value
 }

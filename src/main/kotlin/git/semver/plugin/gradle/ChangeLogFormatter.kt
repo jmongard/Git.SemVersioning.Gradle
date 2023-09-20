@@ -23,21 +23,11 @@ class ChangeLogFormatter(private val settings: SemverSettings, private val forma
             addStaticText(builder, format.groupStart)
             builder.appendLine().appendLine(heading)
             items.forEach { item ->
-                val changeLineSeparator = format.changeLineSeparator
-                if (changeLineSeparator != null) {
-                    builder.appendLine(
-                        item.trim().lines().joinToString(
-                            changeLineSeparator,
-                            format.changePrefix,
-                            format.changePostfix
-                        )
-                    )
-                } else {
-                    builder
-                        .append(format.changePrefix)
-                        .append(item.trim().lineSequence().first())
-                        .appendLine(format.changePostfix)
-                }
+                builder
+                    .append(format.changePrefix)
+                    .append(format.changeLineSeparator?.let { item.lineSequence().joinToString(it) }
+                        ?: item.lineSequence().first())
+                    .appendLine(format.changePostfix)
             }
             addStaticText(builder, format.groupEnd)
         }

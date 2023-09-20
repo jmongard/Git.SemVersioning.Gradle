@@ -19,8 +19,8 @@ class ChangeLogFormatterTest {
     }
 
     @Test fun format_log_with_breaking_changes() {
-        val settings = SemverSettings()
         val changeLog = createChangeLog()
+        val settings = SemverSettings()
 
         val actual = ChangeLogFormatter(settings, settings.changeLogSettings).formatLog(changeLog)
 
@@ -40,6 +40,24 @@ class ChangeLogFormatterTest {
             .contains("- 0110000 An uncategorized change")
             .doesNotContain("1.2.3")
             .doesNotContain("more text")
+        println(actual)
+    }
+
+    @Test fun format_log_with_multiline_and_no_sha() {
+        val changeLog = createChangeLog()
+        val settings = SemverSettings()
+        settings.changeLogSettings.changeShaLength = 0
+        settings.changeLogSettings.changeLineSeparator = "\n  "
+
+        val actual = ChangeLogFormatter(settings, settings.changeLogSettings).formatLog(changeLog)
+
+        assertThat(actual)
+            .startsWith("## What's Changed")
+            .containsOnlyOnce("Bugfix 1")
+            .contains("### Breaking Changes")
+            .contains("- fix(#5)!: A breaking change")
+            .doesNotContain("1.2.3")
+            .contains("  more text")
         println(actual)
     }
 

@@ -80,6 +80,20 @@ class SemVersionTest {
     @Test
     fun testInfoVersionSha() {
         val actualVersion = SemVersion.tryParse(Tag("1.0.0", SHA))
-        assertEquals("1.0.0+sha.8727a3e", actualVersion.toString())
+        assertThat(actualVersion).hasToString("1.0.0+sha.8727a3e")
+    }
+
+    @ParameterizedTest
+    @CsvSource(value = [
+        "1.2.3-SNAPSHOT, false, 1.2.3-SNAPSHOT",
+        "1.2.3-SNAPSHOT, true, 1.2.3-SNAPSHOT",
+        "1.0.0-Alpha.1, false, 1.0.0-Alpha1",
+        "1.0.0-Alpha.1, true, 1.0.0-Alpha.1",
+        "1.2.3, false, 1.2.3",
+        "1.2.3, true, 1.2.3"
+    ])
+    fun toInfoVersionString(version: String, v2: Boolean, expected: String) {
+        val actualVersion = SemVersion.tryParse(Tag(version, SHA))
+        assertThat(actualVersion?.toInfoVersionString(v2 = v2)).isEqualTo(expected)
     }
 }

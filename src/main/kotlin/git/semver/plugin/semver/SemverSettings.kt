@@ -26,8 +26,7 @@ open class SemverSettings {
             "perf" to "### Performance Enhancements",
             "refactor" to "### Refactorings",
             "release" to ""),
-        "- "
-    )
+        "- ")
 
     var releaseCommitTextFormat = "release: v%s\n\n%s"
     var releaseTagNameFormat = "%s"

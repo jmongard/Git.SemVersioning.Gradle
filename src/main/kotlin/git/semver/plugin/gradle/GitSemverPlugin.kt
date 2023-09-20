@@ -15,42 +15,10 @@ class GitSemverPlugin: Plugin<Project> {
     override fun apply(project: Project) {
         val settings = project.extensions.create("semver", GitSemverPluginExtension::class.java, project)
 
-        project.tasks.register("printVersion") { task ->
-            task.group = VERSIONING_GROUP
-            task.description = "Prints the current project version"
-
-            task.doLast {
-                println(settings.version)
-            }
-        }
-
-        project.tasks.register("printSemVersion") { task ->
-            task.group = VERSIONING_GROUP
-            task.description = "Prints the current project semantic version"
-
-            task.doLast {
-                println(settings.semVersion)
-            }
-        }
-
-        project.tasks.register("printInfoVersion") { task ->
-            task.group = VERSIONING_GROUP
-            task.description = "Prints the current project info version"
-
-            task.doLast {
-                println(settings.infoVersion)
-            }
-        }
-
-        project.tasks.register("printChangeLog") { task ->
-            task.group = VERSIONING_GROUP
-            task.description = "Prints a change log"
-
-            task.doLast {
-                println(settings.changeLog)
-            }
-        }
-
+        project.tasks.register("printVersion", PrintTask::class.java, settings::version, "Prints the current project version")
+        project.tasks.register("printSemVersion", PrintTask::class.java, settings::semVersion, "Prints the current project semantic version")
+        project.tasks.register("printInfoVersion", PrintTask::class.java, settings::infoVersion, "Prints the current project info version")
+        project.tasks.register("printChangeLog", PrintTask::class.java, settings::changeLog, "Prints a change log")
         project.tasks.register("releaseVersion", ReleaseTask::class.java, settings)
     }
 

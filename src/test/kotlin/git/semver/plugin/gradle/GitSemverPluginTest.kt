@@ -6,30 +6,37 @@ package git.semver.plugin.gradle
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatCode
 import org.gradle.testfixtures.ProjectBuilder
+import org.junit.jupiter.api.io.TempDir
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
+import java.nio.file.Path
 import kotlin.test.Test
 
 /**
  * A simple unit test for the 'git.semver.plugin.gradle.greeting' plugin.
  */
 class GitSemverPluginTest {
+    @TempDir
+    lateinit var tempDir: Path
+
     @ParameterizedTest
     @ValueSource(strings = ["printVersion", "printSemVersion", "printInfoVersion", "printChangeLog"])
     fun `plugin register print tasks`(name: String) {
-        // Create a test project and apply the plugin
+        val outFile = tempDir.resolve("print.txt")
         val project = ProjectBuilder.builder().build()
         project.plugins.apply("com.github.jmongard.git-semver-plugin")
 
-        val task = project.tasks.findByName(name)
+        val task = project.tasks.findByName(name) as PrintTask
 
-        // Verify the result
         assertThat(task).isNotNull()
+        assertThatCode { task.print() }.doesNotThrowAnyException()
+        task.setFile(outFile.toString())
+        task.print();
+        assertThat(outFile).exists().isNotEmptyFile();
     }
 
     @Test
     fun `plugin register release tasks`() {
-        // Create a test project and apply the plugin
         val project = ProjectBuilder.builder().build()
         project.plugins.apply("com.github.jmongard.git-semver-plugin")
 
@@ -38,8 +45,10 @@ class GitSemverPluginTest {
         assertThat(task).isNotNull()
         assertThatCode {
             task.setNoCommit(true)
+            task.setNoCommit(false)
             task.setCommit(true)
             task.setNoTag(true)
+            task.setNoTag(false)
             task.setTag(true)
             task.setNoDirty(true)
             task.setPreRelease("alpha1")

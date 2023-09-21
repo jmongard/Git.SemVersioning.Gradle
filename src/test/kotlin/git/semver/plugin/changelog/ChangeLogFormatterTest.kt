@@ -20,7 +20,10 @@ class ChangeLogFormatterTest {
         val changeLog = createChangeLog()
         val settings = SemverSettings()
 
-        val actual = ChangeLogFormatter(settings, ChangeLogSettings.defaultChangeLog).formatLog(changeLog)
+        val actual = ChangeLogFormatter(
+            settings,
+            ChangeLogSettings.defaultChangeLog.copy(changeShaLength = 7)
+        ).formatLog(changeLog)
 
         assertThat(actual)
             .startsWith("## What's Changed")

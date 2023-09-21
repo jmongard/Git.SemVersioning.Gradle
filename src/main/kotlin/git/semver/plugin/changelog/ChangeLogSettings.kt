@@ -1,6 +1,6 @@
 package git.semver.plugin.changelog
 
-class ChangeLogSettings(
+data class ChangeLogSettings(
     var header: String? = null,
     var breakingChangeHeader: String? = null,
     var otherChangeHeader: String? = null,
@@ -9,7 +9,7 @@ class ChangeLogSettings(
     var changePrefix: String = "",
     var changePostfix: String = "",
     var changeLineSeparator: String? = null,
-    var changeShaLength: Int = 7,
+    var changeShaLength: Int = 40,
     var groupStart: String? = null,
     var groupEnd: String? = null,
     var footer: String? = null

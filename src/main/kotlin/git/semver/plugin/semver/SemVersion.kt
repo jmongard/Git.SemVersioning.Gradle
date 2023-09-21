@@ -289,6 +289,6 @@ class SemVersion(
         val isPreRelease
             get() = prefix.isNotEmpty() || number != null
 
-        override fun toString() = prefix + (number ?: "");
+        override fun toString() = prefix + (number ?: "")
     }
 }

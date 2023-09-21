@@ -22,7 +22,7 @@ open class PrintTask @Inject constructor(private val prop: () -> Any, desc: Stri
 
     @TaskAction
     fun print() {
-        val fileName = this.file;
+        val fileName = this.file
         if (fileName != null) {
             File(fileName).writeText(prop().toString(), StandardCharsets.UTF_8)
         }

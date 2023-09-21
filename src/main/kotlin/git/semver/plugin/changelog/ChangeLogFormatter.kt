@@ -1,7 +1,6 @@
-package git.semver.plugin.gradle
+package git.semver.plugin.changelog
 
 import git.semver.plugin.scm.Commit
-import git.semver.plugin.semver.ChangeLogSettings
 import git.semver.plugin.semver.SemverSettings
 import java.util.TreeMap
 
@@ -10,6 +9,8 @@ private const val TYPE = "Type"
 private const val MESSAGE = "Message"
 
 class ChangeLogFormatter(private val settings: SemverSettings, private val format: ChangeLogSettings) {
+
+    private val changeLogRegex = format.changeLogPattern.toRegex(setOf(RegexOption.IGNORE_CASE, RegexOption.MULTILINE))
 
     internal fun formatLog(changeLog: List<Commit>): String {
 
@@ -47,12 +48,12 @@ class ChangeLogFormatter(private val settings: SemverSettings, private val forma
         }
 
         val text = commit.key
-        if (settings.majorRegex.containsMatchIn(text)) {
+        if (format.breakingChangeHeader != null && settings.majorRegex.containsMatchIn(text)) {
             addChangeLogText(format.breakingChangeHeader, text)
             return
         }
 
-        val match = settings.changeLogRegex.find(text)
+        val match = changeLogRegex.find(text)
         if (match == null) {
             addChangeLogText(format.missingTypeHeader, text)
             return

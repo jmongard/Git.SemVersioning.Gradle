@@ -10,7 +10,7 @@ private const val MESSAGE = "Message"
 
 class ChangeLogFormatter(private val settings: SemverSettings, private val format: ChangeLogSettings) {
 
-    private val changeLogRegex = format.changeLogPattern.toRegex(setOf(RegexOption.IGNORE_CASE, RegexOption.MULTILINE))
+    private val changeLogRegex = format.changeLogPattern.toRegex(SemverSettings.REGEX_OPTIONS)
 
     internal fun formatLog(changeLog: List<Commit>): String {
 

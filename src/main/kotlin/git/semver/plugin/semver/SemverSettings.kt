@@ -22,9 +22,9 @@ open class SemverSettings {
             "deps" to "### Dependency updates \uD83D\uDE80",
             "build" to "### Build \uD83D\uDC18 & CI ⚙\uFE0F",
             "ci" to "### Build \uD83D\uDC18 & CI ⚙\uFE0F",
-            "chore" to "### Chores",
-            "perf" to "### Performance Enhancements",
-            "refactor" to "### Refactorings",
+            "chore" to "### Chores \uD83D\uDD27",
+            "perf" to "### Performance Enhancements ⚡",
+            "refactor" to "### Refactorings \uD83D\uDE9C",
             "release" to ""),
         "- ")
 

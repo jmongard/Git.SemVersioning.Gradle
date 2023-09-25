@@ -79,14 +79,17 @@ There is several options for getting the version:
 ### Custom version format
 
 There is also the possibility to customize the version string returned using:
-`semver.semVersion.toInfoVersionString(commitCountStringFormat: String, shaLength: Int, version2: Boolean)`
+`semver.semVersion.toInfoVersionString(commitCountStringFormat: String = "%03d", shaLength: Int = 0, version2: Boolean = true, appendPreReleaseLast: Boolean = false)`
 
 If Version2 flag is set to false, then semVer version one will be used stripping any non alpha-numeric characters from
 the pre-release string and removing the metadata part.
 
-* semver.version == semver.semVersion.toInfoVersionString("", 0, true)
-* semver.infoVersion == semver.semVersion.toInfoVersionString("%03d", 0, true)
-* semver.semVersion.toString() == semver.semVersion.toInfoVersionString("%03d", 7, true)
+The `appendPreReleaseLast` option can help when publishing to maven repositories if metadata is included but the version 
+string will not be semver compliant. 
+
+* semver.version == semver.semVersion.toInfoVersionString("", 0, true, false)
+* semver.infoVersion == semver.semVersion.toInfoVersionString("%03d", 0, true, false)
+* semver.semVersion.toString() == semver.semVersion.toInfoVersionString("%03d", 7, true, false)
 
 
 ## Tasks

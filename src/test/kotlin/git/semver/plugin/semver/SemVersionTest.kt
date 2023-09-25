@@ -96,4 +96,11 @@ class SemVersionTest {
         val actualVersion = SemVersion.tryParse(Tag(version, SHA))
         assertThat(actualVersion?.toInfoVersionString(v2 = v2)).isEqualTo(expected)
     }
+
+    @Test
+    fun toInfoVersionString_preReleaseLast() {
+        val version = SemVersion.tryParse(Tag("1.2.3-SNAPSHOT", SHA))
+        assertThat(version?.toInfoVersionString(shaLength = 7, appendPreReleaseLast = true))
+            .isEqualTo("1.2.3+sha.8727a3e-SNAPSHOT")
+    }
 }

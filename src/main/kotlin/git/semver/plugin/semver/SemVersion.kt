@@ -240,10 +240,10 @@ class SemVersion(
         return toInfoVersionString("", 0, v2)
     }
 
-    fun toInfoVersionString(commitCountStringFormat: String = "%03d", shaLength: Int = 0, v2: Boolean = true): String {
+    fun toInfoVersionString(commitCountStringFormat: String = "%03d", shaLength: Int = 0, v2: Boolean = true, appendPreReleaseLast: Boolean = false): String {
         val builder = StringBuilder().append(major).append('.').append(minor).append('.').append(patch)
         if (v2) {
-            if (isPreRelease) {
+            if (isPreRelease && !appendPreReleaseLast) {
                 builder.append('-').append(preRelease)
             }
             var metaSeparator = '+'
@@ -254,6 +254,9 @@ class SemVersion(
             val shaTake = sha.take(shaLength)
             if (shaTake.isNotEmpty()) {
                 builder.append(metaSeparator).append("sha.").append(shaTake)
+            }
+            if (isPreRelease && appendPreReleaseLast) {
+                builder.append('-').append(preRelease)
             }
         }
         else if (isPreRelease) {

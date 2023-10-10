@@ -9,7 +9,7 @@ open class ChangeLogBuilder(
 ) : DocumentBuilder() {
 
     fun formatChanges(block: ChangeLogTextFormatter.() -> Unit) {
-        for (commitInfo in commitInfos()) {
+        for (commitInfo in remainingCommitInfos()) {
             val formatter = ChangeLogTextFormatter(commitInfo)
             formatter.block()
             append(formatter.build())
@@ -18,7 +18,7 @@ open class ChangeLogBuilder(
     }
 
     fun skip() {
-        for (commitInfo in commitInfos()) {
+        for (commitInfo in remainingCommitInfos()) {
             context.flagCommit(commitInfo)
         }
     }
@@ -52,7 +52,7 @@ open class ChangeLogBuilder(
         key: String?,
         block: ChangeLogBuilder.() -> Unit
     ) {
-        val filteredCommits = commitInfos().filter(filter)
+        val filteredCommits = remainingCommitInfos().filter(filter)
         if (filteredCommits.isNotEmpty()) {
             val builder = ChangeLogBuilder(key, filteredCommits, context)
             builder.block()
@@ -71,7 +71,7 @@ open class ChangeLogBuilder(
     }
 
     fun groupBy(keySelector: (ChangeLogFormat.CommitInfo) -> String?, block: ChangeLogBuilder.() -> Unit) {
-        processGroups(commitInfos().mapNotNull { keyMapper(keySelector, it) }
+        processGroups(remainingCommitInfos().mapNotNull { keyMapper(keySelector, it) }
             .groupBy({ it.first }, { it.second }), block)
     }
 
@@ -79,7 +79,7 @@ open class ChangeLogBuilder(
         keySelector: (ChangeLogFormat.CommitInfo) -> String?,
         block: ChangeLogBuilder.() -> Unit
     ) {
-        processGroups(commitInfos().mapNotNull { keyMapper(keySelector, it) }
+        processGroups(remainingCommitInfos().mapNotNull { keyMapper(keySelector, it) }
             .groupByTo(TreeMap(), { it.first }, { it.second }), block)
     }
 
@@ -102,7 +102,7 @@ open class ChangeLogBuilder(
     }
     //</editor-fold>
 
-    fun commitInfos() = commitInfos.filter { !context.isCommitFlagged(it) }
+    fun remainingCommitInfos() = commitInfos.filter { !context.isCommitFlagged(it) }
 }
 
 class ChangeLogTextFormatter(
@@ -124,4 +124,22 @@ class ChangeLogTextFormatter(
         commitInfo().commits.joinToString(" ", "", " ") { format.format(it.sha.take(len)) }
 
     fun commitInfo() = commitInfo
+}
+
+open class DocumentBuilder {
+    private val out = StringBuilder()
+
+    fun build(): String {
+        return out.toString()
+    }
+
+    fun append(t: String?): DocumentBuilder {
+        out.append(t)
+        return this
+    }
+
+    fun appendLine(t: String? = ""): DocumentBuilder {
+        out.appendLine(t)
+        return this
+    }
 }

@@ -12,7 +12,7 @@ open class ChangeLogBuilder(
         for (commitInfo in commitInfos()) {
             val formatter = ChangeLogTextFormatter(commitInfo)
             formatter.block()
-            appendLine(formatter.build())
+            append(formatter.build())
             context.flagCommit(commitInfo)
         }
     }

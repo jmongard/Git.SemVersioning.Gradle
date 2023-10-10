@@ -27,7 +27,7 @@ open class PrintTask @Inject constructor(private val prop: () -> Any, desc: Stri
             File(fileName).writeText(prop().toString(), StandardCharsets.UTF_8)
         }
         else {
-            println(prop().toString())
+            println(prop())
         }
     }
 }

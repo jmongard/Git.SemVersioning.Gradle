@@ -105,27 +105,42 @@ class GitSemverPluginFunctionalTest {
         projectDir.mkdirs()
         projectDir.resolve(".gitignore").writeText(".gradle")
         projectDir.resolve("settings.gradle").writeText("include ':sub1'")
-        projectDir.resolve("build.gradle").writeText(
+        projectDir.resolve("build.gradle.kts").writeText(
             """
+                import git.semver.plugin.changelog.ChangeLogFormat
+                
                 plugins {
-                  id('com.github.jmongard.git-semver-plugin')
+                  id("com.github.jmongard.git-semver-plugin")
                 }
                 
                 semver {
                   groupVersionIncrements = false
                   createReleaseTag = true
                   createReleaseCommit = true
+//                  changeLogFormat = ChangeLogFormat.scopeChangeLog
+                  changeLogFormat {
+                        appendLine("# Test changelog").appendLine()
+                        withType("test") {
+                            appendLine("## Test")
+                            formatChanges {
+                                appendLine("- ${'$'}{scope()}${'$'}{header()}")
+                            }
+                            appendLine()
+                        }
+                    }
                 }
                 
-                def v = semver.version
+                val v = semver.version
                 allprojects {
                   version = v
                 }
                 
-                task testTask(dependsOn:printVersion) {
-                  doLast {
-                     println "ProjVer: " + project.version 
-                  }
+                tasks.register("testTask") {
+                    dependsOn("printVersion")
+                
+                    doLast {
+                        println("ProjVer: ${'$'}{project.version}")
+                    }
                 }
             """.trimIndent()
         )

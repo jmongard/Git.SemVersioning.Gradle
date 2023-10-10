@@ -139,7 +139,7 @@ internal class GitProvider(private val settings: SemverSettings) {
                 revWalk.parseHeaders(parent)
                 yield(getCommit(parent, revWalk))
             }
-        })
+        }, commit.authorIdent.name, commit.authorIdent.emailAddress, commit.authorIdent.`when`)
     }
 
     internal fun checkDirty(noDirtyCheck: Boolean, isClean: Boolean) {

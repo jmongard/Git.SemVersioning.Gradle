@@ -1,7 +1,7 @@
 package git.semver.plugin.gradle
 
-import git.semver.plugin.changelog.ChangeLogFormatter
-import git.semver.plugin.changelog.ChangeLogSettings
+import git.semver.plugin.changelog.ChangeLogBuilder
+import git.semver.plugin.changelog.ChangeLogFormat
 import git.semver.plugin.scm.GitProvider
 import git.semver.plugin.semver.SemverSettings
 import org.gradle.api.Project
@@ -16,10 +16,13 @@ open class GitSemverPluginExtension(project: Project) : SemverSettings() {
     val version by lazy { semVersion.toVersionString() }
     val infoVersion by lazy { semVersion.toInfoVersionString() }
 
-    var changeLogSettings = ChangeLogSettings.defaultChangeLog
+    var changeLogFormat = ChangeLogFormat.defaultChangeLog
+    fun changeLogFormat(builder: ChangeLogBuilder.() -> Unit) {
+        changeLogFormat = ChangeLogFormat(builder = builder)
+    }
     val changeLogList by lazy { GitProvider(this).getChangeLog(gitDirectory) }
     val changeLog
-        get() = ChangeLogFormatter(this, changeLogSettings).formatLog(changeLogList)
+        get() = changeLogFormat.formatLog(changeLogList, this)
 
     init {
         val defaultPreReleaseProperty = project.findProperty("defaultPreRelease")

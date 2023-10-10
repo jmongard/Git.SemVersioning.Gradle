@@ -15,7 +15,8 @@ class SemVersion(
     private var bumpMajor: Int = 0,
     private var bumpPre: Int = 0,
     private val lastReleaseMajor: Int = major,
-    private val lastReleaseMinor: Int = minor
+    private val lastReleaseMinor: Int = minor,
+    private val lastReleasePatch: Int = patch
 ) : Comparable<SemVersion> {
 
     companion object {
@@ -269,6 +270,10 @@ class SemVersion(
 
     override fun toString(): String {
         return toInfoVersionString(shaLength = 7)
+    }
+
+    fun revisionString(): String {
+        return "$lastReleaseMajor.$lastReleaseMinor.$lastReleasePatch.$commitCount"
     }
 
     class PreRelease(val prefix: String, val number: Int?) {

@@ -1,5 +1,6 @@
 package git.semver.plugin.semver
 
+import git.semver.plugin.scm.Commit
 import git.semver.plugin.scm.Tag
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.params.ParameterizedTest
@@ -81,6 +82,23 @@ class SemVersionTest {
     fun testInfoVersionSha() {
         val actualVersion = SemVersion.tryParse(Tag("1.0.0", SHA))
         assertThat(actualVersion).hasToString("1.0.0+sha.8727a3e")
+    }
+
+    @Test
+    fun revisionString() {
+        val settings = SemverSettings()
+        val semver = SemVersion.tryParse(Tag("1.2.3", SHA))!!
+        val commit = Commit("fix: a fix", SHA, emptySequence())
+        semver.updateFromCommit(commit,  settings, null)
+        semver.updateFromCommit(commit,  settings, null)
+        semver.updateFromCommit(commit,  settings, null)
+        semver.updateFromCommit(commit,  settings, null)
+        semver.applyPendingChanges(false, true)
+
+        val actual = semver.revisionString()
+
+        assertThat(actual).isEqualTo("1.2.3.4");
+        assertThat(semver).hasToString("1.2.4+004.sha.8727a3e");
     }
 
     @ParameterizedTest

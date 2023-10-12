@@ -117,18 +117,21 @@ class GitSemverPluginFunctionalTest {
                   groupVersionIncrements = false
                   createReleaseTag = true
                   createReleaseCommit = true
-//                  ChangeLogFormat.defaultHeaderTexts[ChangeLogFormat.HEADER]="My Changelog Header"
-//                  changeLogFormat = ChangeLogFormat.scopeChangeLog
-                    changeLogFormat {
-                        appendLine("# Test changelog").appendLine()
-                        withType("test") {
-                            appendLine("## Test")
-                            formatChanges {
-                                appendLine("- ${'$'}{scope()}${'$'}{header()}")
-                            }
-                            appendLine()
-                        }
+                  changeLogTexts {
+                    header = "# Test changelog"
+                  }
+                  // changeLogFormat = ChangeLogFormat.scopeChangeLog
+                  changeLogFormat {
+                    appendLine(constants.header).appendLine()
+                    withType("test") {
+                    appendLine("## Test")
+                    formatChanges {
+                        appendLine("- ${'$'}{scope()}${'$'}{header()}")
                     }
+                    appendLine()
+                    }
+                  }
+
                 }
                 
                 val v = semver.version

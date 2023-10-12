@@ -10,7 +10,7 @@ class ChangeLogFormatTest {
     fun format_log_empty() {
         val settings = SemverSettings()
 
-        val actual = ChangeLogFormat.defaultChangeLog.formatLog(listOf(), settings)
+        val actual = ChangeLogFormat.defaultChangeLog.formatLog(listOf(), settings, ChangeLogTexts())
 
         assertThat(actual).startsWith("## What's Changed")
     }
@@ -20,7 +20,7 @@ class ChangeLogFormatTest {
         val changeLog = createChangeLog()
         val settings = SemverSettings()
 
-        val actual = ChangeLogFormat.defaultChangeLog.formatLog(changeLog, settings)
+        val actual = ChangeLogFormat.defaultChangeLog.formatLog(changeLog, settings, ChangeLogTexts())
 
         assertThat(actual)
             .startsWith("## What's Changed")
@@ -46,7 +46,7 @@ class ChangeLogFormatTest {
         val changeLog = createChangeLog()
         val settings = SemverSettings()
 
-        val actual = ChangeLogFormat.scopeChangeLog.formatLog(changeLog, settings)
+        val actual = ChangeLogFormat.scopeChangeLog.formatLog(changeLog, settings, ChangeLogTexts())
 
         assertThat(actual)
             .startsWith("## What's Changed")
@@ -73,7 +73,7 @@ class ChangeLogFormatTest {
         val changeLog = createChangeLog()
         val settings = SemverSettings()
 
-        val actual = ChangeLogFormat.simpleChangeLog.formatLog(changeLog, settings)
+        val actual = ChangeLogFormat.simpleChangeLog.formatLog(changeLog, settings, ChangeLogTexts())
 
         assertThat(actual)
             .containsOnlyOnce("Bugfix 1")
@@ -96,7 +96,7 @@ class ChangeLogFormatTest {
         val settings = SemverSettings()
         val changeLog = createChangeLog()
 
-        val actual = ChangeLogFormat {}.formatLog (changeLog, settings)
+        val actual = ChangeLogFormat {}.formatLog (changeLog, settings, ChangeLogTexts())
 
         assertThat(actual).isEmpty()
     }

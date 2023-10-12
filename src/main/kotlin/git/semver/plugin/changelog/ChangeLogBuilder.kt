@@ -5,7 +5,8 @@ import java.util.*
 open class ChangeLogBuilder(
     val groupKey: String? = null,
     private val commitInfos: List<ChangeLogFormat.CommitInfo>,
-    private val context: ChangeLogFormat.Context
+    private val context: ChangeLogFormat.Context,
+    val constants: ChangeLogTexts
 ) : DocumentBuilder() {
 
     fun formatChanges(block: ChangeLogTextFormatter.() -> Unit) {
@@ -25,7 +26,7 @@ open class ChangeLogBuilder(
 
     //<editor-fold desc="filter">
     fun withBreakingChanges(block: ChangeLogBuilder.() -> Unit) {
-        with({ it.isBreaking }, "!", block)
+        with({ it.isBreaking }, ChangeLogTexts.BREAKING_CHANGE, block)
     }
 
     fun withScope(vararg scopes: String, block: ChangeLogBuilder.() -> Unit) {
@@ -54,7 +55,7 @@ open class ChangeLogBuilder(
     ) {
         val filteredCommits = remainingCommitInfos().filter(filter)
         if (filteredCommits.isNotEmpty()) {
-            val builder = ChangeLogBuilder(key, filteredCommits, context)
+            val builder = ChangeLogBuilder(key, filteredCommits, context, constants)
             builder.block()
             append(builder.build())
         }
@@ -95,7 +96,7 @@ open class ChangeLogBuilder(
         block: ChangeLogBuilder.() -> Unit
     ) {
         for ((key, scopeCommits) in groupedByScope.filterKeys { it.isNotEmpty() }) {
-            val builder = ChangeLogBuilder(key, scopeCommits, context)
+            val builder = ChangeLogBuilder(key, scopeCommits, context, constants)
             block(builder)
             append(builder.build())
         }
@@ -126,7 +127,7 @@ class ChangeLogTextFormatter(
     fun commitInfo() = commitInfo
 }
 
-open class DocumentBuilder {
+open class DocumentBuilder() {
     private val out = StringBuilder()
 
     fun build(): String {

@@ -3,10 +3,6 @@ package git.semver.plugin.changelog
 import git.semver.plugin.scm.Commit
 import git.semver.plugin.semver.SemverSettings
 
-private const val SCOPE = "Scope"
-private const val TYPE = "Type"
-private const val MESSAGE = "Message"
-
 data class ChangeLogFormat(
     val groupByText: Boolean = true,
     val sortByText: Boolean = true,
@@ -15,42 +11,26 @@ data class ChangeLogFormat(
     var changeLogPattern = "\\A(?<Type>\\w+)(?:\\((?<Scope>[^()]+)\\))?!?:\\s*(?<Message>(?:.|\n)*)"
 
     companion object {
-        const val HEADER = "#"
-        const val BREAKING_CHANGE = "!"
-        const val OTHER_CHANGE = "?"
-
-        val defaultHeaderTexts = mutableMapOf(
-            HEADER to "## What's Changed",
-            BREAKING_CHANGE to "### Breaking Changes 🛠",
-            OTHER_CHANGE to "### Other Changes \uD83D\uDCA1",
-            "fix" to "### Bug Fixes \uD83D\uDC1E",
-            "feat" to "### New Features \uD83C\uDF89",
-            "test" to "### Tests ✅",
-            "docs" to "### Docs \uD83D\uDCD6",
-            "deps" to "### Dependency updates \uD83D\uDE80",
-            "build" to "### Build \uD83D\uDC18 & CI ⚙\uFE0F",
-            "ci" to "### Build \uD83D\uDC18 & CI ⚙\uFE0F",
-            "chore" to "### Chores \uD83D\uDD27",
-            "perf" to "### Performance Enhancements ⚡",
-            "refactor" to "### Refactorings \uD83D\uDE9C"
-        )
+        private const val SCOPE = "Scope"
+        private const val TYPE = "Type"
+        private const val MESSAGE = "Message"
 
         val defaultChangeLog = ChangeLogFormat {
-            appendLine(defaultHeaderTexts[HEADER]).appendLine()
+            appendLine(constants.header).appendLine()
 
             withType("release") {
                 skip()
             }
             withBreakingChanges {
-                appendLine(defaultHeaderTexts[BREAKING_CHANGE])
+                appendLine(constants.breakingChange)
                 formatChanges {
                     append("- ").append(hash()).appendLine(fullHeader())
                 }
                 appendLine()
             }
-            groupBySorted({ defaultHeaderTexts[it.scope] ?: defaultHeaderTexts[it.type] }) {
+            groupBySorted({ constants.headerTexts[it.scope] ?: constants.headerTexts[it.type] }) {
                 appendLine(groupKey)
-                with({ defaultHeaderTexts.containsKey(it.scope) }) {
+                with({ constants.headerTexts.containsKey(it.scope) }) {
                     formatChanges {
                         append("- ").append(hash()).append(type()).appendLine(header())
                     }
@@ -61,7 +41,7 @@ data class ChangeLogFormat(
                 appendLine()
             }
             otherwise {
-                appendLine(defaultHeaderTexts[OTHER_CHANGE])
+                appendLine(constants.otherChange)
                 formatChanges {
                     append("- ").append(hash()).appendLine(fullHeader())
                 }
@@ -70,17 +50,17 @@ data class ChangeLogFormat(
         }
 
         val simpleChangeLog = ChangeLogFormat {
-            appendLine(defaultHeaderTexts[HEADER]).appendLine()
+            appendLine(constants.header).appendLine()
 
             withBreakingChanges {
-                appendLine(defaultHeaderTexts[BREAKING_CHANGE])
+                appendLine(constants.breakingChange)
                 formatChanges {
                     append("- ").appendLine(fullHeader())
                 }
                 appendLine()
             }
             withType("fix", "feat") {
-                appendLine(defaultHeaderTexts[groupKey])
+                appendLine(constants.headerTexts[groupKey])
                 formatChanges {
                     append("- ").append(scope()).appendLine(header())
                 }
@@ -89,15 +69,15 @@ data class ChangeLogFormat(
         }
 
         val scopeChangeLog = ChangeLogFormat {
-            appendLine(defaultHeaderTexts[HEADER]).appendLine()
+            appendLine(constants.header).appendLine()
 
             withType("release") {
                 skip()
             }
 
-            withBreakingChanges(formatGroupByScopeDisplayType(defaultHeaderTexts[BREAKING_CHANGE]))
+            withBreakingChanges(formatGroupByScopeDisplayType(constants.breakingChange))
 
-            groupBySorted({ defaultHeaderTexts[it.type] }, {
+            groupBySorted({ constants.headerTexts[it.type] }, {
                 appendLine(groupKey).appendLine()
                 groupByScope {
                     append("#### ").appendLine(groupKey)
@@ -116,7 +96,7 @@ data class ChangeLogFormat(
                 appendLine()
             })
 
-            otherwise (formatGroupByScopeDisplayType(defaultHeaderTexts[OTHER_CHANGE]))
+            otherwise (formatGroupByScopeDisplayType(constants.otherChange))
         }
 
         private fun formatGroupByScopeDisplayType(header: String?): ChangeLogBuilder.() -> Unit = {
@@ -139,10 +119,10 @@ data class ChangeLogFormat(
         }
     }
 
-    fun formatLog(changeLog: List<Commit>, settings: SemverSettings): String {
+    fun formatLog(changeLog: List<Commit>, settings: SemverSettings, changeLogTexts: ChangeLogTexts): String {
         val context = Context()
         val commitInfos = getCommitInfos(changeLog, settings)
-        val changeLogBuilder = ChangeLogBuilder(HEADER, commitInfos, context)
+        val changeLogBuilder = ChangeLogBuilder(ChangeLogTexts.HEADER, commitInfos, context, changeLogTexts)
         changeLogBuilder.builder()
         return changeLogBuilder.build()
     }

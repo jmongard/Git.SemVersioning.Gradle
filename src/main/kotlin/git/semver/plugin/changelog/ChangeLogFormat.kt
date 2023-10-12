@@ -7,10 +7,6 @@ private const val SCOPE = "Scope"
 private const val TYPE = "Type"
 private const val MESSAGE = "Message"
 
-const val HEADER = "#"
-const val BREAKING_CHANGE = "!"
-const val OTHER_CHANGE = "?"
-
 data class ChangeLogFormat(
     val groupByText: Boolean = true,
     val sortByText: Boolean = true,
@@ -19,6 +15,10 @@ data class ChangeLogFormat(
     var changeLogPattern = "\\A(?<Type>\\w+)(?:\\((?<Scope>[^()]+)\\))?!?:\\s*(?<Message>(?:.|\n)*)"
 
     companion object {
+        const val HEADER = "#"
+        const val BREAKING_CHANGE = "!"
+        const val OTHER_CHANGE = "?"
+
         val defaultHeaderTexts = mutableMapOf(
             HEADER to "## What's Changed",
             BREAKING_CHANGE to "### Breaking Changes 🛠",

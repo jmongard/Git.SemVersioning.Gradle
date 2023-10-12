@@ -117,8 +117,9 @@ class GitSemverPluginFunctionalTest {
                   groupVersionIncrements = false
                   createReleaseTag = true
                   createReleaseCommit = true
+//                  ChangeLogFormat.defaultHeaderTexts[ChangeLogFormat.HEADER]="My Changelog Header"
 //                  changeLogFormat = ChangeLogFormat.scopeChangeLog
-                  changeLogFormat {
+                    changeLogFormat {
                         appendLine("# Test changelog").appendLine()
                         withType("test") {
                             appendLine("## Test")

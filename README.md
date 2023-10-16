@@ -144,7 +144,7 @@ $ gradlew printChangeLog
   - #1: A bug fix
   - #2: Another bug fix
 ````
-[Configuring the changelog.](ChangeLog.md)
+[Configuring the changelog.](/ChangeLog.md)
 
 ## `releaseVersion`
 The `releaseVersion` task will by default create both a release commit, and a release tag. The releaseVersion task will 

@@ -58,7 +58,7 @@ semver {
 
 ### Predefined templates
 
-There is three predefined templates for the change log:
+There are three predefined templates for the change log:
 
 - defaultChangeLog
 - simpleChangeLog
@@ -77,12 +77,12 @@ semver {
 
 ### Custom template
 
-A custom changelog template can be configured. 
-This is an example for printing test changes. 
+A custom changelog template can be configured instead of using a predefined one. 
+This is an example for printing only test changes. 
 ```kotlin
 semver {
     changeLogFormat {
-        appendLine(constants.header).appendLine()
+        appendLine("## My changed tests").appendLine()
         withType("test") {
             appendLine("### Test")
             formatChanges {

@@ -78,13 +78,13 @@ semver {
 ### Custom template
 
 A custom changelog template can be configured. 
-
+This is an example for printing test changes. 
 ```kotlin
 semver {
     changeLogFormat {
         appendLine(constants.header).appendLine()
         withType("test") {
-            appendLine("## Test")
+            appendLine("### Test")
             formatChanges {
                 appendLine("- ${scope()}${header()}")
             }
@@ -95,3 +95,5 @@ semver {
 ```
 
 #### Default template
+
+[Se default template implementations for more examples](/src/main/kotlin/git/semver/plugin/changelog/ChangeLogFormat.kt)

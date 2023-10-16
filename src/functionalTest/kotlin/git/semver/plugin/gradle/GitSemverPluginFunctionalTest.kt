@@ -107,8 +107,7 @@ class GitSemverPluginFunctionalTest {
         projectDir.resolve("settings.gradle").writeText("include ':sub1'")
         projectDir.resolve("build.gradle.kts").writeText(
             """
-                import git.semver.plugin.changelog.ChangeLogFormat
-                
+      
                 plugins {
                   id("com.github.jmongard.git-semver-plugin")
                 }
@@ -120,7 +119,9 @@ class GitSemverPluginFunctionalTest {
                   changeLogTexts {
                     header = "# Test changelog"
                   }
-                  // changeLogFormat = ChangeLogFormat.scopeChangeLog
+//                  changeLogFormat = git.semver.plugin.changelog.ChangeLogFormat.defaultChangeLog
+//                  changeLogFormat = git.semver.plugin.changelog.ChangeLogFormat.simpleChangeLog
+//                  changeLogFormat = git.semver.plugin.changelog.ChangeLogFormat.scopeChangeLog
                   changeLogFormat {
                     appendLine(constants.header).appendLine()
                     withType("test") {

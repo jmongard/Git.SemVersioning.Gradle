@@ -4,8 +4,8 @@ import java.util.*
 
 open class ChangeLogBuilder(
     val groupKey: String? = null,
-    private val commitInfos: List<ChangeLogFormat.CommitInfo>,
-    private val context: ChangeLogFormat.Context,
+    private val commitInfos: List<ChangeLogFormatter.CommitInfo>,
+    private val context: ChangeLogFormatter.Context,
     val constants: ChangeLogTexts
 ) : DocumentBuilder() {
 
@@ -19,7 +19,11 @@ open class ChangeLogBuilder(
     }
 
     fun skip() {
-        for (commitInfo in remainingCommitInfos()) {
+        skip(remainingCommitInfos())
+    }
+
+    private fun skip(commitInfoList: List<ChangeLogFormatter.CommitInfo>) {
+        for (commitInfo in commitInfoList) {
             context.flagCommit(commitInfo)
         }
     }
@@ -45,11 +49,11 @@ open class ChangeLogBuilder(
         with({ true }, block)
     }
 
-    fun with(filter: (ChangeLogFormat.CommitInfo) -> Boolean, block: ChangeLogBuilder.() -> Unit) =
+    fun with(filter: (ChangeLogFormatter.CommitInfo) -> Boolean, block: ChangeLogBuilder.() -> Unit) =
         with(filter, null, block)
 
     fun with(
-        filter: (ChangeLogFormat.CommitInfo) -> Boolean,
+        filter: (ChangeLogFormatter.CommitInfo) -> Boolean,
         key: String?,
         block: ChangeLogBuilder.() -> Unit
     ) {
@@ -71,34 +75,41 @@ open class ChangeLogBuilder(
         groupBySorted({ it.type }, block)
     }
 
-    fun groupBy(keySelector: (ChangeLogFormat.CommitInfo) -> String?, block: ChangeLogBuilder.() -> Unit) {
-        processGroups(remainingCommitInfos().mapNotNull { keyMapper(keySelector, it) }
+    fun groupBy(keySelector: (ChangeLogFormatter.CommitInfo) -> String?, block: ChangeLogBuilder.() -> Unit) {
+        processGroups(remainingCommitInfos()
+            .mapNotNull { keyMapper(keySelector, it) }
             .groupBy({ it.first }, { it.second }), block)
     }
 
     fun groupBySorted(
-        keySelector: (ChangeLogFormat.CommitInfo) -> String?,
+        keySelector: (ChangeLogFormatter.CommitInfo) -> String?,
         block: ChangeLogBuilder.() -> Unit
     ) {
-        processGroups(remainingCommitInfos().mapNotNull { keyMapper(keySelector, it) }
+        processGroups(remainingCommitInfos()
+            .mapNotNull { keyMapper(keySelector, it) }
             .groupByTo(TreeMap(), { it.first }, { it.second }), block)
     }
 
     private fun keyMapper(
-        keySelector: (ChangeLogFormat.CommitInfo) -> String?,
-        it: ChangeLogFormat.CommitInfo
-    ): Pair<String, ChangeLogFormat.CommitInfo>? {
+        keySelector: (ChangeLogFormatter.CommitInfo) -> String?,
+        it: ChangeLogFormatter.CommitInfo
+    ): Pair<String, ChangeLogFormatter.CommitInfo>? {
         return (keySelector(it) ?: return null) to it
     }
 
     private fun processGroups(
-        groupedByScope: Map<String, List<ChangeLogFormat.CommitInfo>>,
+        groupedByScope: Map<String, List<ChangeLogFormatter.CommitInfo>>,
         block: ChangeLogBuilder.() -> Unit
     ) {
-        for ((key, scopeCommits) in groupedByScope.filterKeys { it.isNotEmpty() }) {
-            val builder = ChangeLogBuilder(key, scopeCommits, context, constants)
-            block(builder)
-            append(builder.build())
+        for ((key, scopeCommits) in groupedByScope) {
+            if (key.isNotEmpty()) {
+                val builder = ChangeLogBuilder(key, scopeCommits, context, constants)
+                block(builder)
+                append(builder.build())
+            }
+            else {
+                skip(scopeCommits)
+            }
         }
     }
     //</editor-fold>
@@ -107,7 +118,7 @@ open class ChangeLogBuilder(
 }
 
 class ChangeLogTextFormatter(
-    private val commitInfo: ChangeLogFormat.CommitInfo
+    private val commitInfo: ChangeLogFormatter.CommitInfo
 ) : DocumentBuilder() {
     fun header() = (commitInfo().message ?: commitInfo().text).lineSequence().first()
 

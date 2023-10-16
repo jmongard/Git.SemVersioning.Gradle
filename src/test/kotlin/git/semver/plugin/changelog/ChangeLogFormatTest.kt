@@ -96,7 +96,7 @@ class ChangeLogFormatTest {
         val settings = SemverSettings()
         val changeLog = createChangeLog()
 
-        val actual = ChangeLogFormat {}.formatLog (changeLog, settings, ChangeLogTexts())
+        val actual = ChangeLogFormatter {}.formatLog (changeLog, settings, ChangeLogTexts())
 
         assertThat(actual).isEmpty()
     }

@@ -29,6 +29,8 @@ class ChangeLogTexts {
             headerTexts[HEADER] = value
         }
 
+    var footer: String = ""
+
     var breakingChange
         get() = headerTexts[BREAKING_CHANGE].orEmpty()
         set(value) {

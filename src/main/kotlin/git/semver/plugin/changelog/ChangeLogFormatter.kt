@@ -19,18 +19,12 @@ data class ChangeLogFormatter(
         val changeLogRegex = changeLogPattern.toRegex(SemverSettings.REGEX_OPTIONS)
         val logEntries = if (sortByText) changeLog.sortedBy { it.text } else changeLog
 
-        if (!groupByText) {
-            return formatLog(changeLogTexts, logEntries.map { getCommitInfo(settings, changeLogRegex, it.text, listOf(it)) })
+        val commitInfos = if (groupByText) {
+            logEntries.groupBy { it.text }.map { getCommitInfo(settings, changeLogRegex, it.key, it.value) }
+        } else {
+            logEntries.map { getCommitInfo(settings, changeLogRegex, it.text, listOf(it)) }
         }
-        return formatLog(changeLogTexts, logEntries.groupBy { it.text }.map {
-            getCommitInfo(settings, changeLogRegex, it.key, it.value)
-        })
-    }
 
-    private fun formatLog(
-        changeLogTexts: ChangeLogTexts,
-        commitInfos: List<CommitInfo>
-    ): String {
         val changeLogBuilder = ChangeLogBuilder(ChangeLogTexts.HEADER, commitInfos, Context(), changeLogTexts)
         changeLogBuilder.builder()
         return changeLogBuilder.build()
@@ -48,7 +42,6 @@ data class ChangeLogFormatter(
                 commits,
                 text,
                 isBreakingChange,
-                true,
                 it.groupValue(TYPE),
                 it.groupValue(SCOPE),
                 it.groupValue(MESSAGE)
@@ -62,7 +55,6 @@ data class ChangeLogFormatter(
         val commits: List<Commit>,
         val text: String,
         val isBreaking: Boolean,
-        val isChangelogPatternMatch: Boolean = false,
         val type: String? = null,
         val scope: String? = null,
         val message: String? = null

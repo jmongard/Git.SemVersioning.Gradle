@@ -37,6 +37,8 @@ class ChangeLogFormat {
                 }
                 appendLine()
             }
+            
+            appendLine(constants.footer)
         }
 
         /**
@@ -59,6 +61,8 @@ class ChangeLogFormat {
                 }
                 appendLine()
             }
+
+            appendLine(constants.footer)
         }
 
         /**
@@ -74,6 +78,8 @@ class ChangeLogFormat {
             withBreakingChanges(formatGroupByScopeDisplayType(constants.breakingChange))
             groupBySorted({ constants.headerTexts[it.type] }, formatGroupBySope())
             otherwise (formatGroupByScopeDisplayType(constants.otherChange))
+
+            appendLine(constants.footer)
         }
 
         private fun formatGroupBySope(): ChangeLogBuilder.() -> Unit = {

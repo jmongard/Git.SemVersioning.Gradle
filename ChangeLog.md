@@ -15,7 +15,7 @@ semver {
             "feat" to "### New Features \uD83C\uDF89",
             "test" to "### Tests ✅",
             "docs" to "### Docs \uD83D\uDCD6",
-            "deps" to "### Dependency updates \uD83D\uDE80",
+            "deps" to "### Dependency Updates \uD83D\uDE80",
             "build" to "### Build \uD83D\uDC18 & CI ⚙\uFE0F",
             "ci" to "### Build \uD83D\uDC18 & CI ⚙\uFE0F",
             "chore" to "### Chores \uD83D\uDD27",

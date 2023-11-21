@@ -42,6 +42,8 @@ semver {
         breakingChange = "### My Custom breaking changes heder ⚠️" // Set your custom breaking change text
         // Set the other changes header e.g
         otherChange = "### My Custom other changes heder  🧩" // Set your custom other change text
+        // Set a footer text
+        footer = "The End"
 
         //Or any other header by updating the headerTexts map directly. These are used for both type and scope e.g.
         headerTexts["fix"] = "### Bug Fixes 🐛"
@@ -49,6 +51,30 @@ semver {
 
         // I you don't like a predefined category just remove it
         headerTexts.remove("refactor")
+    }
+}
+```
+
+Example of redefining all predefined texts:
+```kotlin
+semver {
+    changeLogTexts {
+        header = "## My Custom heder"
+        footer = ""
+
+        breakingChange = "### Breaking Changes"
+        otherChange = "### Other Changes"
+
+        headerTexts["fix"] = "### Bug Fixes"
+        headerTexts["feat"] = "### New Features"
+        headerTexts["test"] = "### Tests "
+        headerTexts["docs"] = "### Documentation"
+        headerTexts["deps"] = "### Dependency Updates"
+        headerTexts["build"] = "### Build & CI"
+        headerTexts["ci"] = "### Build & CI"
+        headerTexts["chore"] = "### Chores"
+        headerTexts["perf"] = "### Performance Enhancements"
+        headerTexts["refactor"] = "### Refactorings"
     }
 }
 

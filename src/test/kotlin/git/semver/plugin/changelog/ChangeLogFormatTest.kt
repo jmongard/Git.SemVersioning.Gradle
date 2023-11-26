@@ -10,9 +10,9 @@ class ChangeLogFormatTest {
     fun format_log_empty() {
         val settings = SemverSettings()
 
-        val actual = ChangeLogFormat.defaultChangeLog.formatLog(listOf(), settings, ChangeLogTexts())
+        val actual = ChangeLogFormat.defaultChangeLog.formatLog(listOf(), settings, DefaultChangeLogTexts)
 
-        assertThat(actual).startsWith("## What's Changed")
+        assertThat(actual).startsWith(DefaultHeaderTexts.TOP_HEADER)
     }
 
     @Test
@@ -20,19 +20,19 @@ class ChangeLogFormatTest {
         val changeLog = createChangeLog()
         val settings = SemverSettings()
 
-        val actual = ChangeLogFormat.defaultChangeLog.formatLog(changeLog, settings, ChangeLogTexts())
+        val actual = ChangeLogFormat.defaultChangeLog.formatLog(changeLog, settings, DefaultChangeLogTexts)
 
         assertThat(actual)
-            .startsWith("## What's Changed")
+            .startsWith(DefaultHeaderTexts.TOP_HEADER)
             .containsOnlyOnce("Bugfix 1")
-            .contains("### Breaking Changes")
+            .contains(DefaultHeaderTexts.BREAKING_CHANGES)
             .contains("- 0050000 fix(changelog)!: A breaking change")
-            .contains("### Bug Fixes")
+            .contains(DefaultHeaderTexts.BUG_FIXES)
             .contains("- 0060000 build: A build change")
             .contains("- 0090000 A CI change")
-            .contains("### Tests")
+            .contains(DefaultHeaderTexts.TESTS)
             .contains("- 0080000 Added some tests")
-            .contains("### New Features")
+            .contains(DefaultHeaderTexts.NEW_FEATURE)
             .contains("- 0040000 semver: A feature")
             .contains("- 0100000 xyz: Some other change")
             .contains("- 0110000 An uncategorized change")
@@ -46,19 +46,19 @@ class ChangeLogFormatTest {
         val changeLog = createChangeLog()
         val settings = SemverSettings()
 
-        val actual = ChangeLogFormat.scopeChangeLog.formatLog(changeLog, settings, ChangeLogTexts())
+        val actual = ChangeLogFormat.scopeChangeLog.formatLog(changeLog, settings, DefaultChangeLogTexts)
 
         assertThat(actual)
-            .startsWith("## What's Changed")
+            .startsWith(DefaultHeaderTexts.TOP_HEADER)
             .containsOnlyOnce("Bugfix 1")
-            .contains("### Breaking Changes")
+            .contains(DefaultHeaderTexts.BREAKING_CHANGES)
             .contains("- 0050000 fix: A breaking change")
-            .contains("### Bug Fixes")
+            .contains(DefaultHeaderTexts.BUG_FIXES)
             .contains("- 0060000 A build change")
             .contains("- 0090000 A CI change")
-            .contains("### Tests")
+            .contains(DefaultHeaderTexts.TESTS)
             .contains("- 0080000 Added some tests")
-            .contains("### New Features")
+            .contains(DefaultHeaderTexts.NEW_FEATURE)
             .contains("- 0040000 A feature")
             .contains("- 0100000 xyz: Some other change")
             .contains("- 0110000 An uncategorized change")
@@ -73,19 +73,46 @@ class ChangeLogFormatTest {
         val changeLog = createChangeLog()
         val settings = SemverSettings()
 
-        val actual = ChangeLogFormat.simpleChangeLog.formatLog(changeLog, settings, ChangeLogTexts())
+        val actual = ChangeLogFormat.simpleChangeLog.formatLog(changeLog, settings, DefaultChangeLogTexts)
 
         assertThat(actual)
+            .startsWith(DefaultHeaderTexts.TOP_HEADER)
             .containsOnlyOnce("Bugfix 1")
-            .contains("## Breaking Changes")
+            .contains(DefaultHeaderTexts.BREAKING_CHANGES)
             .contains("- fix(changelog)!: A breaking change")
-            .contains("## Bug Fixes")
+            .contains(DefaultHeaderTexts.BUG_FIXES)
             .doesNotContain("- build(deps): A build change")
             .doesNotContain("- A CI change")
-            .contains("## New Features")
+            .contains(DefaultHeaderTexts.NEW_FEATURE)
             .contains("- semver: A feature")
             .doesNotContain("- xyz: Some other change")
             .doesNotContain("- An uncategorized change")
+            .doesNotContain("1.2.3")
+            .doesNotContain("more text")
+        println(actual)
+    }
+
+    @Test
+    fun format_default_changelog_with_plain_text() {
+        val changeLog = createChangeLog()
+        val settings = SemverSettings()
+
+        val actual = ChangeLogFormat.defaultChangeLog.formatLog(changeLog, settings, PlainChangeLogTexts)
+
+        assertThat(actual)
+            .startsWith(PlainHeaderTexts.TOP_HEADER)
+            .containsOnlyOnce("Bugfix 1")
+            .contains(PlainHeaderTexts.BREAKING_CHANGES)
+            .contains("- 0050000 fix(changelog)!: A breaking change")
+            .contains(PlainHeaderTexts.BUG_FIXES)
+            .contains("- 0060000 build: A build change")
+            .contains("- 0090000 A CI change")
+            .contains(PlainHeaderTexts.TESTS)
+            .contains("- 0080000 Added some tests")
+            .contains(PlainHeaderTexts.NEW_FEATURE)
+            .contains("- 0040000 semver: A feature")
+            .contains("- 0100000 xyz: Some other change")
+            .contains("- 0110000 An uncategorized change")
             .doesNotContain("1.2.3")
             .doesNotContain("more text")
         println(actual)
@@ -96,7 +123,7 @@ class ChangeLogFormatTest {
         val settings = SemverSettings()
         val changeLog = createChangeLog()
 
-        val actual = ChangeLogFormatter {}.formatLog (changeLog, settings, ChangeLogTexts())
+        val actual = ChangeLogFormatter {}.formatLog (changeLog, settings, DefaultChangeLogTexts)
 
         assertThat(actual).isEmpty()
     }

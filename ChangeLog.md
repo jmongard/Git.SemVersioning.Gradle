@@ -29,6 +29,16 @@ semver {
 }
 ```
 
+### Plain header text
+
+You can configure the header texts to be plain text instead of markdown 
+
+```kotlin
+semver {
+    changeLogTexts = PlainChangeLogTexts
+}
+```
+
 ### Customizing header text
 
 Header texts can be customized using changeLogTexts section in the semver settings:

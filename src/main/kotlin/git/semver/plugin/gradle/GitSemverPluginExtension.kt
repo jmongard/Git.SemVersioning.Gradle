@@ -1,9 +1,6 @@
 package git.semver.plugin.gradle
 
-import git.semver.plugin.changelog.ChangeLogBuilder
-import git.semver.plugin.changelog.ChangeLogFormatter
-import git.semver.plugin.changelog.ChangeLogFormat
-import git.semver.plugin.changelog.ChangeLogTexts
+import git.semver.plugin.changelog.*
 import git.semver.plugin.scm.GitProvider
 import git.semver.plugin.semver.SemverSettings
 import org.gradle.api.Project
@@ -23,7 +20,7 @@ open class GitSemverPluginExtension(project: Project) : SemverSettings() {
         changeLogFormat = ChangeLogFormatter(builder = builder)
     }
 
-    val changeLogTexts = ChangeLogTexts()
+    var changeLogTexts : ChangeLogTexts = DefaultChangeLogTexts
     fun changeLogTexts(builder: ChangeLogTexts.() -> Unit) {
         builder(changeLogTexts)
     }

@@ -1,5 +1,6 @@
 package git.semver.plugin.changelog
 
+import git.semver.plugin.changelog.ChangeLogTexts.Companion.BREAKING_CHANGE
 import java.util.*
 
 open class ChangeLogBuilder(
@@ -30,7 +31,7 @@ open class ChangeLogBuilder(
 
     //<editor-fold desc="filter">
     fun withBreakingChanges(block: ChangeLogBuilder.() -> Unit) {
-        with({ it.isBreaking }, ChangeLogTexts.BREAKING_CHANGE, block)
+        with({ it.isBreaking }, BREAKING_CHANGE, block)
     }
 
     fun withScope(vararg scopes: String, block: ChangeLogBuilder.() -> Unit) {

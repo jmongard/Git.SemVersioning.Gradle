@@ -1,43 +1,52 @@
 package git.semver.plugin.changelog
 
-class ChangeLogTexts {
-    companion object {
+/**
+ * The texts used to build the change log.
+ */
+interface ChangeLogTexts {
+     companion object {
         const val HEADER = "#"
         const val BREAKING_CHANGE = "!"
         const val OTHER_CHANGE = "?"
     }
+    /**
+     * All the header texts for change log.
+     * Implementations must provide values for all conventional commit types and scopes.
+     * @see DefaultChangeLogTexts
+     */
+    val headerTexts: MutableMap<String, String>
 
-    val headerTexts = mutableMapOf(
-        HEADER to "## What's Changed",
-        BREAKING_CHANGE to "### Breaking Changes 🛠",
-        OTHER_CHANGE to "### Other Changes \uD83D\uDCA1",
-        "fix" to "### Bug Fixes \uD83D\uDC1E",
-        "feat" to "### New Features \uD83C\uDF89",
-        "test" to "### Tests ✅",
-        "docs" to "### Documentation \uD83D\uDCD6",
-        "deps" to "### Dependency Updates \uD83D\uDE80",
-        "build" to "### Build \uD83D\uDC18 & CI ⚙\uFE0F",
-        "ci" to "### Build \uD83D\uDC18 & CI ⚙\uFE0F",
-        "chore" to "### Chores \uD83D\uDD27",
-        "perf" to "### Performance Enhancements ⚡",
-        "refactor" to "### Refactorings \uD83D\uDE9C"
-    )
-
+    /**
+     * Topmost header of the change log.
+     */
     var header: String
         get() = headerTexts[HEADER].orEmpty()
         set(value) {
             headerTexts[HEADER] = value
         }
 
-    var footer: String = ""
+    /**
+     * Footer of the change log.
+     */
+    var footer: String
+        get() = headerTexts["footer"].orEmpty()
+        set(value) {
+            headerTexts["footer"] = value
+        }
 
-    var breakingChange
+    /**
+     * Header for breaking changes.
+     */
+    var breakingChange: String
         get() = headerTexts[BREAKING_CHANGE].orEmpty()
         set(value) {
             headerTexts[BREAKING_CHANGE] = value
         }
 
-    var otherChange
+    /**
+     * Header for other changes.
+     */
+    var otherChange: String
         get() = headerTexts[OTHER_CHANGE].orEmpty()
         set(value) {
             headerTexts[OTHER_CHANGE] = value

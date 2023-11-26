@@ -76,13 +76,13 @@ class ChangeLogFormat {
             }
 
             withBreakingChanges(formatGroupByScopeDisplayType(constants.breakingChange))
-            groupBySorted({ constants.headerTexts[it.type] }, formatGroupBySope())
+            groupBySorted({ constants.headerTexts[it.type] }, formatGroupByScope())
             otherwise (formatGroupByScopeDisplayType(constants.otherChange))
 
             appendLine(constants.footer)
         }
 
-        private fun formatGroupBySope(): ChangeLogBuilder.() -> Unit = {
+        private fun formatGroupByScope(): ChangeLogBuilder.() -> Unit = {
             appendLine(groupKey).appendLine()
             groupByScope {
                 append("#### ").appendLine(groupKey)

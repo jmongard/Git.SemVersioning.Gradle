@@ -176,7 +176,6 @@ internal class MutableSemVersion(
     }
 
     private fun applyChangesNotGrouped() {
-        println("applyChangesNotGrouped")
         if (bumpMajor > 0) {
             updateMajor(bumpMajor)
         }
@@ -192,7 +191,6 @@ internal class MutableSemVersion(
     }
 
     private fun applyChangesGrouped() {
-        println("applyChangesGrouped")
         when {
             bumpMajor > 0 -> {
                 updateMajor(1)

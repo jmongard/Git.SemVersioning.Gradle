@@ -5,7 +5,7 @@ import git.semver.plugin.scm.Tag
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class VersionFinderTest {
+class SemVersionFinderTest {
     companion object {
 
         private const val FIFTH = "0000005"
@@ -123,6 +123,7 @@ class VersionFinderTest {
         // then
         assertEquals("0.5.6-SNAPSHOT", versions.toVersionString())
         assertEquals("0.5.6-SNAPSHOT+009", versions.toInfoVersionString())
+        assertEquals("0.5.6-SNAPSHOT", versions.toSemVersion().toString())
     }
 
     @Test
@@ -148,6 +149,7 @@ class VersionFinderTest {
         // then
         assertEquals("0.4.2-Alpha.3", versions.toVersionString())
         assertEquals("0.4.2-Alpha.3+002", versions.toInfoVersionString())
+        assertEquals("0.4.2-Alpha.3", versions.toSemVersion().toString())
     }
 
 
@@ -511,7 +513,7 @@ class VersionFinderTest {
         dirty: Boolean = false,
         groupVersions: Boolean = true,
         disableAutoBump: Boolean = false
-    ): SemVersion {
+    ): SemInfoVersion {
         val settings = SemverSettings().apply {
             groupVersionIncrements = groupVersions
             noAutoBump = disableAutoBump

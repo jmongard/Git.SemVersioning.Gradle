@@ -8,7 +8,7 @@ import java.util.ArrayDeque
 class VersionFinder(private val settings: SemverSettings, private val tags: Map<String, List<IRefInfo>>) {
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    fun getVersion(commit: Commit, isDirty: Boolean, defaultPreRelease: String?): SemVersion {
+    fun getVersion(commit: Commit, isDirty: Boolean, defaultPreRelease: String?): SemInfoVersion {
         val semVersion = findVersion(commit)
         val isModified = semVersion.commitCount > 0 || isDirty
         val updated = semVersion.applyPendingChanges(isModified && !settings.noAutoBump, settings.groupVersionIncrements)
@@ -16,10 +16,10 @@ class VersionFinder(private val settings: SemverSettings, private val tags: Map<
         if (!semVersion.isPreRelease && updated) {
             semVersion.setPreRelease(defaultPreRelease)
         }
-        return semVersion
+        return semVersion.toSemVersion()
     }
 
-    fun getReleaseVersion(commit: Commit, newPreRelease: String?): SemVersion {
+    fun getReleaseVersion(commit: Commit, newPreRelease: String?): SemInfoVersion {
         val semVersion = findVersion(commit)
         semVersion.commitCount = 0
         semVersion.applyPendingChanges(!semVersion.isPreRelease || "" != newPreRelease, settings.groupVersionIncrements)
@@ -27,7 +27,7 @@ class VersionFinder(private val settings: SemverSettings, private val tags: Map<
         if (newPreRelease != null) {
             semVersion.setPreRelease(newPreRelease)
         }
-        return semVersion
+        return semVersion.toSemVersion()
     }
 
     fun getChangeLog(commit: Commit): List<Commit> {
@@ -43,7 +43,7 @@ class VersionFinder(private val settings: SemverSettings, private val tags: Map<
         return changeLog
     }
 
-    private fun findVersion(startCommit: Commit, changeLog: MutableList<Commit>? = null): SemVersion {
+    private fun findVersion(startCommit: Commit, changeLog: MutableList<Commit>? = null): MutableSemVersion {
         if (startCommit.sha.isBlank()) {
             //This is a fake commit created when there exists no real commits
             return versionZero()
@@ -54,13 +54,13 @@ class VersionFinder(private val settings: SemverSettings, private val tags: Map<
     private fun findVersion(
         commitsList: Sequence<Commit>,
         changeLog: MutableList<Commit>?
-    ): SemVersion {
+    ): MutableSemVersion {
 
         var lastFoundVersion = versionZero()
         // This code is a recursive algoritm rewritten as iterative to avoid stack overflow exception.
         // Unfortunately that makes it hard to understand.
         val commits = ArrayDeque(commitsList.map { it to ArrayList<String>(1) }.toList())
-        val visitedCommits = mutableMapOf<String, SemVersion?>()
+        val visitedCommits = mutableMapOf<String, MutableSemVersion?>()
         while (commits.isNotEmpty()) {
             val peek = commits.peek()
             val currentCommit = peek.first
@@ -119,15 +119,15 @@ class VersionFinder(private val settings: SemverSettings, private val tags: Map<
         changeLog?.add(currentCommit)
     }
 
-    private fun isRelease(releaseVersion: SemVersion?) =
+    private fun isRelease(releaseVersion: MutableSemVersion?) =
         releaseVersion != null && !releaseVersion.isPreRelease
 
-    private fun versionZero() = SemVersion()
+    private fun versionZero() = MutableSemVersion()
 
-    private fun getReleaseSemVersionFromCommit(commit: Commit): SemVersion? {
-        return if (SemVersion.isRelease(commit, settings))
-            SemVersion.tryParse(commit)
+    private fun getReleaseSemVersionFromCommit(commit: Commit): MutableSemVersion? {
+        return if (MutableSemVersion.isRelease(commit, settings))
+            MutableSemVersion.tryParse(commit)
         else
-            tags[commit.sha]?.mapNotNull(SemVersion::tryParse)?.maxOrNull()
+            tags[commit.sha]?.mapNotNull(MutableSemVersion::tryParse)?.maxOrNull()
     }
 }

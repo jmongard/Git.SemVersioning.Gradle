@@ -9,7 +9,7 @@ import org.junit.jupiter.params.provider.ValueSource
 import kotlin.test.*
 
 
-class SemVersionTest {
+class MutableSemInfoSemVersionTest {
     companion object {
         const val SHA = "8727a3e1234567"
     }
@@ -17,7 +17,7 @@ class SemVersionTest {
     @ParameterizedTest
     @ValueSource(strings = ["foo", "foo", "v1", "v1.", "va1,2", "av1,2", "v1.-2", "v-1,2"])
     fun `test invalid tags`(tagName: String) {
-        assertThat(SemVersion.tryParse(Tag(tagName, SHA))).isNull()
+        assertThat(MutableSemVersion.tryParse(Tag(tagName, SHA))).isNull()
     }
 
     @ParameterizedTest
@@ -43,7 +43,7 @@ class SemVersionTest {
         preRelease: Int?,
         isPreRelease: Boolean
     ) {
-        val version = assertNotNull(SemVersion.tryParse(Tag(versionTag, SHA)))
+        val version = assertNotNull(MutableSemVersion.tryParse(Tag(versionTag, SHA)))
 
         assertThat(version.major).isEqualTo(major)
         assertThat(version.minor).isEqualTo(minor)
@@ -70,8 +70,8 @@ class SemVersionTest {
         "v1.3.1, 2, v1.3.1, 1"
     )
     fun `test SemVer ordering`(version1: String, c1: Int, version2: String, c2: Int) {
-        val a = SemVersion.tryParse(Tag(version1, SHA))!!
-        val b = SemVersion.tryParse(Tag(version2, SHA))!!
+        val a = MutableSemVersion.tryParse(Tag(version1, SHA))!!
+        val b = MutableSemVersion.tryParse(Tag(version2, SHA))!!
         a.commitCount += c1
         b.commitCount += c2
 
@@ -80,14 +80,14 @@ class SemVersionTest {
 
     @Test
     fun testInfoVersionSha() {
-        val actualVersion = SemVersion.tryParse(Tag("1.0.0", SHA))
-        assertThat(actualVersion).hasToString("1.0.0+sha.8727a3e")
+        val actualVersion = MutableSemVersion.tryParse(Tag("1.0.0", SHA))
+        assertThat(actualVersion?.toSemVersion()).hasToString("1.0.0+sha.8727a3e")
     }
 
     @Test
     fun revisionString() {
         val settings = SemverSettings()
-        val semver = SemVersion.tryParse(Tag("1.2.3", SHA))!!
+        val semver = MutableSemVersion.tryParse(Tag("1.2.3", SHA))!!
         val commit = Commit("fix: a fix", SHA, emptySequence())
         semver.updateFromCommit(commit,  settings, null)
         semver.updateFromCommit(commit,  settings, null)
@@ -98,7 +98,7 @@ class SemVersionTest {
         val actual = semver.revisionString()
 
         assertThat(actual).isEqualTo("1.2.3.4");
-        assertThat(semver).hasToString("1.2.4+004.sha.8727a3e");
+        assertThat(semver.toSemVersion()).hasToString("1.2.4+004.sha.8727a3e");
     }
 
     @ParameterizedTest
@@ -111,14 +111,14 @@ class SemVersionTest {
         "1.2.3, true, 1.2.3"
     ])
     fun toInfoVersionString(version: String, v2: Boolean, expected: String) {
-        val actualVersion = SemVersion.tryParse(Tag(version, SHA))
-        assertThat(actualVersion?.toInfoVersionString(v2 = v2)).isEqualTo(expected)
+        val actualVersion = MutableSemVersion.tryParse(Tag(version, SHA))
+        assertThat(actualVersion?.toSemVersion()?.toInfoVersionString(v2 = v2)).isEqualTo(expected)
     }
 
     @Test
     fun toInfoVersionString_preReleaseLast() {
-        val version = SemVersion.tryParse(Tag("1.2.3-SNAPSHOT", SHA))
-        assertThat(version?.toInfoVersionString(shaLength = 7, appendPreReleaseLast = true))
+        val version = MutableSemVersion.tryParse(Tag("1.2.3-SNAPSHOT", SHA))
+        assertThat(version?.toSemVersion()?.toInfoVersionString(shaLength = 7, appendPreReleaseLast = true))
             .isEqualTo("1.2.3+sha.8727a3e-SNAPSHOT")
     }
 }

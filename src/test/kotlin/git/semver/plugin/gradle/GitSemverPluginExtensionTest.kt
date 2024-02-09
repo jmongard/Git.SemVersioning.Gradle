@@ -20,7 +20,6 @@ class GitSemverPluginExtensionTest {
         val semver = project.extensions.getByName("semver") as GitSemverPluginExtension
 
         assertThat(semver.infoVersion).isNotNull()
-        assertThat(semver.changeLog).isNotNull()
         assertThat(semver.noDirtyCheck).isFalse()
         assertThat(semver.defaultPreRelease).isEqualTo("SNAPSHOT")
     }
@@ -35,7 +34,7 @@ class GitSemverPluginExtensionTest {
 
         val semver = project.extensions.getByName("semver") as GitSemverPluginExtension
 
-        assertThat(semver.noDirtyCheck).isTrue()
-        assertThat(semver.defaultPreRelease).isEqualTo("NEXT")
+        assertThat(semver.createSettings().noDirtyCheck).isTrue()
+        assertThat(semver.createSettings().defaultPreRelease).isEqualTo("NEXT")
     }
 }

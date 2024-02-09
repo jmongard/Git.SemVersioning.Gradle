@@ -70,7 +70,7 @@ class GitSemverPluginFunctionalTest {
     fun `can run testTask task`(version: String?) {
         val projectDir = setupTestProject()
 
-        val result = run(projectDir, version, "testTask")
+        val result = run(projectDir, version, "testTask", "--configuration-cache")
 
         assertThat(result.output).containsPattern("\\d+\\.\\d+\\.\\d+")
         assertThat(result.output).containsPattern("ProjVer: \\d+\\.\\d+\\.\\d+")
@@ -142,9 +142,10 @@ class GitSemverPluginFunctionalTest {
                 
                 tasks.register("testTask") {
                     dependsOn("printVersion")
+                    val ver = project.version
                 
                     doLast {
-                        println("ProjVer: ${'$'}{project.version}")
+                        println("ProjVer: ${'$'}{ver}")
                     }
                 }
             """.trimIndent()

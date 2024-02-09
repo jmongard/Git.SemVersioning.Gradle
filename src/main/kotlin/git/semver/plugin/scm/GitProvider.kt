@@ -1,6 +1,6 @@
 package git.semver.plugin.scm
 
-import git.semver.plugin.semver.SemVersion
+import git.semver.plugin.semver.SemInfoVersion
 import git.semver.plugin.semver.SemverSettings
 import git.semver.plugin.semver.VersionFinder
 import org.eclipse.jgit.api.Git
@@ -22,13 +22,13 @@ internal class GitProvider(private val settings: SemverSettings) {
         internal fun isFormatEnabled(flag: Boolean, format: String) = flag && format.isNotEmpty()
     }
 
-    internal fun getSemVersion(startingPath: File): SemVersion {
+    internal fun getSemVersion(startingPath: File): SemInfoVersion {
         getRepository(startingPath).use {
             return semVersion(Git(it))
         }
     }
 
-    internal fun semVersion(it: Git): SemVersion {
+    internal fun semVersion(it: Git): SemInfoVersion {
         val versionFinder = VersionFinder(settings, getTags(it.repository))
         return versionFinder.getVersion(
             getHeadCommit(it.repository),

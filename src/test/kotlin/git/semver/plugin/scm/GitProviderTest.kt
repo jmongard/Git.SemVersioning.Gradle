@@ -1,6 +1,6 @@
 package git.semver.plugin.scm
 
-import git.semver.plugin.semver.SemVersion
+import git.semver.plugin.semver.SemInfoVersion
 import git.semver.plugin.semver.SemverSettings
 import org.assertj.core.api.Assertions.*
 import org.eclipse.jgit.api.Git
@@ -243,12 +243,12 @@ class GitProviderTest {
         getSemVersionAndPrint(gitProvider, it, "git commit -m \"$msg\"", msg)
     }
 
-    private fun commit(it: Git, msg: String, gitProvider: GitProvider): SemVersion {
+    private fun commit(it: Git, msg: String, gitProvider: GitProvider): SemInfoVersion {
         it.commit().setMessage(msg).call()
         return getSemVersionAndPrint(gitProvider, it, "git commit -m \"$msg\"", msg)
     }
 
-    private fun release(gitProvider: GitProvider, it: Git, preRelease: String? = null): SemVersion {
+    private fun release(gitProvider: GitProvider, it: Git, preRelease: String? = null): SemInfoVersion {
         gitProvider.createRelease(it, false, commit = true, preRelease = preRelease, noDirtyCheck = false)
         return getSemVersionAndPrint(
             gitProvider, it,
@@ -262,7 +262,7 @@ class GitProviderTest {
         it: Git,
         cmd: String,
         msg: String
-    ): SemVersion {
+    ): SemInfoVersion {
         val semVersion = gitProvider.semVersion(it)
         builder.appendLine(tableStringFormat.format(cmd, msg, semVersion.toInfoVersionString()))
         return semVersion

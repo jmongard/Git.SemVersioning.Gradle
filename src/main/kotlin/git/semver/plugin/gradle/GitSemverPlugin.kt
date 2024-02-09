@@ -1,5 +1,6 @@
 package git.semver.plugin.gradle
 
+import git.semver.plugin.scm.GitProvider
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 
@@ -16,10 +17,20 @@ class GitSemverPlugin: Plugin<Project> {
         val settings = project.extensions.create("semver", GitSemverPluginExtension::class.java, project)
 
         project.tasks.register("printVersion", PrintTask::class.java, settings::version, "Prints the current project version")
-        project.tasks.register("printSemVersion", PrintTask::class.java, settings::semVersion, "Prints the current project semantic version")
+        project.tasks.register("printSemVersion", PrintTask::class.java, settings::semInfoVersion, "Prints the current project semantic version")
         project.tasks.register("printInfoVersion", PrintTask::class.java, settings::infoVersion, "Prints the current project info version")
-        project.tasks.register("printChangeLog", PrintTask::class.java, settings::changeLog, "Prints a change log")
-        project.tasks.register("releaseVersion", ReleaseTask::class.java, settings)
+
+        if (project == project.rootProject) {
+            project.tasks.register("printChangeLog", PrintTask::class.java, {
+                settings.changeLogFormat.formatLog(
+                    GitProvider(settings).getChangeLog(settings.gitDirectory),
+                    settings,
+                    settings.changeLogTexts
+                )
+            }, "Prints a change log")
+
+            project.tasks.register("releaseVersion", ReleaseTask::class.java, settings)
+        }
     }
 
 }

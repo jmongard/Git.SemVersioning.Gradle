@@ -11,6 +11,8 @@ class ChangeLogFormat {
             withType("release") {
                 skip()
             }
+
+            // Breaking changes
             withBreakingChanges {
                 appendLine(constants.breakingChange)
                 formatChanges {
@@ -18,6 +20,22 @@ class ChangeLogFormat {
                 }
                 appendLine()
             }
+
+            // Fixes and then Features from typesOrder
+            withType(types = constants.typesOrder.toTypedArray()) {
+                appendLine(constants.headerTexts[groupKey])
+                with({ constants.headerTexts.containsKey(it.scope) }) {
+                    formatChanges {
+                        append("- ").append(hash()).append(type()).appendLine(header())
+                    }
+                }
+                formatChanges {
+                    append("- ").append(hash()).append(scope()).appendLine(header())
+                }
+                appendLine()
+            }
+
+            // Other defined types and scopes in headerTexts
             groupBySorted({ constants.headerTexts[it.scope] ?: constants.headerTexts[it.type] }) {
                 appendLine(groupKey)
                 with({ constants.headerTexts.containsKey(it.scope) }) {
@@ -30,6 +48,8 @@ class ChangeLogFormat {
                 }
                 appendLine()
             }
+
+            // Other changes
             otherwise {
                 appendLine(constants.otherChange)
                 formatChanges {
@@ -54,7 +74,7 @@ class ChangeLogFormat {
                 }
                 appendLine()
             }
-            withType("fix", "feat") {
+            withType(types = constants.typesOrder.toTypedArray()) {
                 appendLine(constants.headerTexts[groupKey])
                 formatChanges {
                     append("- ").append(scope()).appendLine(header())

@@ -51,4 +51,10 @@ interface ChangeLogTexts {
         set(value) {
             headerTexts[OTHER_CHANGE] = value
         }
+
+    /**
+     * List of types in order presented after breaking changes
+     */
+    val typesOrder: MutableList<String>
+        get() = mutableListOf("fix", "feat")
 }

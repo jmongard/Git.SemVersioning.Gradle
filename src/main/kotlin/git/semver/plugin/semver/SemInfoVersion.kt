@@ -4,12 +4,14 @@ import java.io.Serializable
 
 data class SemInfoVersion(
     val sha: String = "",
-    val major: Int = 0,
-    val minor: Int = 0,
-    val patch: Int = 0,
-    val preRelease: PreRelease = PreRelease.noPreRelease,
+    override val major: Int = 0,
+    override val minor: Int = 0,
+    override val patch: Int = 0,
+    override val preRelease: PreRelease = PreRelease.noPreRelease,
     val commitCount: Int = 0
-) : Serializable {
+) : Serializable, Version {
+    override val isPreRelease
+        get() = preRelease.isPreRelease
 
     fun toSemVersion() : SemVersion {
         return SemVersion(major, minor, patch, preRelease)
@@ -27,7 +29,7 @@ data class SemInfoVersion(
     ): String {
         val builder = StringBuilder().append(major).append('.').append(minor).append('.').append(patch)
         if (v2) {
-            if (preRelease.isPreRelease && !appendPreReleaseLast) {
+            if (isPreRelease && !appendPreReleaseLast) {
                 builder.append('-').append(preRelease)
             }
             var metaSeparator = '+'
@@ -39,10 +41,10 @@ data class SemInfoVersion(
             if (shaTake.isNotEmpty()) {
                 builder.append(metaSeparator).append("sha.").append(shaTake)
             }
-            if (preRelease.isPreRelease && appendPreReleaseLast) {
+            if (isPreRelease && appendPreReleaseLast) {
                 builder.append('-').append(preRelease)
             }
-        } else if (preRelease.isPreRelease) {
+        } else if (isPreRelease) {
             builder.append("-")
                 .append(preRelease.prefix.replace("[^0-9A-Za-z-]".toRegex(), ""))
                 .append(preRelease.number ?: "")

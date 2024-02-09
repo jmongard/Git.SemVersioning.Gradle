@@ -119,24 +119,30 @@ open class ChangeLogBuilder(
 }
 
 class ChangeLogTextFormatter(
-    private val commitInfo: ChangeLogFormatter.CommitInfo
+    val commitInfo: ChangeLogFormatter.CommitInfo
 ) : DocumentBuilder() {
-    fun header() = (commitInfo().message ?: commitInfo().text).lineSequence().first()
+    fun header() = (getMessage() ?: getText()).lineSequence().first()
 
-    fun body() = commitInfo().text.lineSequence()
+    fun body() = getText().lineSequence()
         .drop(1)
         .dropWhile { it.isEmpty() }
         .takeWhile { it.isNotEmpty() }
 
-    fun fullHeader() = commitInfo().text.lineSequence().first()
+    fun fullHeader() = getText().lineSequence().first()
 
-    fun scope(format: String = "%s: ") = commitInfo().scope?.let { format.format(it) }.orEmpty()
-    fun type(format: String = "%s: ") = commitInfo().type?.let { format.format(it) }.orEmpty()
+    fun scope(format: String = "%s: ") = commitInfo.scope?.let { format.format(it) }.orEmpty()
 
+    fun type(format: String = "%s: ") = commitInfo.type?.let { format.format(it) }.orEmpty()
     fun hash(format: String = "%s", len: Int = 40) =
-        commitInfo().commits.joinToString(" ", "", " ") { format.format(it.sha.take(len)) }
+        commitInfo.commits.joinToString(" ", "", " ") { format.format(it.sha.take(len)) }
 
-    fun commitInfo() = commitInfo
+    fun authorName(format: String = "%s") =
+        commitInfo.commits.map { it.authorName }.distinct().joinToString(" ", "", " ") { format.format(it) }
+
+    private fun getMessage() = commitInfo.message?.replace("<", "\\<")
+
+    private fun getText() = commitInfo.text.replace("<", "\\<")
+
 }
 
 open class DocumentBuilder() {

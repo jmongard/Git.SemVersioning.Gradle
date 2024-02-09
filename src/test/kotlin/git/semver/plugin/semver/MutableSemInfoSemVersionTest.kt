@@ -95,7 +95,7 @@ class MutableSemInfoSemVersionTest {
         semver.updateFromCommit(commit,  settings, null)
         semver.applyPendingChanges(false, true)
 
-        val actual = semver.revisionString()
+        val actual = semver.toSemVersion().revisionString()
 
         assertThat(actual).isEqualTo("1.2.3.4");
         assertThat(semver.toSemVersion()).hasToString("1.2.4+004.sha.8727a3e");

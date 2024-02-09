@@ -250,11 +250,10 @@ internal class MutableSemVersion(
         bumpPre = 0
     }
 
-    fun revisionString(): String {
-        return "$lastReleaseMajor.$lastReleaseMinor.$lastReleasePatch.$commitCount"
-    }
+
 
     fun toSemVersion(): SemInfoVersion {
-        return SemInfoVersion(sha, major, minor, patch, preRelease, commitCount);
+        return SemInfoVersion(sha, major, minor, patch, preRelease, commitCount,
+            SemVersion(lastReleaseMajor, lastReleaseMinor, lastReleasePatch));
     }
 }

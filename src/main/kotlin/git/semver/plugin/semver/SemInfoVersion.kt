@@ -3,12 +3,13 @@ package git.semver.plugin.semver
 import java.io.Serializable
 
 data class SemInfoVersion(
-    val sha: String = "",
-    override val major: Int = 0,
-    override val minor: Int = 0,
-    override val patch: Int = 0,
-    override val preRelease: PreRelease = PreRelease.noPreRelease,
-    val commitCount: Int = 0
+    val sha: String,
+    override val major: Int,
+    override val minor: Int,
+    override val patch: Int,
+    override val preRelease: PreRelease,
+    val commitCount: Int,
+    val previousVersion: SemVersion
 ) : Serializable, Version {
     override val isPreRelease
         get() = preRelease.isPreRelease
@@ -54,5 +55,9 @@ data class SemInfoVersion(
 
     override fun toString(): String {
         return toInfoVersionString(shaLength = 7)
+    }
+
+    fun revisionString(): String {
+        return "${previousVersion.major}.${previousVersion.minor}.${previousVersion.patch}.$commitCount"
     }
 }

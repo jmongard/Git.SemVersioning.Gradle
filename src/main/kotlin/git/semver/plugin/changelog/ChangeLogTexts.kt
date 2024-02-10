@@ -4,11 +4,13 @@ package git.semver.plugin.changelog
  * The texts used to build the change log.
  */
 interface ChangeLogTexts {
-     companion object {
+    companion object {
         const val HEADER = "#"
         const val BREAKING_CHANGE = "!"
         const val OTHER_CHANGE = "?"
+        const val FOOTER = "footer"
     }
+
     /**
      * All the header texts for change log.
      * Implementations must provide values for all conventional commit types and scopes.
@@ -29,9 +31,9 @@ interface ChangeLogTexts {
      * Footer of the change log.
      */
     var footer: String
-        get() = headerTexts["footer"].orEmpty()
+        get() = headerTexts[FOOTER].orEmpty()
         set(value) {
-            headerTexts["footer"] = value
+            headerTexts[FOOTER] = value
         }
 
     /**

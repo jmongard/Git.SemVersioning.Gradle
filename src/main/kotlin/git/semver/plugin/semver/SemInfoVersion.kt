@@ -11,9 +11,6 @@ data class SemInfoVersion(
     val commitCount: Int,
     val previousVersion: SemVersion
 ) : Serializable, Version {
-    override val isPreRelease
-        get() = preRelease.isPreRelease
-
     fun toSemVersion() : SemVersion {
         return SemVersion(major, minor, patch, preRelease)
     }

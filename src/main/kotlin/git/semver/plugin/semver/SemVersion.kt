@@ -8,8 +8,6 @@ data class SemVersion(
     override val patch: Int,
     override val preRelease: PreRelease = PreRelease.noPreRelease
 ) : Serializable, Version {
-    override val isPreRelease
-        get() = preRelease.isPreRelease
 
     override fun toString(): String {
         val builder = StringBuilder().append(major).append('.').append(minor).append('.').append(patch)

@@ -6,4 +6,5 @@ interface Version {
     val patch: Int
     val preRelease: PreRelease
     val isPreRelease: Boolean
+        get() = preRelease.isPreRelease
 }

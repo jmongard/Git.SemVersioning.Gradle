@@ -5,10 +5,10 @@ import org.slf4j.LoggerFactory
 
 internal class MutableSemVersion(
     var sha: String = "",
-    var major: Int = 0,
-    var minor: Int = 0,
-    var patch: Int = 0,
-    var preRelease: PreRelease = PreRelease.noPreRelease,
+    override var major: Int = 0,
+    override var minor: Int = 0,
+    override var patch: Int = 0,
+    override var preRelease: PreRelease = PreRelease.noPreRelease,
     var commitCount: Int = 0,
     private var bumpPatch: Int = 0,
     private var bumpMinor: Int = 0,
@@ -17,7 +17,7 @@ internal class MutableSemVersion(
     private val lastReleaseMajor: Int = major,
     private val lastReleaseMinor: Int = minor,
     private val lastReleasePatch: Int = patch
-) : Comparable<MutableSemVersion> {
+) : Comparable<MutableSemVersion>, Version {
 
     companion object {
         private val logger = LoggerFactory.getLogger(MutableSemVersion::class.java)
@@ -65,9 +65,6 @@ internal class MutableSemVersion(
             return settings.releaseRegex.containsMatchIn(commit.text)
         }
     }
-
-    val isPreRelease
-        get() = preRelease.isPreRelease
 
     internal fun setPreRelease(value: String?) {
         preRelease = parsePreRelease(value)
@@ -250,10 +247,8 @@ internal class MutableSemVersion(
         bumpPre = 0
     }
 
-
-
     fun toSemVersion(): SemInfoVersion {
         return SemInfoVersion(sha, major, minor, patch, preRelease, commitCount,
-            SemVersion(lastReleaseMajor, lastReleaseMinor, lastReleasePatch));
+            SemVersion(lastReleaseMajor, lastReleaseMinor, lastReleasePatch))
     }
 }

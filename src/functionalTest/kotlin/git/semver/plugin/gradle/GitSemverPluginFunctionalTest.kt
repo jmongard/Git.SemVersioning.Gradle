@@ -99,6 +99,13 @@ class GitSemverPluginFunctionalTest {
     }
 
     private fun setupTestProject(): File {
+        val semverSettings = """
+            semver {
+              groupVersionIncrements = false
+              createReleaseTag = true
+              createReleaseCommit = true
+            }
+        """.trimIndent();
 
         // Setup the test build
         val projectDir = File("build/functionalTest")
@@ -107,15 +114,13 @@ class GitSemverPluginFunctionalTest {
         projectDir.resolve("settings.gradle").writeText("include ':sub1'")
         projectDir.resolve("build.gradle.kts").writeText(
             """
-      
                 plugins {
                   id("com.github.jmongard.git-semver-plugin")
                 }
                 
+                ${semverSettings}
+                
                 semver {
-                  groupVersionIncrements = false
-                  createReleaseTag = true
-                  createReleaseCommit = true
                   changeLogTexts {
                     header = "# Test changelog"
                   }
@@ -132,13 +137,9 @@ class GitSemverPluginFunctionalTest {
                     appendLine()
                     }
                   }
-
                 }
                 
-                val v = semver.version
-                allprojects {
-                  version = v
-                }
+                version = semver.version
                 
                 tasks.register("testTask") {
                     dependsOn("printVersion")
@@ -151,17 +152,24 @@ class GitSemverPluginFunctionalTest {
             """.trimIndent()
         )
 
-        setupSubProject(projectDir)
+        setupSubProject(projectDir, semverSettings)
         setupGitRepo(projectDir)
 
         return projectDir
     }
 
-    private fun setupSubProject(projectDir: File) {
+    private fun setupSubProject(projectDir: File, semverSettings: String) {
         val subProjectDir = File(projectDir, "sub1")
         subProjectDir.mkdirs()
         subProjectDir.resolve("build.gradle").writeText(
             """
+                plugins {
+                  id("com.github.jmongard.git-semver-plugin")
+                }
+                ${semverSettings}
+                
+                version = semver.version
+                
                 task subProjectVersion {
                   doLast {
                      println "SubProjectVersion: " + project.version 

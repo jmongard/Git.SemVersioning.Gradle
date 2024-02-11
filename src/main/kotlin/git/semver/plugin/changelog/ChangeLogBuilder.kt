@@ -137,7 +137,9 @@ class ChangeLogTextFormatter(
         commitInfo.commits.joinToString(" ", "", " ") { format.format(it.sha.take(len)) }
 
     fun authorName(format: String = "%s") =
-        commitInfo.commits.map { it.authorName }.distinct().joinToString(" ", "", " ") { format.format(it) }
+        commitInfo.commits.map{ format.format(it.authorName) }.distinct().joinToString(" ", "", "")
+    fun authorNameAndEmail(format: String = "%s <%s>") =
+        commitInfo.commits.map { format.format(it.authorName, it.authorEmail)}.distinct().joinToString(" ", "", "")
 
     private fun getMessage() = commitInfo.message?.replace("<", "\\<")
 

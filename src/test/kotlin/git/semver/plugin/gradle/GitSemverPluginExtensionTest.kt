@@ -3,8 +3,10 @@
  */
 package git.semver.plugin.gradle
 
+import git.semver.plugin.scm.Commit
 import org.assertj.core.api.Assertions.assertThat
 import org.gradle.testfixtures.ProjectBuilder
+import java.util.*
 import kotlin.test.Test
 
 /**
@@ -36,5 +38,37 @@ class GitSemverPluginExtensionTest {
 
         assertThat(semver.createSettings().noDirtyCheck).isTrue()
         assertThat(semver.createSettings().defaultPreRelease).isEqualTo("NEXT")
+    }
+
+    @Test
+    fun `plugin extension changelog builder`() {
+        // Create a test project and apply the plugin
+        val project = ProjectBuilder.builder().build()
+        project.plugins.apply("com.github.jmongard.git-semver-plugin")
+
+        val semver = project.extensions.getByName("semver") as GitSemverPluginExtension
+        semver.changeLogFormat {
+            appendLine(constants.header).appendLine()
+            withType("test") {
+                appendLine("## Test")
+                formatChanges {
+                    appendLine("- ${scope()}${header()} (${authorName()}) (${authorNameAndEmail()}) (${body()})")
+                }
+                appendLine()
+            }
+        }
+        semver.changeLogTexts {
+            header = "# Test Change Log"
+        }
+
+        val actual = semver.changeLogFormat.formatLog(listOf(
+            Commit("test: Test Commit", "sha", emptySequence(), "John Doe", "john.doe@example.com", Date())),
+            semver.createSettings(),
+            semver.changeLogTexts)
+
+        assertThat(actual)
+            .contains("# Test Change Log")
+            .contains("## Test")
+            .contains("- Test Commit (John Doe) (John Doe <john.doe@example.com>)")
     }
 }

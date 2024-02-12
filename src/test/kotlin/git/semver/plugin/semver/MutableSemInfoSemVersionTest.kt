@@ -22,17 +22,17 @@ class MutableSemInfoSemVersionTest {
 
     @ParameterizedTest
     @CsvSource(
-        "v1.2, 1, 2, 0, '', , false",
-        "v1.2-alpha, 1, 2, 0, 'alpha', , true",
-        "v1.2-alpha5, 1, 2, 0, 'alpha', 5, true",
-        "v1.2-betaV.5, 1, 2, 0, 'betaV.', 5, true",
-        "v1.2.0-beta.5, 1, 2, 0, 'beta.', 5, true",
-        "v1.2.3-beta.5, 1, 2, 3, 'beta.', 5, true",
-        "v1.2.3.4-beta, 1, 2, 3, 'beta', 4, true",
-        "v1.2.3-5, 1, 2, 3, '', 5, true",
-        "v1.2.3-alpha.beta, 1, 2, 3, 'alpha.beta', , true",
-        "1.2.3.4, 1, 2, 3, '', , false",
-        "v9.5.0.41-rc, 9, 5, 0, 'rc', 41, true"
+        "v1.2, 1, 2, 0, '', , false, 0",
+        "v1.2-alpha, 1, 2, 0, 'alpha', , true, 0",
+        "v1.2-alpha5, 1, 2, 0, 'alpha', 5, true, 0",
+        "v1.2-betaV.5, 1, 2, 0, 'betaV.', 5, true, 0",
+        "v1.2.0-beta.5, 1, 2, 0, 'beta.', 5, true, 0",
+        "v1.2.3-beta.5, 1, 2, 3, 'beta.', 5, true, 0",
+        "v1.2.3.4-beta, 1, 2, 3, 'beta', , true, 4",
+        "v1.2.3-5, 1, 2, 3, '', 5, true, 0",
+        "v1.2.3-alpha.beta, 1, 2, 3, 'alpha.beta', , true, 0",
+        "1.2.3.4, 1, 2, 3, '', , false, 4",
+        "v9.5.0.41-rc, 9, 5, 0, 'rc', , true, 41"
     )
     fun `valid version tags`(
         versionTag: String,
@@ -41,7 +41,8 @@ class MutableSemInfoSemVersionTest {
         patch: Int,
         suffix: String,
         preRelease: Int?,
-        isPreRelease: Boolean
+        isPreRelease: Boolean,
+        cc : Int
     ) {
         val version = assertNotNull(MutableSemVersion.tryParse(Tag(versionTag, SHA)))
 
@@ -51,6 +52,7 @@ class MutableSemInfoSemVersionTest {
         assertThat(version.preRelease.prefix).isEqualTo(suffix)
         assertThat(version.preRelease.number).isEqualTo(preRelease)
         assertThat(version.isPreRelease).isEqualTo(isPreRelease)
+        assertThat(version.commitCount).isEqualTo(cc)
     }
 
     @ParameterizedTest

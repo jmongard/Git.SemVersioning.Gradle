@@ -4,20 +4,21 @@ import git.semver.plugin.scm.IRefInfo
 import org.slf4j.LoggerFactory
 
 internal class MutableSemVersion(
-    var sha: String = "",
-    override var major: Int = 0,
-    override var minor: Int = 0,
-    override var patch: Int = 0,
-    override var preRelease: PreRelease = PreRelease.noPreRelease,
-    var commitCount: Int = 0,
-    private var bumpPatch: Int = 0,
-    private var bumpMinor: Int = 0,
-    private var bumpMajor: Int = 0,
-    private var bumpPre: Int = 0,
-    private val lastReleaseMajor: Int = major,
-    private val lastReleaseMinor: Int = minor,
-    private val lastReleasePatch: Int = patch
+    var sha: String,
+    private val initialVersion: SemVersion,
+    var commitCount: Int
 ) : Comparable<MutableSemVersion>, Version {
+    override var major: Int = initialVersion.major
+    override var minor: Int = initialVersion.minor
+    override var patch: Int = initialVersion.patch
+    override var preRelease: PreRelease = initialVersion.preRelease
+
+    private var bumpMajor = 0
+    private var bumpMinor = 0
+    private var bumpPatch = 0
+    private var bumpPre = 0
+
+    constructor() : this("", SemVersion(0,0,0), 0)
 
     companion object {
         private val logger = LoggerFactory.getLogger(MutableSemVersion::class.java)
@@ -32,23 +33,24 @@ internal class MutableSemVersion(
 
         fun tryParse(refInfo: IRefInfo): MutableSemVersion? {
             val match = semVersionPattern.find(refInfo.text) ?: return null
-            fun getInt(group: String) = match.groups[group]?.value?.toInt()
+            fun getValue(group: String) = match.groups[group]?.value
+            fun getIntValue(group: String) = getValue(group)?.toInt() ?: 0
 
             val version = MutableSemVersion(
                 refInfo.sha,
-                getInt("Major")!!,
-                getInt("Minor")!!,
-                getInt("Patch") ?: 0,
-                parsePreRelease(
-                    match.groups["PreRelease"]?.value,
-                    getInt("Revision")
-                )
+                SemVersion(
+                    getIntValue("Major"),
+                    getIntValue("Minor"),
+                    getIntValue("Patch"),
+                    parsePreRelease(getValue("PreRelease"))
+                ),
+                getIntValue("Revision")
             )
             logger.debug("Found version: {} in: '{}'", version, refInfo.text)
             return version
         }
 
-        internal fun parsePreRelease(value: String?, defaultPreReleaseVersion: Int? = null): PreRelease {
+        internal fun parsePreRelease(value: String?): PreRelease {
             if (value == null) {
                 return PreRelease.noPreRelease
             }
@@ -58,7 +60,7 @@ internal class MutableSemVersion(
                 if (prefix.length < value.length)
                     value.substring(prefix.length).toInt()
                 else
-                    defaultPreReleaseVersion)
+                    null)
         }
 
         fun isRelease(commit: IRefInfo, settings: SemverSettings): Boolean {
@@ -124,7 +126,7 @@ internal class MutableSemVersion(
     ) {
         when {
             settings.majorRegex.containsMatchIn(text) ->
-                if (!isPreRelease || major == lastReleaseMajor) {
+                if (!isPreRelease || major == initialVersion.major) {
                     bumpMajor += 1
                     bumpMinor = 0
                     bumpPatch = 0
@@ -132,7 +134,7 @@ internal class MutableSemVersion(
                 }
 
             settings.minorRegex.containsMatchIn(text) ->
-                if (!isPreRelease || major == lastReleaseMajor && minor == lastReleaseMinor) {
+                if (!isPreRelease || major == initialVersion.major && minor == initialVersion.minor) {
                     bumpMinor += 1
                     bumpPatch = 0
                     bumpPre = 0
@@ -165,7 +167,7 @@ internal class MutableSemVersion(
 
         val preReleaseNumber = preRelease.number
         if (preReleaseNumber != null) {
-            preRelease = PreRelease(preRelease.prefix, preReleaseNumber + 1)
+            preRelease = preRelease.copy(number = preReleaseNumber + 1)
         } else {
             patch += 1
         }
@@ -225,7 +227,7 @@ internal class MutableSemVersion(
     private fun updatePreReleaseNumber(updateFunction: (Int) -> Int) {
         val preReleaseNumber = preRelease.number
         if (preReleaseNumber != null) {
-            preRelease = PreRelease(preRelease.prefix, updateFunction(preReleaseNumber))
+            preRelease = preRelease.copy(number = updateFunction(preReleaseNumber))
         }
     }
 
@@ -248,7 +250,6 @@ internal class MutableSemVersion(
     }
 
     fun toSemVersion(): SemInfoVersion {
-        return SemInfoVersion(sha, major, minor, patch, preRelease, commitCount,
-            SemVersion(lastReleaseMajor, lastReleaseMinor, lastReleasePatch))
+        return SemInfoVersion(sha, major, minor, patch, preRelease, commitCount, initialVersion)
     }
 }

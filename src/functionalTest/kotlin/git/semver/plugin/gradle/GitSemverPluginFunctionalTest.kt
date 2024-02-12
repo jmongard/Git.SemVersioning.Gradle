@@ -141,6 +141,8 @@ class GitSemverPluginFunctionalTest {
                 
                 version = semver.version
                 
+                println("InfoVer: ${'$'}{semver.semVersion.toInfoVersionString()}")
+                
                 tasks.register("testTask") {
                     dependsOn("printVersion")
                     val ver = project.version
@@ -166,7 +168,7 @@ class GitSemverPluginFunctionalTest {
                 plugins {
                   id("com.github.jmongard.git-semver-plugin")
                 }
-                ${semverSettings}
+                $semverSettings
                 
                 version = semver.version
                 

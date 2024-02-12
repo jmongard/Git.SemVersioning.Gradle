@@ -87,22 +87,24 @@ abstract class GitSemverPluginExtension(project: Project) : SemverSettings() {
     /**
      * The semantic version for the project with commit info e.g. 1.2.3-Alpha.4+005.sha.7f8c962
      */
-    val semInfoVersion: SemInfoVersion by lazy { semInfoVersionValueSource.get() }
+    val semVersion: SemInfoVersion by lazy { semInfoVersionValueSource.get() }
 
     /**
      * The semantic version for the project with commit info excluding sha as a string e.g. "1.2.3-Alpha.4+005"
      */
-    val infoVersion by lazy { semInfoVersion.toInfoVersionString() }
+    val infoVersion: String
+        get() = semVersion.toInfoVersionString()
 
     /**
      * The semantic version for the project e.g. 1.2.3-Alpha.4
      */
-    val semVersion: SemVersion by lazy { semVersionValueSource.get() }
+    val versionValue: SemVersion by lazy { semVersionValueSource.get() }
 
     /**
      * The semantic version for the project as a string e.g. "1.2.3-Alpha.4"
      */
-    val version by lazy { semVersion.toString() }
+    val version: String
+        get() = versionValue.toString()
 
     private var semInfoVersionValueSource = project.providers.of(SemInfoVersionValueSource::class.java) {
         it.parameters.getGitDir().set(gitDirectory);

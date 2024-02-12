@@ -16,8 +16,8 @@ class GitSemverPlugin: Plugin<Project> {
     override fun apply(project: Project) {
         val extension = project.extensions.create("semver", GitSemverPluginExtension::class.java, project)
 
-        project.tasks.register("printVersion", PrintTask::class.java, extension::semVersion, "Prints the current project version")
-        project.tasks.register("printSemVersion", PrintTask::class.java, extension::semInfoVersion, "Prints the current project semantic version")
+        project.tasks.register("printVersion", PrintTask::class.java, extension::versionValue, "Prints the current project version")
+        project.tasks.register("printSemVersion", PrintTask::class.java, extension::semVersion, "Prints the current project semantic version")
         project.tasks.register("printInfoVersion", PrintTask::class.java, extension::infoVersion, "Prints the current project info version")
 
         if (project == project.rootProject) {

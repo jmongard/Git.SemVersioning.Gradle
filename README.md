@@ -1,14 +1,16 @@
 # Semantic versioning for Gradle using Git 
 [![Gradle Build](https://github.com/jmongard/Git.SemVersioning.Gradle/workflows/Gradle%20Build/badge.svg)](https://github.com/jmongard/Git.SemVersioning.Gradle/actions/workflows/gradle-push.yml)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=jmongard_Git.SemVersioning.Gradle&metric=alert_status)](https://sonarcloud.io/dashboard?id=jmongard_Git.SemVersioning.Gradle)
+[![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=jmongard_Git.SemVersioning.Gradle&metric=ncloc)](https://sonarcloud.io/summary/new_code?id=jmongard_Git.SemVersioning.Gradle)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=jmongard_Git.SemVersioning.Gradle&metric=coverage)](https://sonarcloud.io/summary/new_code?id=jmongard_Git.SemVersioning.Gradle)
 [![GitHub tag (with filter)](https://img.shields.io/github/v/tag/jmongard/Git.SemVersioning.Gradle?logo=gradle&label=Release)](https://plugins.gradle.org/plugin/com.github.jmongard.git-semver-plugin)
 
-Gradle plugin for automatically versioning a project with git using semantic versioning and conventional commits.
+Gradle plugin for automatically versioning a project using semantic versioning and conventional commits with change log support based on git commit messages.
 
 
 ## Usage
 
-Apply the plugin using standard Gradle convention and set the version of the project:
+Apply the plugin using standard Gradle convention and set the version of the project: 
 
 ```groovy
 plugins {
@@ -20,11 +22,14 @@ plugins {
 //Set the version for the current project:
 version = semver.version
 
-//Or in a multi project build set the version of all projects (only include the plugin in the root project):
+//Or in a multi project build set the version of all projects:
 def ver = semver.version
 allprojects {
     version = ver
 }
+// Note: Using `allprojects` with configuration cache is currently not supported by Gradle.
+// If you plan to use configuration cache, apply the plugin to each subproject separately.
+
 ```
 
 [For the latest published version see the plugins page at Gradle.org](https://plugins.gradle.org/plugin/com.github.jmongard.git-semver-plugin)

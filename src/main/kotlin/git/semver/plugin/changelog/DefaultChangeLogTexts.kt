@@ -15,6 +15,7 @@ import git.semver.plugin.changelog.DefaultHeaderTexts.OTHER_CHANGES
 import git.semver.plugin.changelog.DefaultHeaderTexts.PERFORMANCE_ENHANCEMENTS
 import git.semver.plugin.changelog.DefaultHeaderTexts.TESTS
 import git.semver.plugin.changelog.DefaultHeaderTexts.TOP_HEADER
+import git.semver.plugin.changelog.DefaultHeaderTexts.REFACTOR
 
 
 internal object DefaultHeaderTexts {
@@ -30,6 +31,7 @@ internal object DefaultHeaderTexts {
     const val CI = BUILD
     const val CHORES = "### Chores \uD83D\uDD27"
     const val PERFORMANCE_ENHANCEMENTS = "### Performance Enhancements ⚡"
+    const val REFACTOR = "### Refactorings \uD83D\uDE9C"
 }
 
 
@@ -47,6 +49,6 @@ object DefaultChangeLogTexts : ChangeLogTexts {
         "ci" to CI,
         "chore" to CHORES,
         "perf" to PERFORMANCE_ENHANCEMENTS,
-        "refactor" to OTHER_CHANGES
+        "refactor" to REFACTOR
     )
 }

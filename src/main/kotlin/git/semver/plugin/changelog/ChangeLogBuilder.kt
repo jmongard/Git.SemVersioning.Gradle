@@ -121,14 +121,46 @@ open class ChangeLogBuilder(
 class ChangeLogTextFormatter(
     val commitInfo: ChangeLogFormatter.CommitInfo
 ) : DocumentBuilder() {
-    fun header() = (getMessage() ?: getText()).lineSequence().first()
+    companion object {
+        fun sanitizeHtml(s: String): String {
+            val tokenizer = StringTokenizer(s, "`<", true)
+            var inBacktick = false
+            var inDoubleBackTick = false
+            val result = StringBuilder(s.length)
+            var lastToken = ""
 
-    fun body() = getText().lineSequence()
+            while (tokenizer.hasMoreTokens()) {
+                val token = tokenizer.nextToken()
+                if (token == "`") {
+                    if (lastToken == "`" && inBacktick && !inDoubleBackTick) {
+                        inDoubleBackTick = true
+                    }
+                    else if (!inDoubleBackTick || lastToken == "`"){
+                        inBacktick = !inBacktick
+                        inDoubleBackTick = false
+                    }
+                }
+
+                if (!inBacktick && token == "<") {
+                    result.append("\\<")
+                } else {
+                    result.append(token)
+                }
+                lastToken = token;
+            }
+
+            return result.toString()
+        }
+    }
+
+    fun header() = (sanitizeHtml(commitInfo.message ?: commitInfo.text)).lineSequence().first()
+
+    fun body() = sanitizeHtml(commitInfo.text).lineSequence()
         .drop(1)
         .dropWhile { it.isEmpty() }
         .takeWhile { it.isNotEmpty() }
 
-    fun fullHeader() = getText().lineSequence().first()
+    fun fullHeader() = sanitizeHtml(commitInfo.text).lineSequence().first()
 
     fun scope(format: String = "%s: ") = commitInfo.scope?.let { format.format(it) }.orEmpty()
 
@@ -140,11 +172,6 @@ class ChangeLogTextFormatter(
         commitInfo.commits.map{ format.format(it.authorName) }.distinct().joinToString(" ", "", "")
     fun authorNameAndEmail(format: String = "%s <%s>") =
         commitInfo.commits.map { format.format(it.authorName, it.authorEmail)}.distinct().joinToString(" ", "", "")
-
-    private fun getMessage() = commitInfo.message?.replace("<", "\\<")
-
-    private fun getText() = commitInfo.text.replace("<", "\\<")
-
 }
 
 open class DocumentBuilder() {

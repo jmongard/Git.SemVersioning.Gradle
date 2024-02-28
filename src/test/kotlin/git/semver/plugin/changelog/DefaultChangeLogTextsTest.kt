@@ -13,7 +13,13 @@ class DefaultChangeLogTextsTest {
         assertThat(DefaultChangeLogTexts.headerTexts[ChangeLogTexts.HEADER])
             .isEqualTo("HEADER")
             .isEqualTo(DefaultChangeLogTexts.header)
-            .isNotEqualTo(oldValue);
+            .isNotEqualTo(oldValue)
+
+        //---------------
+
+        DefaultChangeLogTexts.headerTexts.remove(ChangeLogTexts.HEADER)
+
+        assertThat(DefaultChangeLogTexts.header).isEmpty()
     }
 
     @Test
@@ -25,19 +31,32 @@ class DefaultChangeLogTextsTest {
         assertThat(DefaultChangeLogTexts.headerTexts[ChangeLogTexts.FOOTER])
             .isEqualTo("FOOTER")
             .isEqualTo(DefaultChangeLogTexts.footer)
-            .isNotEqualTo(oldValue);
+            .isNotEqualTo(oldValue)
+
+        //---------------
+
+        DefaultChangeLogTexts.headerTexts.remove(ChangeLogTexts.FOOTER)
+
+        assertThat(DefaultChangeLogTexts.footer).isEmpty()
     }
 
     @Test
     fun breakingChange() {
         val oldValue = DefaultChangeLogTexts.breakingChange
 
+
         DefaultChangeLogTexts.breakingChange = "BREAKING_CHANGE"
 
         assertThat(DefaultChangeLogTexts.headerTexts[ChangeLogTexts.BREAKING_CHANGE])
             .isEqualTo("BREAKING_CHANGE")
             .isEqualTo(DefaultChangeLogTexts.breakingChange)
-            .isNotEqualTo(oldValue);
+            .isNotEqualTo(oldValue)
+
+        //---------------
+
+        DefaultChangeLogTexts.headerTexts.remove(ChangeLogTexts.BREAKING_CHANGE)
+
+        assertThat(DefaultChangeLogTexts.breakingChange).isEmpty()
     }
 
     @Test
@@ -49,7 +68,13 @@ class DefaultChangeLogTextsTest {
         assertThat(DefaultChangeLogTexts.headerTexts[ChangeLogTexts.OTHER_CHANGE])
             .isEqualTo("OTHER_CHANGE")
             .isEqualTo(DefaultChangeLogTexts.otherChange)
-            .isNotEqualTo(oldValue);
+            .isNotEqualTo(oldValue)
+
+        //---------------
+
+        DefaultChangeLogTexts.headerTexts.remove(ChangeLogTexts.OTHER_CHANGE)
+
+        assertThat(DefaultChangeLogTexts.otherChange).isEmpty()
     }
 
     @Test

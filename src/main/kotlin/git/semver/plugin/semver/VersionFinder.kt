@@ -8,9 +8,9 @@ import java.util.ArrayDeque
 class VersionFinder(private val settings: SemverSettings, private val tags: Map<String, List<IRefInfo>>) {
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    fun getVersion(commit: Commit, isDirty: Boolean, defaultPreRelease: String?): SemInfoVersion {
+    fun getVersion(commit: Commit, isClean: Boolean, defaultPreRelease: String?): SemInfoVersion {
         val semVersion = findVersion(commit)
-        val isModified = semVersion.commitCount > 0 || isDirty
+        val isModified = semVersion.commitCount > 0 || !isClean
         val updated = semVersion.applyPendingChanges(isModified && !settings.noAutoBump, settings.groupVersionIncrements)
 
         if (!semVersion.isPreRelease && updated) {

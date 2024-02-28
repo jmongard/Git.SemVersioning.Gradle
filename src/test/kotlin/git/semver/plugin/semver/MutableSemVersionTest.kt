@@ -9,7 +9,7 @@ import org.junit.jupiter.params.provider.ValueSource
 import kotlin.test.*
 
 
-class MutableSemInfoSemVersionTest {
+class MutableSemVersionTest {
     companion object {
         const val SHA = "8727a3e1234567"
     }

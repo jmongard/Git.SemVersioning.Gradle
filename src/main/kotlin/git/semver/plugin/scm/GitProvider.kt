@@ -32,7 +32,7 @@ internal class GitProvider(private val settings: SemverSettings) {
         val versionFinder = VersionFinder(settings, getTags(it.repository))
         return versionFinder.getVersion(
             getHeadCommit(it.repository),
-            !isClean(it),
+            isClean(it),
             settings.defaultPreRelease
         )
     }

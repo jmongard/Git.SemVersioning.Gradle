@@ -46,13 +46,17 @@ class GitSemverPluginTest {
         assertThatCode {
             task.setNoCommit(true)
             task.setNoCommit(false)
-            task.setCommit(true)
             task.setNoTag(true)
             task.setNoTag(false)
-            task.setTag(true)
-            task.setNoDirty(true)
             task.setPreRelease("alpha1")
             task.setMessage("A Message")
+            task.setTag(true)
+            task.setTag(false)
+            task.setCommit(true)
+            task.setCommit(false)
+            task.setNoDirty(false)
+            task.setNoDirty(true)
+            task.createRelease()
         }.doesNotThrowAnyException()
     }
 }

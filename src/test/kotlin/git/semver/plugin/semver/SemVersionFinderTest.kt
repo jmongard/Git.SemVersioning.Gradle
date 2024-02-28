@@ -193,6 +193,7 @@ class SemVersionFinderTest {
         // then
         assertEquals("1.0.0", versions.toVersionString())
         assertEquals("1.0.0", versions.toInfoVersionString())
+        assertEquals("1.0.0", versions.toSemVersion().toString())
     }
 
     @Test
@@ -207,6 +208,7 @@ class SemVersionFinderTest {
         // then
         assertEquals("1.0.0-Alpha.1", versions.toVersionString())
         assertEquals("1.0.0-Alpha.1", versions.toInfoVersionString())
+        assertEquals("1.0.0-Alpha.1", versions.toSemVersion().toString())
     }
 
     @Test
@@ -518,7 +520,7 @@ class SemVersionFinderTest {
             groupVersionIncrements = groupVersions
             noAutoBump = disableAutoBump
         }
-        return VersionFinder(settings, tags.groupBy { it.sha }).getVersion(commit, dirty, "SNAPSHOT")
+        return VersionFinder(settings, tags.groupBy { it.sha }).getVersion(commit, !dirty, "SNAPSHOT")
     }
 
     private fun asCommit(commits: List<String>) = asCommits(commits.reversed()).first()

@@ -1,6 +1,7 @@
 package git.semver.plugin.gradle
 
 import git.semver.plugin.changelog.*
+import git.semver.plugin.semver.BaseSettings
 import git.semver.plugin.semver.SemInfoVersion
 import git.semver.plugin.semver.SemverSettings
 import git.semver.plugin.semver.SemVersion
@@ -8,7 +9,7 @@ import org.gradle.api.Project
 import java.io.File
 
 
-abstract class GitSemverPluginExtension(project: Project) : SemverSettings() {
+abstract class GitSemverPluginExtension(project: Project) : BaseSettings() {
     private val defaultPreReleaseProperty = project.findProperty("defaultPreRelease")
     private val noDirtyCheckProperty = project.findProperty("noDirtyCheck")
 

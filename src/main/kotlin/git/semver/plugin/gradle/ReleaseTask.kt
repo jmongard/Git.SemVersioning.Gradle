@@ -8,7 +8,6 @@ import javax.inject.Inject
 
 
 open class ReleaseTask @Inject constructor(private val settings: GitSemverPluginExtension) : DefaultTask() {
-    private val gitProvider = GitProvider(settings)
     private var preRelease: String? = null
     private var message: String? = null
     private var tag = settings.createReleaseTag
@@ -57,6 +56,6 @@ open class ReleaseTask @Inject constructor(private val settings: GitSemverPlugin
 
     @TaskAction
     fun createRelease() {
-        gitProvider.createRelease(settings.gitDirectory, tag, commit, preRelease, message, noDirtyCheck)
+        GitProvider(settings.createSettings()).createRelease(settings.gitDirectory, tag, commit, preRelease, message, noDirtyCheck)
     }
 }

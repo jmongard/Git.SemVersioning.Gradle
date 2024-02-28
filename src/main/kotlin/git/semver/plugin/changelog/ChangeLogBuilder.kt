@@ -54,15 +54,13 @@ open class ChangeLogBuilder(
         with(filter, null, block)
 
     fun with(
-        filter: (ChangeLogFormatter.CommitInfo) -> Boolean,
+        predicate: (ChangeLogFormatter.CommitInfo) -> Boolean,
         key: String?,
         block: ChangeLogBuilder.() -> Unit
     ) {
-        val filteredCommits = remainingCommitInfos().filter(filter)
+        val filteredCommits = remainingCommitInfos().filter(predicate)
         if (filteredCommits.isNotEmpty()) {
-            val builder = ChangeLogBuilder(key, filteredCommits, context, constants)
-            builder.block()
-            append(builder.build())
+            processCommits(key, filteredCommits, block)
         }
     }
     //</editor-fold>
@@ -77,18 +75,32 @@ open class ChangeLogBuilder(
     }
 
     fun groupBy(keySelector: (ChangeLogFormatter.CommitInfo) -> String?, block: ChangeLogBuilder.() -> Unit) {
-        processGroups(remainingCommitInfos()
-            .mapNotNull { keyMapper(keySelector, it) }
-            .groupBy({ it.first }, { it.second }), block)
+        processCommitsGrouped(keySelector, LinkedHashMap(), block)
     }
 
     fun groupBySorted(
         keySelector: (ChangeLogFormatter.CommitInfo) -> String?,
         block: ChangeLogBuilder.() -> Unit
     ) {
-        processGroups(remainingCommitInfos()
+        processCommitsGrouped(keySelector, TreeMap(), block)
+    }
+
+    private fun processCommitsGrouped(
+        keySelector: (ChangeLogFormatter.CommitInfo) -> String?,
+        destination: MutableMap<String, MutableList<ChangeLogFormatter.CommitInfo>>,
+        block: ChangeLogBuilder.() -> Unit
+    ) {
+        val groupedCommits = remainingCommitInfos()
             .mapNotNull { keyMapper(keySelector, it) }
-            .groupByTo(TreeMap(), { it.first }, { it.second }), block)
+            .groupByTo(destination, { it.first }, { it.second })
+
+        for ((key, commits) in groupedCommits) {
+            if (key.isEmpty()) {
+                skip(commits)
+                continue;
+            }
+            processCommits(key, commits, block)
+        }
     }
 
     private fun keyMapper(
@@ -98,21 +110,16 @@ open class ChangeLogBuilder(
         return (keySelector(it) ?: return null) to it
     }
 
-    private fun processGroups(
-        groupedByScope: Map<String, List<ChangeLogFormatter.CommitInfo>>,
+    private fun processCommits(
+        key: String?,
+        commits: List<ChangeLogFormatter.CommitInfo>,
         block: ChangeLogBuilder.() -> Unit
     ) {
-        for ((key, scopeCommits) in groupedByScope) {
-            if (key.isNotEmpty()) {
-                val builder = ChangeLogBuilder(key, scopeCommits, context, constants)
-                block(builder)
-                append(builder.build())
-            }
-            else {
-                skip(scopeCommits)
-            }
-        }
+        val builder = ChangeLogBuilder(key, commits, context, constants)
+        block(builder)
+        append(builder.build())
     }
+
     //</editor-fold>
 
     fun remainingCommitInfos() = commitInfos.filter { !context.isCommitFlagged(it) }

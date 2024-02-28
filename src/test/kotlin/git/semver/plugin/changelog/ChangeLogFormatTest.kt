@@ -36,6 +36,7 @@ class ChangeLogFormatTest {
             .contains("- 0040000 semver: A feature")
             .contains("- 0100000 xyz: Some other change")
             .contains("- 0110000 An uncategorized change")
+            .contains("- 0030000 deps: Bugfix broken deps")
             .doesNotContain("1.2.3")
             .doesNotContain("more text")
         println(actual)

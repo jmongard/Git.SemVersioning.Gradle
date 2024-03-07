@@ -56,6 +56,6 @@ open class ReleaseTask @Inject constructor(private val settings: GitSemverPlugin
 
     @TaskAction
     fun createRelease() {
-        GitProvider(settings.createSettings()).createRelease(settings.gitDirectory, tag, commit, preRelease, message, noDirtyCheck)
+        GitProvider(settings.createSettings()).createRelease(settings.gitDir.get().asFile, tag, commit, preRelease, message, noDirtyCheck)
     }
 }

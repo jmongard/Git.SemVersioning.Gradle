@@ -25,6 +25,8 @@ class GitSemverPluginTest {
         val outFile = tempDir.resolve("print.txt")
         val project = ProjectBuilder.builder().build()
         project.plugins.apply("com.github.jmongard.git-semver-plugin")
+        val c = project.extensions.findByName("semver") as GitSemverPluginExtension
+        c.defaultPreRelease = "XYZ"
 
         val task = project.tasks.findByName(name) as PrintTask
 
@@ -32,7 +34,7 @@ class GitSemverPluginTest {
         assertThatCode { task.print() }.doesNotThrowAnyException()
         task.setFile(outFile.toString())
         task.print();
-        assertThat(outFile).exists().isNotEmptyFile();
+        assertThat(outFile).exists().isNotEmptyFile().content().doesNotContain("SNAPSHOT")
     }
 
     @Test

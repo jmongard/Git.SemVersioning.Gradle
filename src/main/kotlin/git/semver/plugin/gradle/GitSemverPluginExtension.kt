@@ -3,21 +3,26 @@ package git.semver.plugin.gradle
 import git.semver.plugin.changelog.*
 import git.semver.plugin.semver.BaseSettings
 import git.semver.plugin.semver.SemInfoVersion
-import git.semver.plugin.semver.SemverSettings
 import git.semver.plugin.semver.SemVersion
+import git.semver.plugin.semver.SemverSettings
 import org.gradle.api.Project
-import java.io.File
+import org.gradle.api.file.Directory
+import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.provider.Provider
+import org.gradle.api.provider.ProviderFactory
+import org.gradle.api.tasks.Internal
 
 
-abstract class GitSemverPluginExtension(project: Project) : BaseSettings() {
+abstract class GitSemverPluginExtension(project: Project, providerFactory: ProviderFactory) : BaseSettings() {
     private val defaultPreReleaseProperty = project.findProperty("defaultPreRelease")
     private val noDirtyCheckProperty = project.findProperty("noDirtyCheck")
+    private val projectDir = project.layout.projectDirectory;
 
     /**
      * Directory where to find the git project. If the git directory is a parent of this directory it will be found.
      * Default: project dir.
      */
-    var gitDirectory: File = project.projectDir
+    abstract val gitDirectory: DirectoryProperty
 
     /**
      * Should a release commit be created when running the release task.
@@ -108,13 +113,21 @@ abstract class GitSemverPluginExtension(project: Project) : BaseSettings() {
         get() = versionValue.toString()
 
     private var semInfoVersionValueSource = project.providers.of(SemInfoVersionValueSource::class.java) {
-        it.parameters.getGitDir().set(gitDirectory);
-        it.parameters.getSettings().set(createSettings())
+        it.parameters.getGitDir().set(gitDir);
+        it.parameters.getSettings().set(providerFactory.provider {
+            createSettings()
+        })
     }
     private var semVersionValueSource = project.providers.of(SemVersionValueSource::class.java) {
-        it.parameters.getGitDir().set(gitDirectory);
-        it.parameters.getSettings().set(createSettings())
+        it.parameters.getGitDir().set(gitDir);
+        it.parameters.getSettings().set(providerFactory.provider {
+            createSettings()
+        })
     }
+
+    @get:Internal
+    internal val gitDir: Provider<Directory>
+        get() = gitDirectory.orElse(projectDir)
 
     internal fun createSettings(): SemverSettings {
         return SemverSettings(this).apply {

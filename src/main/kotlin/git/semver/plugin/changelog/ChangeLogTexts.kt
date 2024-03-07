@@ -3,20 +3,20 @@ package git.semver.plugin.changelog
 /**
  * The texts used to build the change log.
  */
-interface ChangeLogTexts {
+open class ChangeLogTexts(
+    /**
+     * All the header texts for change log.
+     * Implementations must provide values for all conventional commit types and scopes.
+     * @see DefaultChangeLogTexts
+     */
+    val headerTexts: MutableMap<String, String>) {
+
     companion object {
         const val HEADER = "#"
         const val BREAKING_CHANGE = "!"
         const val OTHER_CHANGE = "?"
         const val FOOTER = "footer"
     }
-
-    /**
-     * All the header texts for change log.
-     * Implementations must provide values for all conventional commit types and scopes.
-     * @see DefaultChangeLogTexts
-     */
-    val headerTexts: MutableMap<String, String>
 
     /**
      * Topmost header of the change log.
@@ -57,6 +57,12 @@ interface ChangeLogTexts {
     /**
      * List of types in order presented after breaking changes
      */
-    val typesOrder: MutableList<String>
-        get() = mutableListOf("fix", "feat")
+    val typesOrder: MutableList<String> = mutableListOf("fix", "feat")
+
+    var groupByText: Boolean = true
+
+    var sortByText: Boolean = true
+
+    var changeLogPattern: String = "\\A(?<Type>\\w+)(?:\\((?<Scope>[^()]+)\\))?!?:\\s*(?<Message>(?:.|\n)*)"
+
 }

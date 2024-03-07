@@ -129,6 +129,36 @@ class ChangeLogFormatTest {
         assertThat(actual).isEmpty()
     }
 
+    @Test
+    fun format_no_grouping_nor_sorting() {
+        val settings = SemverSettings()
+        val changeLog = listOf(
+            Commit("fix: B", "1", emptySequence()),
+            Commit("fix: A", "2", emptySequence()),
+            Commit("fix: B", "3", emptySequence()),
+            Commit("fix: A", "4", emptySequence()),
+        )
+        val c = ChangeLogTexts(mutableMapOf("fix" to "FIX", "#" to "CHANGELOG"))
+        c.groupByText  = false
+        c.sortByText = false
+
+
+        val actual = ChangeLogFormat.defaultChangeLog.formatLog(changeLog, settings, c)
+
+        assertThat(actual).startsWith(
+            """
+            CHANGELOG
+
+            FIX
+            - 1 B
+            - 2 A
+            - 3 B
+            - 4 A
+            
+            """.trimIndent()
+        )
+    }
+
     private fun createChangeLog(): List<Commit> {
         val changeLog = mapOf(
             "0010000" to "fix(changelog): Bugfix 1 #1",

@@ -4,9 +4,6 @@ import git.semver.plugin.scm.Commit
 import git.semver.plugin.semver.SemverSettings
 
 data class ChangeLogFormatter(
-    val groupByText: Boolean = true,
-    val sortByText: Boolean = true,
-    val changeLogPattern: String = "\\A(?<Type>\\w+)(?:\\((?<Scope>[^()]+)\\))?!?:\\s*(?<Message>(?:.|\n)*)",
     val builder: ChangeLogBuilder.() -> Unit
 ) {
     companion object {
@@ -16,18 +13,34 @@ data class ChangeLogFormatter(
     }
 
     fun formatLog(changeLog: List<Commit>, settings: SemverSettings, changeLogTexts: ChangeLogTexts): String {
-        val changeLogRegex = changeLogPattern.toRegex(SemverSettings.REGEX_OPTIONS)
-        val logEntries = if (sortByText) changeLog.sortedBy { it.text } else changeLog
-
-        val commitInfos = if (groupByText) {
-            logEntries.groupBy { it.text }.map { getCommitInfo(settings, changeLogRegex, it.key, it.value) }
-        } else {
-            logEntries.map { getCommitInfo(settings, changeLogRegex, it.text, listOf(it)) }
-        }
+        val commitInfos = commitInfos(
+            changeLog,
+            settings,
+            changeLogTexts.changeLogPattern,
+            changeLogTexts.sortByText,
+            changeLogTexts.groupByText
+        )
 
         val changeLogBuilder = ChangeLogBuilder(ChangeLogTexts.HEADER, commitInfos, Context(), changeLogTexts)
         changeLogBuilder.builder()
         return changeLogBuilder.build()
+    }
+
+    private fun commitInfos(
+        changeLog: List<Commit>,
+        settings: SemverSettings,
+        pattern: String,
+        sorByText: Boolean,
+        groupByText: Boolean
+    ): List<CommitInfo> {
+        val changeLogRegex = pattern.toRegex(SemverSettings.REGEX_OPTIONS)
+        val logEntries = if (sorByText) changeLog.sortedBy { it.text } else changeLog
+
+        return if (groupByText) {
+            logEntries.groupBy { it.text }.map { getCommitInfo(settings, changeLogRegex, it.key, it.value) }
+        } else {
+            logEntries.map { getCommitInfo(settings, changeLogRegex, it.text, listOf(it)) }
+        }
     }
 
     private fun getCommitInfo(

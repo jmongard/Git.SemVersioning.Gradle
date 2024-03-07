@@ -16,20 +16,18 @@ internal object PlainHeaderTexts {
     const val PERFORMANCE_ENHANCEMENTS = "### Performance Enhancements"
     const val REFACTORINGS = "### Refactorings"
 }
-object PlainChangeLogTexts : ChangeLogTexts {
-    override val headerTexts = mutableMapOf(
-        ChangeLogTexts.HEADER to PlainHeaderTexts.TOP_HEADER,
-        ChangeLogTexts.BREAKING_CHANGE to PlainHeaderTexts.BREAKING_CHANGES,
-        ChangeLogTexts.OTHER_CHANGE to PlainHeaderTexts.OTHER_CHANGES,
-        "fix" to PlainHeaderTexts.BUG_FIXES,
-        "feat" to PlainHeaderTexts.NEW_FEATURE,
-        "test" to PlainHeaderTexts.TESTS,
-        "docs" to PlainHeaderTexts.DOCUMENTATION,
-        "deps" to PlainHeaderTexts.DEPENDENCY_UPDATES,
-        "build" to PlainHeaderTexts.BUILD,
-        "ci" to PlainHeaderTexts.CI,
-        "chore" to PlainHeaderTexts.CHORES,
-        "perf" to PlainHeaderTexts.PERFORMANCE_ENHANCEMENTS,
-        "refactor" to PlainHeaderTexts.REFACTORINGS
-    )
-}
+object PlainChangeLogTexts : ChangeLogTexts(mutableMapOf(
+    HEADER to PlainHeaderTexts.TOP_HEADER,
+    BREAKING_CHANGE to PlainHeaderTexts.BREAKING_CHANGES,
+    OTHER_CHANGE to PlainHeaderTexts.OTHER_CHANGES,
+    "fix" to PlainHeaderTexts.BUG_FIXES,
+    "feat" to PlainHeaderTexts.NEW_FEATURE,
+    "test" to PlainHeaderTexts.TESTS,
+    "docs" to PlainHeaderTexts.DOCUMENTATION,
+    "deps" to PlainHeaderTexts.DEPENDENCY_UPDATES,
+    "build" to PlainHeaderTexts.BUILD,
+    "ci" to PlainHeaderTexts.CI,
+    "chore" to PlainHeaderTexts.CHORES,
+    "perf" to PlainHeaderTexts.PERFORMANCE_ENHANCEMENTS,
+    "refactor" to PlainHeaderTexts.REFACTORINGS
+))

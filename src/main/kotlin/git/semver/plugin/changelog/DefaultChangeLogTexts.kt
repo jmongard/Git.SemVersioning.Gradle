@@ -1,8 +1,5 @@
 package git.semver.plugin.changelog
 
-import git.semver.plugin.changelog.ChangeLogTexts.Companion.BREAKING_CHANGE
-import git.semver.plugin.changelog.ChangeLogTexts.Companion.HEADER
-import git.semver.plugin.changelog.ChangeLogTexts.Companion.OTHER_CHANGE
 import git.semver.plugin.changelog.DefaultHeaderTexts.BREAKING_CHANGES
 import git.semver.plugin.changelog.DefaultHeaderTexts.BUG_FIXES
 import git.semver.plugin.changelog.DefaultHeaderTexts.BUILD
@@ -35,20 +32,18 @@ internal object DefaultHeaderTexts {
 }
 
 
-object DefaultChangeLogTexts : ChangeLogTexts {
-    override val headerTexts = mutableMapOf(
-        HEADER to TOP_HEADER,
-        BREAKING_CHANGE to BREAKING_CHANGES,
-        OTHER_CHANGE to OTHER_CHANGES,
-        "fix" to BUG_FIXES,
-        "feat" to NEW_FEATURE,
-        "test" to TESTS,
-        "docs" to DOCUMENTATION,
-        "deps" to DEPENDENCY_UPDATES,
-        "build" to BUILD,
-        "ci" to CI,
-        "chore" to CHORES,
-        "perf" to PERFORMANCE_ENHANCEMENTS,
-        "refactor" to REFACTOR
-    )
-}
+object DefaultChangeLogTexts : ChangeLogTexts(mutableMapOf(
+    HEADER to TOP_HEADER,
+    BREAKING_CHANGE to BREAKING_CHANGES,
+    OTHER_CHANGE to OTHER_CHANGES,
+    "fix" to BUG_FIXES,
+    "feat" to NEW_FEATURE,
+    "test" to TESTS,
+    "docs" to DOCUMENTATION,
+    "deps" to DEPENDENCY_UPDATES,
+    "build" to BUILD,
+    "ci" to CI,
+    "chore" to CHORES,
+    "perf" to PERFORMANCE_ENHANCEMENTS,
+    "refactor" to REFACTOR
+))

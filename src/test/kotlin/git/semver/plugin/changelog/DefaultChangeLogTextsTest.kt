@@ -20,6 +20,10 @@ class DefaultChangeLogTextsTest {
         DefaultChangeLogTexts.headerTexts.remove(ChangeLogTexts.HEADER)
 
         assertThat(DefaultChangeLogTexts.header).isEmpty()
+
+        //---------------
+
+        DefaultChangeLogTexts.header = oldValue
     }
 
     @Test
@@ -38,6 +42,10 @@ class DefaultChangeLogTextsTest {
         DefaultChangeLogTexts.headerTexts.remove(ChangeLogTexts.FOOTER)
 
         assertThat(DefaultChangeLogTexts.footer).isEmpty()
+
+        //---------------
+
+//        DefaultChangeLogTexts.footer = oldValue
     }
 
     @Test
@@ -57,6 +65,10 @@ class DefaultChangeLogTextsTest {
         DefaultChangeLogTexts.headerTexts.remove(ChangeLogTexts.BREAKING_CHANGE)
 
         assertThat(DefaultChangeLogTexts.breakingChange).isEmpty()
+
+        //---------------
+
+        DefaultChangeLogTexts.breakingChange = oldValue
     }
 
     @Test
@@ -75,12 +87,23 @@ class DefaultChangeLogTextsTest {
         DefaultChangeLogTexts.headerTexts.remove(ChangeLogTexts.OTHER_CHANGE)
 
         assertThat(DefaultChangeLogTexts.otherChange).isEmpty()
+
+        //---------------
+
+        DefaultChangeLogTexts.otherChange = oldValue
     }
 
     @Test
     fun typesOrder() {
-        val actual = DefaultChangeLogTexts.typesOrder
+        DefaultChangeLogTexts.typesOrder.add("test")
 
-        assertThat(actual).containsExactly("fix", "feat")
+        assertThat(DefaultChangeLogTexts.typesOrder)
+            .containsExactly("fix", "feat", "test")
+    }
+
+    @Test
+    fun `has same texts heder text keys as PlainChangeLogTexts`() {
+        assertThat(DefaultChangeLogTexts.headerTexts)
+            .containsOnlyKeys(PlainChangeLogTexts.headerTexts.keys)
     }
 }

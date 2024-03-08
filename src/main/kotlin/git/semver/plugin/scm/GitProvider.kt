@@ -51,45 +51,37 @@ internal class GitProvider(private val settings: SemverSettings) {
 
     internal fun createRelease(
         startingPath: File,
-        tag: Boolean,
-        commit: Boolean,
-        preRelease: String?,
-        message: String? = null,
-        noDirtyCheck: Boolean
+        params: ReleaseParams
     ) {
         getRepository(startingPath).use {
-            createRelease(Git(it), tag, commit, preRelease, message, noDirtyCheck)
+            createRelease(Git(it), params)
         }
     }
 
     internal fun createRelease(
         it: Git,
-        tag: Boolean,
-        commit: Boolean,
-        preRelease: String?,
-        message: String? = null,
-        noDirtyCheck: Boolean
+        params: ReleaseParams
     ) {
-        checkDirty(noDirtyCheck, isClean(it))
+        checkDirty(params.noDirtyCheck, isClean(it))
 
         val versionFinder = VersionFinder(settings, getTags(it.repository))
         val version = versionFinder.getReleaseVersion(
             getHeadCommit(it.repository),
-            preRelease?.trimStart('-')
+            params.preRelease?.trimStart('-')
         )
         val versionString = version.toInfoVersionString()
         logger.info("Saving new version: {}", versionString)
 
-        val isCommit = isFormatEnabled(commit, settings.releaseCommitTextFormat)
+        val isCommit = isFormatEnabled(params.commit, settings.releaseCommitTextFormat)
         if (isCommit) {
-            val commitMessage = settings.releaseCommitTextFormat.format(versionString, message.orEmpty())
+            val commitMessage = settings.releaseCommitTextFormat.format(versionString, params.message.orEmpty())
             it.commit().setMessage(commitMessage.trim()).call()
         }
 
-        val isTag = isFormatEnabled(tag, settings.releaseTagNameFormat)
+        val isTag = isFormatEnabled(params.tag, settings.releaseTagNameFormat)
         if (isTag) {
             val name = settings.releaseTagNameFormat.format(versionString)
-            it.tag().setName(name).setMessage(message).call()
+            it.tag().setName(name).setMessage(params.message).call()
             println("Created new local Git tag: $name")
         }
 
@@ -148,4 +140,11 @@ internal class GitProvider(private val settings: SemverSettings) {
 
     private fun getObjectIdFromRef(repository: Repository, ref: Ref): ObjectId =
         repository.refDatabase.peel(ref).peeledObjectId ?: ref.objectId
+
+    internal class ReleaseParams(
+        val tag: Boolean,
+        val commit: Boolean,
+        val preRelease: String?,
+        val message: String? = null,
+        val noDirtyCheck: Boolean)
 }

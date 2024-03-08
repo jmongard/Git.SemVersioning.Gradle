@@ -2,6 +2,7 @@ package git.semver.plugin.gradle
 
 import git.semver.plugin.scm.GitProvider
 import org.gradle.api.DefaultTask
+import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.options.Option
 import javax.inject.Inject
@@ -56,6 +57,9 @@ open class ReleaseTask @Inject constructor(private val settings: GitSemverPlugin
 
     @TaskAction
     fun createRelease() {
-        GitProvider(settings.createSettings()).createRelease(settings.gitDir.get().asFile, tag, commit, preRelease, message, noDirtyCheck)
+        GitProvider(settings.createSettings()).createRelease(settings.gitDir.get().asFile, getReleaseParams())
     }
+
+    @Internal
+    internal fun getReleaseParams() = GitProvider.ReleaseParams(tag, commit, preRelease, message, noDirtyCheck)
 }

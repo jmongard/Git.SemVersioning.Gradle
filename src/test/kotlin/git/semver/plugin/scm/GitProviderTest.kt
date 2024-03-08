@@ -249,7 +249,7 @@ class GitProviderTest {
     }
 
     private fun release(gitProvider: GitProvider, it: Git, preRelease: String? = null): SemInfoVersion {
-        gitProvider.createRelease(it, false, commit = true, preRelease = preRelease, noDirtyCheck = false)
+        gitProvider.createRelease(it, GitProvider.ReleaseParams(false, commit = true, preRelease = preRelease, noDirtyCheck = false))
         return getSemVersionAndPrint(
             gitProvider, it,
             "gradle releaseVersion " + if (preRelease == null) "" else "--preRelease=\"$preRelease\"",
@@ -279,25 +279,25 @@ class GitProviderTest {
         Git.init().setDirectory(gitDir).call().use {
             commit(it, "some changes", gitProvider)
         }
-        gitProvider.createRelease(gitDir, true, commit = false, preRelease = "alpha.1", noDirtyCheck = false)
+        gitProvider.createRelease(gitDir, GitProvider.ReleaseParams(true, commit = false, preRelease = "alpha.1", noDirtyCheck = false))
 
         Git.open(gitDir).use {
             commit(it, "feat: some feature", gitProvider)
             commit(it, "docs: some documentation", gitProvider)
         }
-        gitProvider.createRelease(gitDir, false, commit = true, "beta.1", "some message", false)
+        gitProvider.createRelease(gitDir, GitProvider.ReleaseParams(false, commit = true, "beta.1", "some message", false))
 
         Git.open(gitDir).use {
             commit(it, "fix: some fixes", gitProvider)
             commit(it, "docs: some documentation", gitProvider)
         }
-        gitProvider.createRelease(gitDir, true, commit = true, preRelease = null, noDirtyCheck = false)
+        gitProvider.createRelease(gitDir, GitProvider.ReleaseParams(true, commit = true, preRelease = null, noDirtyCheck = false))
 
         Git.open(gitDir).use {
             commit(it, "some changes", gitProvider)
             commit(it, "docs: some documentation", gitProvider)
         }
-        gitProvider.createRelease(gitDir, false, commit = true, preRelease = "", noDirtyCheck = false)
+        gitProvider.createRelease(gitDir, GitProvider.ReleaseParams(false, commit = true, preRelease = "", noDirtyCheck = false))
 
         Git.open(gitDir).use {
             assertTrue(gitProvider.getHeadCommit(it.repository).text.startsWith("release: v0."))

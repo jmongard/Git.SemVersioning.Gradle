@@ -33,8 +33,23 @@ class GitSemverPluginTest {
         assertThat(task).isNotNull()
         assertThatCode { task.print() }.doesNotThrowAnyException()
         task.setFile(outFile.toString())
-        task.print();
-        assertThat(outFile).exists().isNotEmptyFile().content().doesNotContain("SNAPSHOT")
+        task.print()
+
+        if (name.endsWith("Version"))
+            assertThat(outFile).exists().isNotEmptyFile().content().doesNotContain("SNAPSHOT").contains(c.version)
+        else
+            assertThat(outFile).exists().isNotEmptyFile().content().startsWith("#")
+    }
+
+    @Test
+    fun `plugin subproject don't register releaseVersion task`() {
+        val project = ProjectBuilder.builder().build()
+        project.plugins.apply("com.github.jmongard.git-semver-plugin")
+        val subproject = ProjectBuilder.builder().withParent(project).build()
+        subproject.plugins.apply("com.github.jmongard.git-semver-plugin")
+
+        assertThat(project.tasks.findByName("releaseVersion")).isNotNull()
+        assertThat(subproject.tasks.findByName("releaseVersion")).isNull()
     }
 
     @Test
@@ -45,19 +60,39 @@ class GitSemverPluginTest {
         val task = project.tasks.findByName("releaseVersion") as ReleaseTask
 
         assertThat(task).isNotNull()
+
+        task.setPreRelease("alpha1")
+        assertThat(task.getReleaseParams().preRelease).isEqualTo("alpha1")
+
+        task.setMessage("A Message")
+        assertThat(task.getReleaseParams().message).isEqualTo("A Message")
+
+        task.setNoDirty(false)
+        assertThat(task.getReleaseParams().noDirtyCheck).isFalse()
+        task.setNoDirty(true)
+        assertThat(task.getReleaseParams().noDirtyCheck).isTrue()
+
+        task.setNoCommit(true)
+        assertThat(task.getReleaseParams().commit).isFalse()
+        task.setNoCommit(false)
+        assertThat(task.getReleaseParams().commit).isTrue()
+
+        task.setNoTag(true)
+        assertThat(task.getReleaseParams().tag).isFalse()
+        task.setNoTag(false)
+        assertThat(task.getReleaseParams().tag).isTrue()
+
+        task.setTag(true)
+        assertThat(task.getReleaseParams().tag).isTrue()
+        task.setTag(false)
+        assertThat(task.getReleaseParams().tag).isFalse()
+
+        task.setCommit(true)
+        assertThat(task.getReleaseParams().commit).isTrue()
+        task.setCommit(false)
+        assertThat(task.getReleaseParams().commit).isFalse()
+
         assertThatCode {
-            task.setNoCommit(true)
-            task.setNoCommit(false)
-            task.setNoTag(true)
-            task.setNoTag(false)
-            task.setPreRelease("alpha1")
-            task.setMessage("A Message")
-            task.setTag(true)
-            task.setTag(false)
-            task.setCommit(true)
-            task.setCommit(false)
-            task.setNoDirty(false)
-            task.setNoDirty(true)
             task.createRelease()
         }.doesNotThrowAnyException()
     }

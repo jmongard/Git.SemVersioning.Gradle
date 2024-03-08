@@ -3,7 +3,7 @@ package git.semver.plugin.changelog
 import git.semver.plugin.changelog.ChangeLogTexts.Companion.BREAKING_CHANGE
 import java.util.*
 
-open class ChangeLogBuilder(
+class ChangeLogBuilder(
     val groupKey: String? = null,
     private val commitInfos: List<ChangeLogFormatter.CommitInfo>,
     private val context: ChangeLogFormatter.Context,

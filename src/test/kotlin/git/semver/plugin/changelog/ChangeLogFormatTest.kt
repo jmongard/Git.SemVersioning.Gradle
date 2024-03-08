@@ -135,10 +135,14 @@ class ChangeLogFormatTest {
         val changeLog = listOf(
             Commit("fix: B", "1", emptySequence()),
             Commit("fix: A", "2", emptySequence()),
+            Commit("ignore: B", "5", emptySequence()),
             Commit("fix: B", "3", emptySequence()),
             Commit("fix: A", "4", emptySequence()),
         )
-        val c = ChangeLogTexts(mutableMapOf("fix" to "FIX", "#" to "CHANGELOG"))
+        val c = ChangeLogTexts(mutableMapOf(
+            "fix" to "FIX",
+            "ignore" to "",
+            "#" to "CHANGELOG"))
         c.groupByText  = false
         c.sortByText = false
 

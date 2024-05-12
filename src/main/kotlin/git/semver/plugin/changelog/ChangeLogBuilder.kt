@@ -129,31 +129,33 @@ class ChangeLogTextFormatter(
     val commitInfo: ChangeLogFormatter.CommitInfo
 ) : DocumentBuilder() {
     companion object {
-        fun sanitizeHtml(s: String): String {
-            val tokenizer = StringTokenizer(s, "`<", true)
-            var inBacktick = false
-            var inDoubleBackTick = false
-            val result = StringBuilder(s.length)
-            var lastToken = ""
+        fun sanitizeHtml(str: String): String {
+            if (str.indexOf('<') == -1) {
+                return str
+            }
 
-            while (tokenizer.hasMoreTokens()) {
-                val token = tokenizer.nextToken()
-                if (token == "`") {
-                    if (lastToken == "`" && inBacktick && !inDoubleBackTick) {
-                        inDoubleBackTick = true
-                    }
-                    else if (!inDoubleBackTick || lastToken == "`"){
-                        inBacktick = !inBacktick
-                        inDoubleBackTick = false
-                    }
-                }
+            val result = StringBuilder(str.length)
+            var backtickCount = 0
+            var index = 0;
+            while (index < str.length) {
+                val token = str[index]
+                when {
+                    token == '`' -> backtickCount += 1
 
-                if (!inBacktick && token == "<") {
-                    result.append("\\<")
-                } else {
-                    result.append(token)
+                    backtickCount > 0 -> {
+                        val end = str.indexOf("`".repeat(backtickCount), index) + backtickCount
+                        if (end > index) {
+                            result.append(str, index, end)
+                            index = end
+                        }
+                        backtickCount = 0
+                        continue
+                    }
+
+                    token == '<' -> result.append("\\")
                 }
-                lastToken = token;
+                result.append(token)
+                index += 1;
             }
 
             return result.toString()
@@ -181,7 +183,7 @@ class ChangeLogTextFormatter(
         commitInfo.commits.map { format.format(it.authorName, it.authorEmail)}.distinct().joinToString(" ", "", "")
 }
 
-open class DocumentBuilder() {
+open class DocumentBuilder {
     private val out = StringBuilder()
 
     fun build(): String {

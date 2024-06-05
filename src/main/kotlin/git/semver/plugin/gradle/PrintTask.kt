@@ -3,11 +3,13 @@ package git.semver.plugin.gradle
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.options.Option
-import java.io.File
 import java.nio.charset.StandardCharsets
+import java.nio.file.Paths
 import javax.inject.Inject
+import kotlin.io.path.createDirectories
+import kotlin.io.path.writeText
 
-open class PrintTask @Inject constructor(private val prop: () -> Any, desc: String) : DefaultTask() {
+open class PrintTask @Inject constructor(private val printout: () -> Any, desc: String) : DefaultTask() {
     private var file:String? = null
 
     init {
@@ -24,10 +26,12 @@ open class PrintTask @Inject constructor(private val prop: () -> Any, desc: Stri
     fun print() {
         val fileName = this.file
         if (fileName != null) {
-            File(fileName).writeText(prop().toString(), StandardCharsets.UTF_8)
+            val path = Paths.get(fileName)
+            path.parent.createDirectories()
+            path.writeText(printout().toString(), StandardCharsets.UTF_8)
         }
         else {
-            println(prop())
+            println(printout())
         }
     }
 }

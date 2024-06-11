@@ -98,6 +98,15 @@ class GitSemverPluginFunctionalTest {
         assertThat(result.output).containsPattern("added test files")
     }
 
+    @Test
+    fun `can run printVersion to file task`() {
+        val projectDir = setupTestProject()
+
+        val result = run(projectDir, null, "-i", "printVersion", "--file", "v.txt")
+
+        assertThat(result.output).containsPattern("v.txt")
+    }
+
     private fun setupTestProject(): File {
         val semverSettings = """
             semver {

@@ -26,12 +26,16 @@ open class PrintTask @Inject constructor(private val printout: () -> Any, desc: 
     fun print() {
         val fileName = this.file
         if (fileName != null) {
-            val path = Paths.get(fileName)
-            path.parent.createDirectories()
-            path.writeText(printout().toString(), StandardCharsets.UTF_8)
+            writeFile(fileName)
         }
         else {
             println(printout())
         }
+    }
+
+    private fun writeFile(fileName: String) {
+        val path = Paths.get(fileName).toAbsolutePath()
+        path.parent.createDirectories()
+        path.writeText(printout().toString(), StandardCharsets.UTF_8)
     }
 }

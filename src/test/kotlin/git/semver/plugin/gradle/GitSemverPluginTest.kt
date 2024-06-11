@@ -9,6 +9,7 @@ import org.gradle.testfixtures.ProjectBuilder
 import org.junit.jupiter.api.io.TempDir
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
+import java.io.File
 import java.nio.file.Path
 import kotlin.test.Test
 
@@ -22,7 +23,7 @@ class GitSemverPluginTest {
     @ParameterizedTest
     @ValueSource(strings = ["printVersion", "printSemVersion", "printInfoVersion", "printChangeLog"])
     fun `plugin register print tasks`(name: String) {
-        val outFile = tempDir.resolve("print.txt")
+        val outFile = tempDir.resolve("print/out.txt")
         val project = ProjectBuilder.builder().build()
         project.plugins.apply("com.github.jmongard.git-semver-plugin")
         val c = project.extensions.findByName("semver") as GitSemverPluginExtension
@@ -39,6 +40,20 @@ class GitSemverPluginTest {
             assertThat(outFile).exists().isNotEmptyFile().content().doesNotContain("SNAPSHOT").contains(c.version)
         else
             assertThat(outFile).exists().isNotEmptyFile().content().startsWith("#")
+    }
+
+    @Test
+    fun `plugin print relative file`() {
+        val project = ProjectBuilder.builder().build()
+        project.plugins.apply("com.github.jmongard.git-semver-plugin")
+        val c = project.extensions.findByName("semver") as GitSemverPluginExtension
+        c.defaultPreRelease = "XYZ"
+
+        val task = project.tasks.findByName("printVersion") as PrintTask
+        task.setFile("version.txt")
+        task.print()
+
+        assertThat(File("version.txt")).exists()
     }
 
     @Test

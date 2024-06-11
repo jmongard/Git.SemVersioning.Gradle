@@ -136,6 +136,8 @@ $ gradlew printSemVersion
 This plugin adds a printChangeLog task, which will format the commit message for the current version
 and output them to standard-out. To avoid enoding problem in the console the change log can be outputed 
 to an UTF-8 encoded file using `--file <filename>` e.g. `./gradlew printChangeLog --file build/changelog.md`
+Note: Use an absolute path for filename as the working directory might not be the one you expect if running 
+using gradle deamon. 
 
 ````shell
 $ gradlew printChangeLog

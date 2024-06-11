@@ -34,6 +34,8 @@ semver {
 You can configure the header texts to be plain text instead of markdown 
 
 ```kotlin
+import git.semver.plugin.changelog.PlainChangeLogTexts
+...
 semver {
     changeLogTexts = PlainChangeLogTexts
 }

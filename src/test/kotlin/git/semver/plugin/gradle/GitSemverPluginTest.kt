@@ -53,7 +53,9 @@ class GitSemverPluginTest {
         task.setFile("version.txt")
         task.print()
 
-        assertThat(File("version.txt")).exists()
+        val file = File("version.txt")
+        assertThat(file).exists()
+        file.delete()
     }
 
     @Test

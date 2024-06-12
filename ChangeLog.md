@@ -32,19 +32,30 @@ semver {
 ### Plain header text
 
 You can configure the header texts to be plain text instead of markdown 
-
+Kotlin DSL:
 ```kotlin
 import git.semver.plugin.changelog.PlainChangeLogTexts
-...
+
 semver {
     changeLogTexts = PlainChangeLogTexts
 }
 ```
 
+Groovy DSL:
+```groovy
+import git.semver.plugin.changelog.PlainChangeLogTexts
+
+semver {
+    changeLogTexts = PlainChangeLogTexts.INSTANCE
+}
+```
+
+
 ### Customizing header text
 
-Header texts can be customized using changeLogTexts section in the semver settings:
+Header texts can be customized using changeLogTexts section in the semver settings.
 
+Kotlin DSL:
 ```kotlin
 semver {
     changeLogTexts {
@@ -67,7 +78,21 @@ semver {
 }
 ```
 
-Example of redefining all predefined texts:
+Groovy DSL:
+```groovy
+semver {
+    changeLogTexts.header = "## My Custom heder"
+
+    changeLogTexts.headerTexts["wip"] = "### Work in progress"
+
+    changeLogTexts.headerTexts.putAll([
+        "fix" : "## FIX",
+        "feat" : "## FEATURE"
+    ])
+}
+```
+
+Example of redefining all predefined texts (Kotlin DSL):
 ```kotlin
 semver {
     changeLogTexts {

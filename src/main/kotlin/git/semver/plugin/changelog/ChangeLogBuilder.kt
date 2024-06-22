@@ -95,12 +95,24 @@ class ChangeLogBuilder(
             .groupByTo(destination, { it.first }, { it.second })
 
         for ((key, commits) in groupedCommits) {
-            if (key.isEmpty()) {
-                skip(commits)
-                continue;
-            }
-            processCommits(key, commits, block)
+            filterEmptyHeader(key, commits, block)
         }
+    }
+
+    fun filterEmptyHeader(key: String?, block: ChangeLogBuilder.() -> Unit) {
+        filterEmptyHeader(key ?: "", remainingCommitInfos(), block)
+    }
+
+    private fun filterEmptyHeader(
+        key: String,
+        commits: List<ChangeLogFormatter.CommitInfo>,
+        block: ChangeLogBuilder.() -> Unit
+    ) {
+        if (key.isEmpty()) {
+            skip(commits)
+            return;
+        }
+        processCommits(key, commits, block)
     }
 
     private fun keyMapper(

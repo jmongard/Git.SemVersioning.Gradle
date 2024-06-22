@@ -57,7 +57,7 @@ open class ChangeLogTexts(
     /**
      * List of types in order presented after breaking changes
      */
-    val typesOrder: MutableList<String> = mutableListOf("fix", "feat")
+    val typesOrder: LinkedHashSet<String> = linkedSetOf("fix", "feat")
 
     var groupByText: Boolean = true
 

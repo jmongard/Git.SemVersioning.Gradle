@@ -22,11 +22,13 @@ object ChangeLogFormat {
 
         // Fixes and then Features from typesOrder
         withType(types = constants.typesOrder.toTypedArray()) {
-            appendLine(constants.headerTexts[groupKey])
-            formatChanges {
-                append("- ").append(hash()).append(scope()).appendLine(header())
+            filterEmptyHeader(constants.headerTexts[groupKey]) {
+                appendLine(groupKey)
+                formatChanges {
+                    append("- ").append(hash()).append(scope()).appendLine(header())
+                }
+                appendLine()
             }
-            appendLine()
         }
 
         // Other defined types and scopes in headerTexts
@@ -45,11 +47,13 @@ object ChangeLogFormat {
 
         // Other changes
         otherwise {
-            appendLine(constants.otherChange)
-            formatChanges {
-                append("- ").append(hash()).appendLine(fullHeader())
+            filterEmptyHeader(constants.otherChange) {
+                appendLine(groupKey)
+                formatChanges {
+                    append("- ").append(hash()).appendLine(fullHeader())
+                }
+                appendLine()
             }
-            appendLine()
         }
 
         appendLine(constants.footer)

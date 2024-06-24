@@ -102,9 +102,14 @@ class GitSemverPluginFunctionalTest {
     fun `can run printVersion to file task`() {
         val projectDir = setupTestProject()
 
-        val result = run(projectDir, null, "-i", "printVersion", "--file", "v.txt")
+        val file = "testPrintVersion.txt"
+        val result = run(projectDir, null, "-i", "printVersion", "--file", file)
 
-        assertThat(result.output).containsPattern("v.txt")
+        assertThat(result.output).containsPattern(file)
+        val f = File(file);
+        if (f.exists()) {
+            assertThat(f.delete()).isTrue();
+        }
     }
 
     private fun setupTestProject(): File {

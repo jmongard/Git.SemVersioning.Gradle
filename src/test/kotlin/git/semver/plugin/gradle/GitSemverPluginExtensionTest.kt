@@ -62,7 +62,7 @@ class GitSemverPluginExtensionTest {
         }
 
         val actual = semver.changeLogFormat.formatLog(listOf(
-            Commit("test: Test Commit", "sha", emptySequence(), "John Doe", "john.doe@example.com", Date())),
+            Commit("test: Test Commit", "sha", 0, emptySequence(), "John Doe", "john.doe@example.com", Date())),
             semver.createSettings(),
             semver.changeLogTexts)
 

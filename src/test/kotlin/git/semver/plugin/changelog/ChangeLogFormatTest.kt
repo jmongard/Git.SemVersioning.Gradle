@@ -133,11 +133,11 @@ class ChangeLogFormatTest {
     fun format_no_grouping_nor_sorting() {
         val settings = SemverSettings()
         val changeLog = listOf(
-            Commit("fix: B", "1", emptySequence()),
-            Commit("fix: A", "2", emptySequence()),
-            Commit("ignore: B", "5", emptySequence()),
-            Commit("fix: B", "3", emptySequence()),
-            Commit("fix: A", "4", emptySequence()),
+            Commit("fix: B", "1", 0, emptySequence()),
+            Commit("fix: A", "2", 1, emptySequence()),
+            Commit("ignore: B", "5", 2, emptySequence()),
+            Commit("fix: B", "3", 3, emptySequence()),
+            Commit("fix: A", "4", 4, emptySequence()),
         )
         val c = ChangeLogTexts(mutableMapOf(
             "fix" to "FIX",
@@ -177,6 +177,6 @@ class ChangeLogFormatTest {
             "0100000" to "xyz: Some other change",
             "0110000" to "An uncategorized change"
         )
-        return changeLog.map { Commit(it.value, it.key, emptySequence()) }
+        return changeLog.map { Commit(it.value, it.key, 0, emptySequence()) }
     }
 }

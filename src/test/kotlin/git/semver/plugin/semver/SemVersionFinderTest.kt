@@ -73,20 +73,20 @@ class SemVersionFinderTest {
             Tag("v1.3.1-RC", "SHA_B1")
         )
 
-        val a0 = Commit("fix: msg a0", "SHA_A0", sequenceOf())
-        val a1 = Commit("fix: msg a1", "SHA_A1", sequenceOf(a0))
+        val a0 = Commit("fix: msg a0", "SHA_A0", 0, sequenceOf())
+        val a1 = Commit("fix: msg a1", "SHA_A1", 1, sequenceOf(a0))
 
-        val b0 = Commit("fix: msg b0", "SHA_B0", sequenceOf(a1))
-        val b1 = Commit("fix: msg b1", "SHA_B1", sequenceOf(b0))
-        val b2 = Commit("fix: msg b2", "SHA_B2", sequenceOf(b1))
+        val b0 = Commit("fix: msg b0", "SHA_B0", 2, sequenceOf(a1))
+        val b1 = Commit("fix: msg b1", "SHA_B1", 4, sequenceOf(b0))
+        val b2 = Commit("fix: msg b2", "SHA_B2", 6, sequenceOf(b1))
 
-        val c0 = Commit("fix: msg c0", "SHA_C0", sequenceOf(a1))
-        val c1 = Commit("fix: msg c1", "SHA_C1", sequenceOf(c0))
-        val c2 = Commit("fix: msg c2", "SHA_C2", sequenceOf(c1))
-        val c3 = Commit("fix: msg c3", "SHA_C3", sequenceOf(c2))
+        val c0 = Commit("fix: msg c0", "SHA_C0", 3, sequenceOf(a1))
+        val c1 = Commit("fix: msg c1", "SHA_C1", 5, sequenceOf(c0))
+        val c2 = Commit("fix: msg c2", "SHA_C2", 7, sequenceOf(c1))
+        val c3 = Commit("fix: msg c3", "SHA_C3", 9, sequenceOf(c2))
 
-        val d0 = Commit("fix: msg d0", "SHA_D0", sequenceOf(c3, b2))
-        val d1 = Commit("fix: msg d1", "SHA_D1", sequenceOf(d0))
+        val d0 = Commit("fix: msg d0", "SHA_D0", 10, sequenceOf(c3, b2))
+        val d1 = Commit("fix: msg d1", "SHA_D1", 11, sequenceOf(d0))
 
         // when
         val versions = getVersion(tags, d1)
@@ -103,19 +103,19 @@ class SemVersionFinderTest {
             Tag("v0.4.0", "SHA0")
         )
 
-        val a0 = Commit("a msg1", "SHA0", sequenceOf())
-        val a1 = Commit("feat: a feature", "SHA1", sequenceOf(a0))
-        val a2 = Commit("a msg3", "SHA2", sequenceOf(a1))
+        val a0 = Commit("a msg1", "SHA0", 0, sequenceOf())
+        val a1 = Commit("feat: a feature", "SHA1", 1, sequenceOf(a0))
+        val a2 = Commit("a msg3", "SHA2", 2, sequenceOf(a1))
 
-        val b0 = Commit("fix: test 11", "SHA11", sequenceOf(a2))
-        val b1 = Commit("fix: test 12", "SHA12", sequenceOf(b0))
-        val b2 = Commit("fix: test 13", "SHA13", sequenceOf(b1))
+        val b0 = Commit("fix: test 11", "SHA11", 3, sequenceOf(a2))
+        val b1 = Commit("fix: test 12", "SHA12", 4, sequenceOf(b0))
+        val b2 = Commit("fix: test 13", "SHA13", 5, sequenceOf(b1))
 
-        val c0 = Commit("fix: test 21", "SHA21", sequenceOf(a2))
-        val c1 = Commit("fix: test 22", "SHA22", sequenceOf(c0))
+        val c0 = Commit("fix: test 21", "SHA21", 6, sequenceOf(a2))
+        val c1 = Commit("fix: test 22", "SHA22", 7, sequenceOf(c0))
 
-        val d0 = Commit("merge msg", "SHA31", sequenceOf(b2, c1))
-        val d1 = Commit("fix: msg", "SHA32", sequenceOf(d0))
+        val d0 = Commit("merge msg", "SHA31", 8, sequenceOf(b2, c1))
+        val d1 = Commit("fix: msg", "SHA32", 9, sequenceOf(d0))
 
         // when
         val versions = getVersion(tags, d1, groupVersions = false)
@@ -134,14 +134,14 @@ class SemVersionFinderTest {
             Tag("v0.4.2-Alpha.1", "SHA12"),
         )
 
-        val a0 = Commit("a msg1", "SHA0", sequenceOf())
-        val a1 = Commit("a msg2", "SHA1", sequenceOf(a0))
-        val a2 = Commit("a msg3", "SHA2", sequenceOf(a1))
+        val a0 = Commit("a msg1", "SHA0", 0, sequenceOf())
+        val a1 = Commit("a msg2", "SHA1", 2, sequenceOf(a0))
+        val a2 = Commit("a msg3", "SHA2", 3, sequenceOf(a1))
 
-        val b0 = Commit("fix: test 11", "SHA11", sequenceOf(a2))
-        val b1 = Commit("fix: test 12", "SHA12", sequenceOf(b0))
-        val b2 = Commit("fix: test 13", "SHA13", sequenceOf(b1))
-        val b3 = Commit("fix: msg", "SHA14", sequenceOf(b2))
+        val b0 = Commit("fix: test 11", "SHA11", 4, sequenceOf(a2))
+        val b1 = Commit("fix: test 12", "SHA12", 5, sequenceOf(b0))
+        val b2 = Commit("fix: test 13", "SHA13", 6, sequenceOf(b1))
+        val b3 = Commit("fix: msg", "SHA14", 7, sequenceOf(b2))
 
         // when
         val versions = getVersion(tags, b3, groupVersions = false)
@@ -434,6 +434,27 @@ class SemVersionFinderTest {
     }
 
     @Test
+    fun `test long lived develop branch should not count commits twice`() {
+        val m1 = Commit("Initial commit", "1", 1, emptySequence())
+        val d2 = Commit("fix: a fix", "2", 2, sequenceOf(m1))
+        val d3 = Commit("feat: a feat", "3", 3, sequenceOf(d2))
+        val m4 = Commit("merge branch develop", "4", 4, sequenceOf(m1, d3))
+        val m5 = Commit("release: v1.0.0", "5", 5, sequenceOf(m4))
+        val d6 = Commit("merge branch master into develop", "6", 6, sequenceOf(d3, m5))
+        val d7 = Commit("feat: a feat", "7", 7, sequenceOf(d6))
+        val d8 = Commit("feat: a feat", "8", 8, sequenceOf(d7))
+        val m9 = Commit("merge branch develop", "9", 9, sequenceOf(m5,d8))
+        val m10 = Commit("docs: some doc", "10", 10, sequenceOf(m9))
+        val m11 = Commit("release: 1.1.0", "11", 11, sequenceOf(m10))
+        val d12 = Commit("merge branch master into develop", "12", 12, sequenceOf(d8, m11))
+
+        val actual = getVersion(emptyList(), d12, false)
+
+        assertEquals("1.1.1-SNAPSHOT+001", actual.toInfoVersionString())
+    }
+
+
+    @Test
     fun testIncrementVersion_dirty() {
         assertEquals("1.1.1-SNAPSHOT", getVersionFromTagAndDirty("v1.1.0"))
         assertEquals("2.2.3-SNAPSHOT", getVersionFromTagAndDirty("v2.2.2"))
@@ -525,12 +546,12 @@ class SemVersionFinderTest {
 
     private fun asCommit(commits: List<String>) = asCommits(commits.reversed()).first()
 
-    private fun asCommits(commits: List<String>): Sequence<Commit> {
-        return commits.take(1).map { Commit("commit message", it, asCommits(commits.drop(1))) }.asSequence()
+    private fun asCommits(commits: List<String>, commitTime: Int = 0): Sequence<Commit> {
+        return commits.take(1).map { Commit("commit message", it, commitTime, asCommits(commits.drop(1), commitTime + 1)) }.asSequence()
     }
 
-    private fun asCommits(shas: Iterable<Pair<String, String>>): Sequence<Commit> {
-        return shas.take(1).map { Commit(it.second, it.first, asCommits(shas.drop(1))) }.asSequence()
+    private fun asCommits(shas: Iterable<Pair<String, String>>, commitTime: Int = 0): Sequence<Commit> {
+        return shas.take(1).map { Commit(it.second, it.first, commitTime,  asCommits(shas.drop(1), commitTime + 1)) }.asSequence()
     }
 
     private fun generateSHAString(range: IntRange): List<String> {

@@ -119,14 +119,14 @@ internal class GitProvider(private val settings: SemverSettings) {
 
     internal fun getHeadCommit(it: Repository): Commit {
         val revWalk = RevWalk(it)
-        val head = it.resolve("HEAD") ?: return Commit("", "", emptySequence())
+        val head = it.resolve("HEAD") ?: return Commit("", "", 0, emptySequence())
         val revCommit = revWalk.parseCommit(head)
         revWalk.markStart(revCommit)
         return getCommit(revCommit, revWalk)
     }
 
     private fun getCommit(commit: RevCommit, revWalk: RevWalk): Commit {
-        return Commit(commit.fullMessage, commit.name, sequence {
+        return Commit(commit.fullMessage, commit.name, commit.commitTime, sequence {
             for (parent in commit.parents) {
                 revWalk.parseHeaders(parent)
                 yield(getCommit(parent, revWalk))

@@ -113,4 +113,19 @@ class GitSemverPluginTest {
             task.createRelease()
         }.doesNotThrowAnyException()
     }
+
+    @Test
+    fun `plugin version for a git directory`() {
+        val project = ProjectBuilder.builder().build()
+        project.plugins.apply("com.github.jmongard.git-semver-plugin")
+        val c = project.extensions.findByName("semver") as GitSemverPluginExtension
+
+//        c.gitDirectory.set(File("c:/dev/src/test1"))
+        c.gitDirectory.set(project.layout.projectDirectory)
+
+        val task = project.tasks.findByName("printVersion") as PrintTask
+
+        assertThat(task).isNotNull()
+        assertThatCode { task.print() }.doesNotThrowAnyException()
+    }
 }

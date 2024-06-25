@@ -90,7 +90,7 @@ class MutableSemVersionTest {
     fun revisionString() {
         val settings = SemverSettings()
         val semver = MutableSemVersion.tryParse(Tag("1.2.3", SHA))!!
-        val commit = Commit("fix: a fix", SHA, emptySequence())
+        val commit = Commit("fix: a fix", SHA, 0, emptySequence())
         semver.updateFromCommit(commit,  settings, null)
         semver.updateFromCommit(commit,  settings, null)
         semver.updateFromCommit(commit,  settings, null)
@@ -99,8 +99,8 @@ class MutableSemVersionTest {
 
         val actual = semver.toSemVersion().revisionString()
 
-        assertThat(actual).isEqualTo("1.2.3.4");
-        assertThat(semver.toSemVersion()).hasToString("1.2.4+004.sha.8727a3e");
+        assertThat(actual).isEqualTo("1.2.3.4")
+        assertThat(semver.toSemVersion()).hasToString("1.2.4+004.sha.8727a3e")
     }
 
     @ParameterizedTest

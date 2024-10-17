@@ -22,6 +22,7 @@ class GitSemverPluginFunctionalTest {
         fun gradleVersions(): List<Arguments> {
             return listOf(
                 Arguments.of("8.6"),
+                Arguments.of("8.7"),
                 Arguments.of("7.6.4"),
 //                Arguments.of("6.9.4"),
 //                Arguments.of("5.6.4")

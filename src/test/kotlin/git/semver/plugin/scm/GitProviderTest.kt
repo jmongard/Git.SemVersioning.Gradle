@@ -124,6 +124,31 @@ class GitProviderTest {
         }
     }
 
+    @Test
+    fun changeLog_stops_at_prerelease() {
+        val gitDir = File("build/integrationTest33")
+        gitDir.mkdirs()
+
+        val gitProvider = GitProvider(SemverSettings())
+        Git.init().setDirectory(gitDir).call().use {
+            initOrReset(it, gitProvider)
+            commit(it, "fix: first change", gitProvider)
+            release(gitProvider, it, "alpha.1")
+            commit(it, "build: some changes", gitProvider)
+            commit(it, "feat: another feature", gitProvider)
+            commit(it, "fix: another change", gitProvider)
+            release(gitProvider, it, "-")
+
+            val actual = gitProvider().changeLog(it)
+
+            assertThat(actual.map(Commit::toString))
+                .contains("feat: another feature")
+                .contains("fix: another change")
+                .contains("release: v0.1.0")
+                .doesNotContain("fix: first change")
+        }
+    }
+
     private fun lotsOfCommits(it: Git, gitProvider: GitProvider) {
         initOrReset(it, gitProvider)
         commit(it, "build: some changes", gitProvider)

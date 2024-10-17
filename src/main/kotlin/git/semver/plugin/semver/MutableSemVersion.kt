@@ -231,12 +231,13 @@ internal class MutableSemVersion(
         }
     }
 
-    internal fun mergeChanges(versions: List<MutableSemVersion>) {
+    internal fun mergeChanges(versions: List<MutableSemVersion>): MutableSemVersion {
         this.commitCount = versions.sumOf { it.commitCount }
         this.bumpPatch = versions.sumOf { it.bumpPatch }
         this.bumpMinor = versions.sumOf { it.bumpMinor }
         this.bumpMajor = versions.sumOf { it.bumpMajor }
         this.bumpPre = versions.sumOf { it.bumpPre }
+        return this
     }
 
     private val hasPendingChanges

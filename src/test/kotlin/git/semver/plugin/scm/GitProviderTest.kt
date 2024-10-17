@@ -233,7 +233,7 @@ class GitProviderTest {
             commit(it, "fix: update semver plugin", gitProvider)
             val actual = release(gitProvider, it, "-")
 
-            assertEquals("0.0.2", actual.toVersionString())
+            assertEquals("0.0.3", actual.toVersionString())
         }
         printFoot()
     }
@@ -254,7 +254,7 @@ class GitProviderTest {
             commit(it, "fix: update semver plugin", gitProvider)
             val actual = release(gitProvider, it, "-")
 
-            assertEquals("0.0.2", actual.toVersionString())
+            assertEquals("0.0.3", actual.toVersionString())
         }
         printFoot()
     }

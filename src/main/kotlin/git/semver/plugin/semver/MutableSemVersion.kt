@@ -141,10 +141,10 @@ internal class MutableSemVersion(
                 }
 
             settings.patchRegex.containsMatchIn(text) ->
-                if (!isPreRelease) {
+                if (preRelease.number == null) {
                     bumpPatch += 1
                     bumpPre = 0
-                } else if (preRelease.number != null) {
+                } else {
                     bumpPre += 1
                 }
         }

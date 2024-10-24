@@ -5,8 +5,8 @@ import java.io.Serializable
 abstract class BaseSettings(
     var defaultPreRelease: String = "SNAPSHOT",
     var releasePattern: String = "\\Arelease(?:\\([^()]+\\))?:",
-    var patchPattern: String = "\\Afix(?:\\([^()]+\\))?:",
-    var minorPattern: String = "\\Afeat(?:\\([^()]+\\))?:",
+    var patchPattern: String = "\\Afix!?(?:\\([^()]+\\))?:",
+    var minorPattern: String = "\\Afeat!?(?:\\([^()]+\\))?:",
     var majorPattern: String = "\\A\\w+(?:\\([^()]+\\))?!:|^BREAKING[ -]CHANGE:",
     var releaseCommitTextFormat: String = "release: v%s\n\n%s",
     var releaseTagNameFormat: String = "%s",

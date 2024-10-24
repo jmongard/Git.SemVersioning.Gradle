@@ -312,6 +312,7 @@ class SemVersionFinderTest {
         assertEquals("1.1.1-SNAPSHOT+003", getVersionFromTagAndCommits("v1.1.0", "Commit 1", "Commit 2", "Commit 3"))
         assertEquals("1.2.1-SNAPSHOT+003", getVersionFromTagAndCommits("v1.2", "Commit 1", "Commit 2", "Commit 3"))
         assertEquals("2.2.3-SNAPSHOT+001", getVersionFromTagAndCommits("v2.2.2", "Commit 1"))
+        assertEquals("0.3.0-SNAPSHOT+001", getVersionFromTagAndCommits("v0.2.2", "feat!: Version 0 not updating major on breaking change"))
         assertEquals("3.0.0-SNAPSHOT+001", getVersionFromTagAndCommits("v2.2.2", "refactor!: drop some support"))
         assertEquals(
             "3.0.0-SNAPSHOT+001",

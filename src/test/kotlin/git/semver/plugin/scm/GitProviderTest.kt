@@ -55,7 +55,7 @@ class GitProviderTest {
 
             val actual = release(gitProvider, it, "-")
 
-            assertEquals("2.0.0", actual.toVersionString())
+            assertEquals("3.0.0", actual.toVersionString())
         }
 
         printFoot()
@@ -74,7 +74,7 @@ class GitProviderTest {
 
             val actual = release(gitProvider, it, "-")
 
-            assertEquals("2.0.0", actual.toVersionString())
+            assertEquals("3.0.0", actual.toVersionString())
         }
         printFoot()
     }
@@ -119,7 +119,7 @@ class GitProviderTest {
             assertThat(actual.map(Commit::toString))
                 .contains("feat: another feature")
                 .contains("feat!: breaking feature")
-                .contains("release: v2.0.0")
+                .contains("release: v3.0.0")
                 .doesNotContain("docs: updated readme")
         }
     }
@@ -151,6 +151,7 @@ class GitProviderTest {
 
     private fun lotsOfCommits(it: Git, gitProvider: GitProvider) {
         initOrReset(it, gitProvider)
+        commit(it, "release: 1.0.0", gitProvider)
         commit(it, "build: some changes", gitProvider)
         release(gitProvider, it)
         commit(it, "docs: updated readme", gitProvider)

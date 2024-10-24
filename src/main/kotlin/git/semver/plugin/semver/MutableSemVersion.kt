@@ -125,7 +125,7 @@ internal class MutableSemVersion(
         text: String
     ) {
         when {
-            settings.majorRegex.containsMatchIn(text) ->
+            major > 0 && settings.majorRegex.containsMatchIn(text) ->
                 if (!isPreRelease || major == initialVersion.major) {
                     bumpMajor += 1
                     bumpMinor = 0

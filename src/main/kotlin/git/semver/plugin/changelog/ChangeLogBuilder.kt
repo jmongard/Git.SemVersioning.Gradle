@@ -12,7 +12,7 @@ class ChangeLogBuilder(
 
     fun formatChanges(block: ChangeLogTextFormatter.() -> Unit) {
         for (commitInfo in remainingCommitInfos()) {
-            val formatter = ChangeLogTextFormatter(commitInfo)
+            val formatter = ChangeLogTextFormatter(commitInfo, constants)
             formatter.block()
             append(formatter.build())
             context.flagCommit(commitInfo)
@@ -138,7 +138,8 @@ class ChangeLogBuilder(
 }
 
 class ChangeLogTextFormatter(
-    val commitInfo: ChangeLogFormatter.CommitInfo
+    val commitInfo: ChangeLogFormatter.CommitInfo,
+    val constants: ChangeLogTexts
 ) : DocumentBuilder() {
     companion object {
         fun sanitizeHtml(str: String): String {
@@ -174,25 +175,26 @@ class ChangeLogTextFormatter(
         }
     }
 
-    fun header() = (sanitizeHtml(commitInfo.message ?: commitInfo.text)).lineSequence().first()
+    fun header() = sanitizeHtml(constants.headerFormat(commitInfo))
+
+    fun fullHeader() = sanitizeHtml(constants.fullHeaderFormat(commitInfo))
+
+    fun scope() = constants.scopeFormat(commitInfo)
+
+    fun type() = constants.typeFormat(commitInfo)
+
+    fun hash() = constants.hashFormat(commitInfo)
+
+    fun authorName(format: String = "%s") =
+        commitInfo.commits.map{ format.format(it.authorName) }.distinct().joinToString(" ", "", "")
+
+    fun authorNameAndEmail(format: String = "%s [%s]") =
+        commitInfo.commits.map { format.format(it.authorName, it.authorEmail)}.distinct().joinToString(" ", "", "")
 
     fun body() = sanitizeHtml(commitInfo.text).lineSequence()
         .drop(1)
         .dropWhile { it.isEmpty() }
         .takeWhile { it.isNotEmpty() }
-
-    fun fullHeader() = sanitizeHtml(commitInfo.text).lineSequence().first()
-
-    fun scope(format: String = "%s: ") = commitInfo.scope?.let { format.format(it) }.orEmpty()
-
-    fun type(format: String = "%s: ") = commitInfo.type?.let { format.format(it) }.orEmpty()
-    fun hash(format: String = "%s", len: Int = 40) =
-        commitInfo.commits.joinToString(" ", "", " ") { format.format(it.sha.take(len)) }
-
-    fun authorName(format: String = "%s") =
-        commitInfo.commits.map{ format.format(it.authorName) }.distinct().joinToString(" ", "", "")
-    fun authorNameAndEmail(format: String = "%s <%s>") =
-        commitInfo.commits.map { format.format(it.authorName, it.authorEmail)}.distinct().joinToString(" ", "", "")
 }
 
 open class DocumentBuilder {

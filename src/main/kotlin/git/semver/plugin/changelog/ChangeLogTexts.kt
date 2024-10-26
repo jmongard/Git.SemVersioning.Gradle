@@ -1,7 +1,7 @@
 package git.semver.plugin.changelog
 
 /**
- * The texts used to build the change log.
+ * The settings and texts used to build the change log.
  */
 open class ChangeLogTexts(
     /**
@@ -65,4 +65,20 @@ open class ChangeLogTexts(
 
     var changeLogPattern: String = "\\A(?<Type>\\w+)(?:\\((?<Scope>[^()]+)\\))?!?:\\s*(?<Message>(?:.|\n)*)"
 
+
+    var headerFormat: (ChangeLogFormatter.CommitInfo) -> String = { commitInfo ->
+        (commitInfo.message ?: commitInfo.text).lineSequence().first()
+    }
+    var fullHeaderFormat: (ChangeLogFormatter.CommitInfo) -> String = { commitInfo ->
+        commitInfo.text.lineSequence().first()
+    }
+    var scopeFormat: (ChangeLogFormatter.CommitInfo) -> String = { commitInfo ->
+        commitInfo.scope?.let { "$it: " }.orEmpty()
+    }
+    var typeFormat: (ChangeLogFormatter.CommitInfo) -> String = { commitInfo ->
+        commitInfo.type?.let { "$it: " }.orEmpty()
+    }
+    var hashFormat: (ChangeLogFormatter.CommitInfo) -> String = { commitInfo ->
+        commitInfo.commits.joinToString(" ", "", " ") { it.sha }
+    }
 }

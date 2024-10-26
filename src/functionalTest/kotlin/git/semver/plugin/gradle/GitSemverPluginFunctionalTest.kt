@@ -21,7 +21,7 @@ class GitSemverPluginFunctionalTest {
         @JvmStatic
         fun gradleVersions(): List<Arguments> {
             return listOf(
-                Arguments.of("8.6"),
+//                Arguments.of("8.6"),
                 Arguments.of("8.7"),
                 Arguments.of("7.6.4"),
 //                Arguments.of("6.9.4"),
@@ -32,7 +32,8 @@ class GitSemverPluginFunctionalTest {
 
     @ParameterizedTest
     @MethodSource("gradleVersions")
-    fun `can run release task`(version: String) {
+    @NullSource
+    fun `can run release task`(version: String?) {
         val projectDir = setupTestProject()
 
         val releaseResult = run(
@@ -50,7 +51,8 @@ class GitSemverPluginFunctionalTest {
 
     @ParameterizedTest
     @MethodSource("gradleVersions")
-    fun `can run release task with --no-tag and --no-commit`(version: String) {
+    @NullSource
+    fun `can run release task with --no-tag and --no-commit`(version: String?) {
         val projectDir = setupTestProject()
 
         val releaseResult2 = run(
@@ -71,7 +73,7 @@ class GitSemverPluginFunctionalTest {
     fun `can run testTask task`(version: String?) {
         val projectDir = setupTestProject()
 
-        val result = run(projectDir, version, "testTask", "--configuration-cache")
+        val result = run(projectDir, version, "testTask", "--configuration-cache", "--stacktrace")
 
         assertThat(result.output).containsPattern("\\d+\\.\\d+\\.\\d+")
         assertThat(result.output).containsPattern("ProjVer: \\d+\\.\\d+\\.\\d+")
@@ -138,6 +140,9 @@ class GitSemverPluginFunctionalTest {
                 semver {
                   changeLogTexts {
                     header = "# Test changelog"
+                    hashFormat =  { commitInfo ->
+                        commitInfo.commits.joinToString(" <<<", "", ">>> ") { it.sha }
+                    }
                   }
 //                  changeLogFormat = git.semver.plugin.changelog.ChangeLogFormat.defaultChangeLog
 //                  changeLogFormat = git.semver.plugin.changelog.ChangeLogFormat.simpleChangeLog
@@ -147,7 +152,7 @@ class GitSemverPluginFunctionalTest {
                     withType("test") {
                     appendLine("## Test")
                     formatChanges {
-                        appendLine("- ${'$'}{scope()}${'$'}{header()}")
+                        appendLine("- ${'$'}{scope()}${'$'}{header()} ${'$'}{hash()}")
                     }
                     appendLine()
                     }

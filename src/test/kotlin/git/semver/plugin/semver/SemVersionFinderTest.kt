@@ -2,19 +2,22 @@ package git.semver.plugin.semver
 
 import git.semver.plugin.scm.Commit
 import git.semver.plugin.scm.Tag
+import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.Arguments
+import org.junit.jupiter.params.provider.MethodSource
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class SemVersionFinderTest {
-    companion object {
+private const val FIFTH = "0000005"
+private const val FOURTH = "0000004"
+private const val THIRD = "0000003"
+private const val SECOND = "0000002"
+private const val FIRST = "0000001"
+private const val ZERO = "0000000"
 
-        private const val FIFTH = "0000005"
-        private const val FOURTH = "0000004"
-        private const val THIRD = "0000003"
-        private const val SECOND = "0000002"
-        private const val FIRST = "0000001"
-        private const val ZERO = "0000000"
-    }
+class SemVersionFinderTest {
+
 
     @Test
     fun release_and_pre_release_tags() {
@@ -254,46 +257,9 @@ class SemVersionFinderTest {
         assertEquals("1.0.1-RC.3+001", version.toInfoVersionString())
     }
 
-    @Test
-    fun `test update from commit pre-release dirty`() {
-        assertEquals("1.1.1-Beta.3+001", getVersionFromTagAndPreAndCommitDirty("v1.1.0", "1.1.1-Beta.2", "Commit 1"))
-        assertEquals("2.2.4-Alpha+001", getVersionFromTagAndPreAndCommitDirty("v2.2.2", "2.2.3-Alpha", "Commit 1"))
-        assertEquals("2.2.3-Alpha.2+001", getVersionFromTagAndPreAndCommitDirty("v2.2.2", "2.2.3-Alpha.1", "fix: bug"))
-        assertEquals("2.2.3-Beta.4+001", getVersionFromTagAndPreAndCommitDirty("v2.2.2", "2.2.3-Beta.3", "fix: bug"))
-        assertEquals(
-            "3.0.0-Beta.2+001",
-            getVersionFromTagAndPreAndCommitDirty("v2.2.2", "3.0.0-Beta.1", "refactor!: drop some support")
-        )
-        assertEquals(
-            "3.0.0-Beta.1+001",
-            getVersionFromTagAndPreAndCommitDirty("v2.2.2", "2.2.3-Beta.1", "refactor!: drop some support")
-        )
-        assertEquals(
-            "3.0.0-Beta.2+001",
-            getVersionFromTagAndPreAndCommitDirty(
-                "v2.2.2",
-                "3.0.0-Beta.1",
-                "feat: new api\r\n\r\nA message\r\n\r\nBREAKING CHANGE: drop support"
-            )
-        )
-        assertEquals(
-            "3.0.0-Beta.1+001",
-            getVersionFromTagAndPreAndCommitDirty(
-                "v2.2.2",
-                "2.2.3-Beta.1",
-                "feat: new api\r\n\r\nA message\r\n\r\nBREAKING CHANGE: drop support"
-            )
-        )
-        assertEquals("2.3.0-NEXT.2+001", getVersionFromTagAndPreAndCommitDirty("v2.2.2", "2.3.0-NEXT.1", "feat: new"))
-        assertEquals("2.3.0-NEXT.1+001", getVersionFromTagAndPreAndCommitDirty("v2.2.2", "2.2.3-NEXT.1", "feat: new"))
-        assertEquals(
-            "2.3.0-SNAPSHOT+002",
-            getVersionFromTagAndPreAndCommitDirty("v2.2.2", "1.0.0-IGNORED", "feat: new")
-        )
-        assertEquals("2.3.0-NEXT+001", getVersionFromTagAndPreAndCommitDirty("v2.2.2", "2.2.3-NEXT", "feat: new"))
-    }
-
-    private fun getVersionFromTagAndPreAndCommitDirty(tagName: String, preRelease: String, commit: String): String {
+    @ParameterizedTest
+    @MethodSource("test update from commit pre-release dirt testcases")
+    fun `test update from commit pre-release dirty`(expectedVersion: String, tagName: String, preRelease: String, commit: String) {
         val commits = listOf(
             FIRST to "release tagged",
             SECOND to "pre-release tagged",
@@ -304,74 +270,93 @@ class SemVersionFinderTest {
             Tag(preRelease, SECOND)
         )
 
-        return getVersion(tags, asCommits(commits.reversed()).first(), true).toInfoVersionString()
+        val actual = getVersion(tags, asCommits(commits.reversed()).first(), true).toInfoVersionString()
+
+        assertThat(actual).isEqualTo(expectedVersion)
     }
 
-    @Test
-    fun `test update from commit`() {
-        assertEquals("1.1.1-SNAPSHOT+003", getVersionFromTagAndCommits("v1.1.0", "Commit 1", "Commit 2", "Commit 3"))
-        assertEquals("1.2.1-SNAPSHOT+003", getVersionFromTagAndCommits("v1.2", "Commit 1", "Commit 2", "Commit 3"))
-        assertEquals("2.2.3-SNAPSHOT+001", getVersionFromTagAndCommits("v2.2.2", "Commit 1"))
-        assertEquals("0.3.0-SNAPSHOT+001", getVersionFromTagAndCommits("v0.2.2", "feat!: Version 0 not updating major on breaking change"))
-        assertEquals("3.0.0-SNAPSHOT+001", getVersionFromTagAndCommits("v2.2.2", "refactor!: drop some support"))
-        assertEquals(
-            "3.0.0-SNAPSHOT+001",
-            getVersionFromTagAndCommits(
+
+    @ParameterizedTest
+    @MethodSource("test update from commit testcases")
+    fun `test update from commit`(expectedVersion: String, tagName: String, commits: Array<String>) {
+        assertThat(getVersionFromTagAndCommits(tagName, *commits)).isEqualTo(expectedVersion)
+    }
+
+    companion object {
+        @JvmStatic
+        fun `test update from commit pre-release dirt testcases`() = listOf(
+            Arguments.of("1.1.1-Beta.3+001", "v1.1.0", "1.1.1-Beta.2", "Commit 1"),
+            Arguments.of("2.2.4-Alpha+001", "v2.2.2", "2.2.3-Alpha", "Commit 1"),
+            Arguments.of("2.2.3-Alpha.2+001", "v2.2.2", "2.2.3-Alpha.1", "fix: bug"),
+            Arguments.of("2.2.3-Beta.4+001", "v2.2.2", "2.2.3-Beta.3", "fix: bug"),
+            Arguments.of("3.0.0-Beta.2+001", "v2.2.2", "3.0.0-Beta.1", "refactor!: drop some support"),
+            Arguments.of("3.0.0-Beta.1+001", "v2.2.2", "2.2.3-Beta.1", "refactor!: drop some support"),
+            Arguments.of(
+                "3.0.0-Beta.2+001",
                 "v2.2.2",
-                "feat:  new api\r\n\r\nReplacing the old API\r\n\r\nBREAKING CHANGE: drop support"
-            )
+                "3.0.0-Beta.1",
+                "feat: new api\r\n\r\nA message\r\n\r\nBREAKING CHANGE: drop support"
+            ),
+            Arguments.of(
+                "3.0.0-Beta.1+001",
+                "v2.2.2",
+                "2.2.3-Beta.1",
+                "feat: new api\r\n\r\nA message\r\n\r\nBREAKING CHANGE: drop support"
+            ),
+            Arguments.of("2.3.0-NEXT.2+001", "v2.2.2", "2.3.0-NEXT.1", "feat: new"),
+            Arguments.of("2.3.0-NEXT.1+001", "v2.2.2", "2.2.3-NEXT.1", "feat: new"),
+            Arguments.of("2.3.0-SNAPSHOT+002", "v2.2.2", "1.0.0-IGNORED", "feat: new"),
+            Arguments.of("2.3.0-NEXT+001", "v2.2.2", "2.2.3-NEXT", "feat: new")
         )
-        assertEquals("2.3.0-SNAPSHOT+001", getVersionFromTagAndCommits("v2.2.2", "feat: new"))
-        assertEquals("2.2.3-SNAPSHOT+001", getVersionFromTagAndCommits("v2.2.2", "fix: bug"))
-        assertEquals("1.0.1-SNAPSHOT+002", getVersionFromTagAndCommits("v1.0.0", "fix: bug", "fix: bug"))
 
-        assertEquals("3.0.0", getVersionFromTagAndCommits("v2.2.2", "refactor!: drop some support", "release: 3.0.0"))
-        assertEquals("2.2.3", getVersionFromTagAndCommits("v2.2.2", "fix:   bug", "release: 2.2.3"))
-        assertEquals("1.0.2", getVersionFromTagAndCommits("v1.0.0", "fix:   bug", "fix: bug", "release: 1.0.2"))
-        assertEquals(
-            "1.0.3-SNAPSHOT+002",
-            getVersionFromTagAndCommits("v1.0.0", "fix:   bug", "fix: bug", "release: 1.0.2", "fix: bug", "fix: bug")
-        )
-        assertEquals("2.3.0", getVersionFromTagAndCommits("v2.2.2", "feat:  wow", "release: 2.3.0"))
-        assertEquals("3.0.0", getVersionFromTagAndCommits("v2.2.2", "feat!: WOW", "release: 3.0.0"))
-        assertEquals(
-            "2.2.4-SNAPSHOT+001",
-            getVersionFromTagAndCommits("v2.2.2", "fix:   bug", "release: 2.2.3", "fix: bug")
-        )
-        assertEquals(
-            "2.3.1-SNAPSHOT+001",
-            getVersionFromTagAndCommits("v2.2.2", "feat:  new", "release: 2.3.0", "fix: bug")
-        )
-        assertEquals(
-            "3.0.1-SNAPSHOT+001",
-            getVersionFromTagAndCommits("v2.2.2", "feat!: WOW", "release: 3.0.0", "fix: bug")
-        )
-        assertEquals(
-            "2.3.0-SNAPSHOT+001",
-            getVersionFromTagAndCommits("v2.2.2", "fix:   bug", "release: 2.2.3", "feat: new")
-        )
-        assertEquals(
-            "2.4.0-SNAPSHOT+001",
-            getVersionFromTagAndCommits("v2.2.2", "feat:  new", "release: 2.3.0", "feat: new")
-        )
-        assertEquals(
-            "3.1.0-SNAPSHOT+001",
-            getVersionFromTagAndCommits("v2.2.2", "feat!: WOW", "release: 3.0.0", "feat: new")
-        )
-        assertEquals(
-            "3.0.0-SNAPSHOT+001",
-            getVersionFromTagAndCommits("v2.2.2", "fix:   bug", "release: 2.2.3", "feat!: WOW")
-        )
-        assertEquals(
-            "3.0.0-SNAPSHOT+001",
-            getVersionFromTagAndCommits("v2.2.2", "feat:  new", "release: 2.3.0", "feat!: WOW")
-        )
-        assertEquals(
-            "4.0.0-SNAPSHOT+001",
-            getVersionFromTagAndCommits("v2.2.2", "feat!: WOW", "release: 3.0.0", "feat!: WOW")
+        @JvmStatic
+        fun `test update from commit testcases`() = listOf(
+            Arguments.of("1.1.1-SNAPSHOT+003", "v1.1.0", arrayOf("Commit 1", "Commit 2", "Commit 3")),
+            Arguments.of("1.2.1-SNAPSHOT+003", "v1.2", arrayOf("Commit 1", "Commit 2", "Commit 3")),
+            Arguments.of("2.2.3-SNAPSHOT+001", "v2.2.2", arrayOf("Commit 1")),
+            Arguments.of(
+                "0.3.0-SNAPSHOT+001",
+                "v0.2.2",
+                arrayOf("feat!: Version 0 not updating major on breaking change")
+            ),
+            Arguments.of(
+                "0.2.3-SNAPSHOT+001",
+                "v0.2.2",
+                arrayOf("fix!: Version 0 not updating major on breaking change")
+            ),
+            Arguments.of("3.0.0-SNAPSHOT+001", "v2.2.2", arrayOf("refactor!: drop some support")),
+            Arguments.of(
+                "3.0.0-SNAPSHOT+001",
+                "v2.2.2", arrayOf(
+                    "feat:  new api\r\n\r\nReplacing the old API\r\n\r\nBREAKING CHANGE: drop support"
+                )
+            ),
+            Arguments.of("2.3.0-SNAPSHOT+001", "v2.2.2", arrayOf("feat: new")),
+            Arguments.of("2.2.3-SNAPSHOT+001", "v2.2.2", arrayOf("fix: bug")),
+            Arguments.of("1.0.1-SNAPSHOT+002", "v1.0.0", arrayOf("fix: bug", "fix: bug")),
+
+            Arguments.of("3.0.0", "v2.2.2", arrayOf("refactor!: drop some support", "release: 3.0.0")),
+            Arguments.of("2.2.3", "v2.2.2", arrayOf("fix:   bug", "release: 2.2.3")),
+            Arguments.of("1.0.2", "v1.0.0", arrayOf("fix:   bug", "fix: bug", "release: 1.0.2")),
+            Arguments.of(
+                "1.0.3-SNAPSHOT+002",
+                "v1.0.0",
+                arrayOf("fix:   bug", "fix: bug", "release: 1.0.2", "fix: bug", "fix: bug")
+            ),
+            Arguments.of("2.3.0", "v2.2.2", arrayOf("feat:  wow", "release: 2.3.0")),
+            Arguments.of("3.0.0", "v2.2.2", arrayOf("feat!: WOW", "release: 3.0.0")),
+            Arguments.of("2.2.4-SNAPSHOT+001", "v2.2.2", arrayOf("fix:   bug", "release: 2.2.3", "fix: bug")),
+            Arguments.of("2.3.1-SNAPSHOT+001", "v2.2.2", arrayOf("feat:  new", "release: 2.3.0", "fix: bug")),
+            Arguments.of("3.0.1-SNAPSHOT+001", "v2.2.2", arrayOf("feat!: WOW", "release: 3.0.0", "fix: bug")),
+            Arguments.of("2.3.0-SNAPSHOT+001", "v2.2.2", arrayOf("fix:   bug", "release: 2.2.3", "feat: new")),
+            Arguments.of("2.4.0-SNAPSHOT+001", "v2.2.2", arrayOf("feat:  new", "release: 2.3.0", "feat: new")),
+            Arguments.of("3.1.0-SNAPSHOT+001", "v2.2.2", arrayOf("feat!: WOW", "release: 3.0.0", "feat: new")),
+            Arguments.of("3.0.0-SNAPSHOT+001", "v2.2.2", arrayOf("fix:   bug", "release: 2.2.3", "feat!: WOW")),
+            Arguments.of("3.0.0-SNAPSHOT+001", "v2.2.2", arrayOf("feat:  new", "release: 2.3.0", "feat!: WOW")),
+            Arguments.of("4.0.0-SNAPSHOT+001", "v2.2.2", arrayOf("feat!: WOW", "release: 3.0.0", "feat!: WOW")),
         )
     }
-
+    
     private fun getVersionFromTagAndCommits(tagName: String, vararg commits: String): String {
         val commitList =
             commits.mapIndexed { idx, it -> "000%02x".format(idx) to it }.reversed() + Pair(FIRST, "release: $tagName")

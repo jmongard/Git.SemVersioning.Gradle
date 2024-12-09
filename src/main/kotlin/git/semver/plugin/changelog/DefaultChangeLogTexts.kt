@@ -17,20 +17,19 @@ import git.semver.plugin.changelog.DefaultHeaderTexts.REFACTOR
 
 internal object DefaultHeaderTexts {
     const val TOP_HEADER = "## What's Changed"
-    const val BREAKING_CHANGES = "### Breaking Changes 🛠"
-    const val OTHER_CHANGES = "### Other Changes \uD83D\uDCA1"
-    const val BUG_FIXES = "### Bug Fixes \uD83D\uDC1E"
-    const val NEW_FEATURE = "### New Features \uD83C\uDF89"
-    const val TESTS = "### Tests ✅"
-    const val DOCUMENTATION = "### Documentation \uD83D\uDCD6"
-    const val DEPENDENCY_UPDATES = "### Dependency Updates \uD83D\uDE80"
-    const val BUILD = "### Build \uD83D\uDC18 & CI ⚙\uFE0F"
+    const val BREAKING_CHANGES = "### \uD83D\uDEE0 Breaking Changes"
+    const val OTHER_CHANGES = "### \uD83D\uDCA1 Other Changes"
+    const val BUG_FIXES = "### \uD83D\uDC1E Bug Fixes "
+    const val NEW_FEATURE = "### \uD83C\uDF89 New Features"
+    const val TESTS = "### ✅ Tests"
+    const val DOCUMENTATION = "### \uD83D\uDCD6 Documentation"
+    const val DEPENDENCY_UPDATES = "### \uD83D\uDE80 Dependency Updates"
+    const val BUILD = "### \uD83D\uDC18 Build & ⚙\uFE0F CI"
     const val CI = BUILD
-    const val CHORES = "### Chores \uD83D\uDD27"
-    const val PERFORMANCE_ENHANCEMENTS = "### Performance Enhancements ⚡"
-    const val REFACTOR = "### Refactorings \uD83D\uDE9C"
+    const val CHORES = "### \uD83D\uDD27 Chores"
+    const val PERFORMANCE_ENHANCEMENTS = "### ⚡ Performance Enhancements"
+    const val REFACTOR = "### \uD83D\uDE9C Refactorings"
 }
-
 
 object DefaultChangeLogTexts : ChangeLogTexts(mutableMapOf(
     HEADER to TOP_HEADER,

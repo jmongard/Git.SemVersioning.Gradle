@@ -1,20 +1,20 @@
 package git.semver.plugin.changelog
 
-import git.semver.plugin.changelog.DefaultHeaderTextsEmojisLast.BREAKING_CHANGES
-import git.semver.plugin.changelog.DefaultHeaderTextsEmojisLast.BUG_FIXES
-import git.semver.plugin.changelog.DefaultHeaderTextsEmojisLast.BUILD
-import git.semver.plugin.changelog.DefaultHeaderTextsEmojisLast.CHORES
-import git.semver.plugin.changelog.DefaultHeaderTextsEmojisLast.CI
-import git.semver.plugin.changelog.DefaultHeaderTextsEmojisLast.DEPENDENCY_UPDATES
-import git.semver.plugin.changelog.DefaultHeaderTextsEmojisLast.DOCUMENTATION
-import git.semver.plugin.changelog.DefaultHeaderTextsEmojisLast.NEW_FEATURE
-import git.semver.plugin.changelog.DefaultHeaderTextsEmojisLast.OTHER_CHANGES
-import git.semver.plugin.changelog.DefaultHeaderTextsEmojisLast.PERFORMANCE_ENHANCEMENTS
-import git.semver.plugin.changelog.DefaultHeaderTextsEmojisLast.TESTS
-import git.semver.plugin.changelog.DefaultHeaderTextsEmojisLast.TOP_HEADER
-import git.semver.plugin.changelog.DefaultHeaderTextsEmojisLast.REFACTOR
+import git.semver.plugin.changelog.EmojisLastHeaderTexts.BREAKING_CHANGES
+import git.semver.plugin.changelog.EmojisLastHeaderTexts.BUG_FIXES
+import git.semver.plugin.changelog.EmojisLastHeaderTexts.BUILD
+import git.semver.plugin.changelog.EmojisLastHeaderTexts.CHORES
+import git.semver.plugin.changelog.EmojisLastHeaderTexts.CI
+import git.semver.plugin.changelog.EmojisLastHeaderTexts.DEPENDENCY_UPDATES
+import git.semver.plugin.changelog.EmojisLastHeaderTexts.DOCUMENTATION
+import git.semver.plugin.changelog.EmojisLastHeaderTexts.NEW_FEATURE
+import git.semver.plugin.changelog.EmojisLastHeaderTexts.OTHER_CHANGES
+import git.semver.plugin.changelog.EmojisLastHeaderTexts.PERFORMANCE_ENHANCEMENTS
+import git.semver.plugin.changelog.EmojisLastHeaderTexts.TESTS
+import git.semver.plugin.changelog.EmojisLastHeaderTexts.TOP_HEADER
+import git.semver.plugin.changelog.EmojisLastHeaderTexts.REFACTOR
 
-internal object DefaultHeaderTextsEmojisLast {
+internal object EmojisLastHeaderTexts {
     const val TOP_HEADER = "## What's Changed"
     const val BREAKING_CHANGES = "### Breaking Changes 🛠"
     const val OTHER_CHANGES = "### Other Changes \uD83D\uDCA1"
@@ -30,7 +30,7 @@ internal object DefaultHeaderTextsEmojisLast {
     const val REFACTOR = "### Refactorings \uD83D\uDE9C"
 }
 
-object DefaultChangeLogTextsEmojisLast : ChangeLogTexts(mutableMapOf(
+object EmojisLastChangeLogTexts : ChangeLogTexts(mutableMapOf(
     HEADER to TOP_HEADER,
     BREAKING_CHANGE to BREAKING_CHANGES,
     OTHER_CHANGE to OTHER_CHANGES,

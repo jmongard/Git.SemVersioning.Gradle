@@ -69,6 +69,6 @@ class GitSemverPluginExtensionTest {
         assertThat(actual)
             .contains("# Test Change Log")
             .contains("## Test")
-            .contains("- Test Commit (John Doe) (John Doe <john.doe@example.com>)")
+            .contains("- Test Commit (John Doe) (John Doe [john.doe@example.com])")
     }
 }

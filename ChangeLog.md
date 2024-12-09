@@ -11,23 +11,33 @@ The default texts are defined like this:
 semver {
     changeLogTexts {
         headerTexts = mutableMapOf(
-            "fix" to "### Bug Fixes \uD83D\uDC1E",
-            "feat" to "### New Features \uD83C\uDF89",
-            "test" to "### Tests ✅",
-            "docs" to "### Documentation \uD83D\uDCD6",
-            "deps" to "### Dependency Updates \uD83D\uDE80",
-            "build" to "### Build \uD83D\uDC18 & CI ⚙\uFE0F",
-            "ci" to "### Build \uD83D\uDC18 & CI ⚙\uFE0F",
-            "chore" to "### Chores \uD83D\uDD27",
-            "perf" to "### Performance Enhancements ⚡",
-            "refactor" to "### Refactorings \uD83D\uDE9C"
+            "fix" to "### \uD83D\uDC1E Bug Fixes",
+            "feat" to "### \uD83C\uDF89 New Features",
+            "test" to "### ✅ Tests",
+            "docs" to "### \uD83D\uDCD6 Documentation",
+            "deps" to "### \uD83D\uDE80 Dependency Updates",
+            "build" to "### \uD83D\uDC18 Build & ⚙\uFE0F CI",
+            "ci" to "### \uD83D\uDC18 Build & ⚙\uFE0F CI",
+            "chore" to "### \uD83D\uDD27 Chores",
+            "perf" to "### ⚡ Performance Enhancements",
+            "refactor" to "### \uD83D\uDE9C Refactorings"
         )
         header = "## What's Changed" // Set your custom header text
-        breakingChange = "### Breaking Changes 🛠" // Set your custom breaking change text
-        otherChange = "### Other Changes \uD83D\uDCA1" // Set your custom other change text
+        breakingChange = "### 🛠 Breaking Changes" // Set your custom breaking change text
+        otherChange = "### \uD83D\uDCA1 Other Changes" // Set your custom other change text
     }
 }
 ```
+
+Note: this is a change from how it looked before. If you want the emojis last like configure the plugin like this:
+```kotlin
+import git.semver.plugin.changelog.EmojisLastHeaderTexts
+
+semver {
+    changeLogTexts = EmojisLastHeaderTexts
+}
+```
+
 
 ### Plain header text
 

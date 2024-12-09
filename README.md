@@ -315,14 +315,16 @@ a shallow copy.
 ```
 
 
-## Limitations
+## Version 0.x.x
+Breaking changes for version 0.x.x do not automatically increase the major version. If you want to increase the major
+version, create a release commit manually and set the desired version number e.g.
 
-### Version 0.x.x
-There is currently no special handling for version 0.x.x. If you make breaking changes and want to preserve the 0.x.x 
-version create a release commit yourself and set the number as desired e.g.
 ```
-git commit -m "release: 0.1.2" --allow-empty 
+git commit -m "release: 1.0.0" --allow-empty 
 ```
+
+
+## Limitations
 
 ### Reverts
 The plugin does not handle commits reverting previous commits and referring to the reverted commit in the commit message. 

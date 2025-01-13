@@ -34,6 +34,7 @@ allprojects {
 
 [For the latest published version see the plugins page at Gradle.org](https://plugins.gradle.org/plugin/com.github.jmongard.git-semver-plugin)
 
+The plugin requires java version 17 to run. (Use version `0.13.0` if Java 8 is required.)
 
 ## Versioning
 
@@ -139,6 +140,8 @@ to an UTF-8 encoded file using `--file <filename>` e.g. `./gradlew printChangeLo
 Note: Use an absolute path for filename as the working directory might not be the one you expect if running 
 using gradle deamon. 
 
+Note: The `printChangeLog` task is currently only registered on the root project given that the plugin is applied there.
+
 ````shell
 $ gradlew printChangeLog
 
@@ -167,6 +170,7 @@ fail with an error if there exists local modification. It is possible to change 
  * **--preRelease**="pre-release": Change the current pre-release e.g. `--preRelease=alpha.1`.
    Set the pre-release to "-" e.g. `--preRelease=-` to promote a pre-release to a release.
 
+Note: The `releaseVersion` task is currently only registered on the root project given that the plugin is applied there.
 
 ## Example of how version is calculated 
 With setting: `groupVersionIncrements = true` (default)

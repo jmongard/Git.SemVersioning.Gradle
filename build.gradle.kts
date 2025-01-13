@@ -22,19 +22,14 @@ repositories {
 }
 
 dependencies {
-    implementation(kotlin("stdlib-jdk8"))
+    implementation(kotlin("stdlib"))
+    implementation("org.eclipse.jgit:org.eclipse.jgit:7.1.0.202411261347-r")
+    implementation("org.eclipse.jgit:org.eclipse.jgit.gpg.bc:7.1.0.202411261347-r")
+    implementation("org.slf4j:slf4j-api:1.7.36")
+
     testImplementation(kotlin("test-junit5"))
     testImplementation("org.junit.jupiter:junit-jupiter-params")
-    testImplementation("org.assertj:assertj-core:3.26.3")
-
-    implementation("org.eclipse.jgit:org.eclipse.jgit:5.13.3.202401111512-r")
-    implementation("org.eclipse.jgit:org.eclipse.jgit.gpg.bc:5.13.3.202401111512-r") {
-        exclude(group = "org.bouncycastle")
-    }
-    implementation("org.bouncycastle:bcpg-jdk18on:1.79")
-    implementation("org.bouncycastle:bcutil-jdk18on:1.79")
-    implementation("org.bouncycastle:bcpkix-jdk18on:1.79")
-    implementation("org.slf4j:slf4j-api:1.7.36")
+    testImplementation("org.assertj:assertj-core:3.27.2")
 }
 
 gradlePlugin {

@@ -13,6 +13,7 @@ import org.eclipse.jgit.revwalk.RevWalk
 import org.eclipse.jgit.util.FS
 import org.slf4j.LoggerFactory
 import java.io.File
+import java.util.*
 
 internal class GitProvider(private val settings: SemverSettings) {
     companion object {
@@ -131,7 +132,7 @@ internal class GitProvider(private val settings: SemverSettings) {
                 revWalk.parseHeaders(parent)
                 yield(getCommit(parent, revWalk))
             }
-        }, commit.authorIdent.name, commit.authorIdent.emailAddress, commit.authorIdent.`when`)
+        }, commit.authorIdent.name, commit.authorIdent.emailAddress, Date.from(commit.authorIdent.whenAsInstant))
     }
 
     internal fun checkDirty(noDirtyCheck: Boolean, isClean: Boolean) {

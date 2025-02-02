@@ -103,12 +103,23 @@ internal class GitProvider(private val settings: SemverSettings) {
             return true
         }
         logger.info("The Git repository is dirty. (Check: {})", settings.noDirtyCheck)
+        val changes = mapOf(
+            "added" to status.added.size,
+            "changed" to status.changed.size,
+            "removed" to status.removed.size,
+            "missing" to status.missing.size,
+            "modified" to status.modified.size,
+            "conflicting" to status.conflicting.size,
+            "untracked" to status.untracked.size
+        )
+        logger.info("Changes: {}", changes.filter { it.value > 0 }.keys.joinToString(", "))
         logger.debug("added: {}", status.added)
         logger.debug("changed: {}", status.changed)
         logger.debug("removed: {}", status.removed)
         logger.debug("conflicting: {}", status.conflicting)
         logger.debug("missing: {}", status.missing)
         logger.debug("modified: {}", status.modified)
+        logger.debug("untracked: {}", status.untracked)
         return settings.noDirtyCheck
     }
 

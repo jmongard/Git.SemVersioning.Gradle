@@ -12,7 +12,8 @@ abstract class BaseSettings(
     var releaseTagNameFormat: String = "%s",
     var groupVersionIncrements: Boolean = true,
     var noDirtyCheck: Boolean = false,
-    var noAutoBump: Boolean = false
+    var noAutoBump: Boolean = false,
+    var gitSigning: Boolean? = null // null means use the jgit default
 ) : Serializable {
     constructor(settings: BaseSettings) : this(
         settings.defaultPreRelease, settings.releasePattern, settings.patchPattern, settings.minorPattern,

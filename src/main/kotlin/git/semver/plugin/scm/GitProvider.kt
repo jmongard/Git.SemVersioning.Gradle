@@ -76,13 +76,17 @@ internal class GitProvider(private val settings: SemverSettings) {
         val isCommit = isFormatEnabled(params.commit, settings.releaseCommitTextFormat)
         if (isCommit) {
             val commitMessage = settings.releaseCommitTextFormat.format(versionString, params.message.orEmpty())
-            it.commit().setMessage(commitMessage.trim()).call()
+            val commitCommand = it.commit().setMessage(commitMessage.trim())
+            settings.gitSigning?.let(commitCommand::setSign) // Set signing if not set to null
+            commitCommand.call()
         }
 
         val isTag = isFormatEnabled(params.tag, settings.releaseTagNameFormat)
         if (isTag) {
             val name = settings.releaseTagNameFormat.format(versionString)
-            it.tag().setName(name).setMessage(params.message).call()
+            val tagCommand = it.tag().setName(name).setMessage(params.message)
+            settings.gitSigning?.let(tagCommand::setSigned) // Set signing if not set to null
+            tagCommand.call()
             println("Created new local Git tag: $name")
         }
 

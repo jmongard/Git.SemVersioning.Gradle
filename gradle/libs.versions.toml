@@ -16,6 +16,5 @@ assertj-core = { module = "org.assertj:assertj-core", version.ref = "assertj" }
 jgit-core = { module = "org.eclipse.jgit:org.eclipse.jgit", version.ref = "jgit" }
 jgit-gpg = { module = "org.eclipse.jgit:org.eclipse.jgit.gpg.bc", version.ref = "jgit" }
 junit-jupiter-params = { module = "org.junit.jupiter:junit-jupiter-params" }
-kotlin-stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib" }
 kotlin-test-junit5 = { module = "org.jetbrains.kotlin:kotlin-test-junit5" }
 slf4j-api = { module = "org.slf4j:slf4j-api", version.ref = "slf4j" }

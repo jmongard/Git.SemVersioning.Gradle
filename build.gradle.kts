@@ -22,7 +22,6 @@ repositories {
 }
 
 dependencies {
-    implementation(libs.kotlin.stdlib)
     implementation(libs.jgit.core)
     implementation(libs.jgit.gpg)
     implementation(libs.slf4j.api)

@@ -3,9 +3,9 @@ plugins {
     `java-gradle-plugin`
 
     // Apply the Kotlin JVM plugin to add support for Kotlin.
-    kotlin("jvm") version "1.9.10"
-    id("com.gradle.plugin-publish") version "1.2.1"
-    id("com.github.jmongard.git-semver-plugin") version "0.13.0"
+    alias(libs.plugins.kotlin.jvm)
+    alias(libs.plugins.plugin.publish)
+    alias(libs.plugins.git.semver)
     id("jacoco")
 }
 
@@ -22,14 +22,14 @@ repositories {
 }
 
 dependencies {
-    implementation(kotlin("stdlib"))
-    implementation("org.eclipse.jgit:org.eclipse.jgit:7.1.0.202411261347-r")
-    implementation("org.eclipse.jgit:org.eclipse.jgit.gpg.bc:7.1.0.202411261347-r")
-    implementation("org.slf4j:slf4j-api:1.7.36")
+    implementation(libs.kotlin.stdlib)
+    implementation(libs.jgit.core)
+    implementation(libs.jgit.gpg)
+    implementation(libs.slf4j.api)
 
-    testImplementation(kotlin("test-junit5"))
-    testImplementation("org.junit.jupiter:junit-jupiter-params")
-    testImplementation("org.assertj:assertj-core:3.27.2")
+    testImplementation(libs.kotlin.test.junit5)
+    testImplementation(libs.junit.jupiter.params)
+    testImplementation(libs.assertj.core)
 }
 
 gradlePlugin {

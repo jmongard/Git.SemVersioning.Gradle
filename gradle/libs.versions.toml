@@ -1,0 +1,21 @@
+[versions]
+assertj = "3.27.2"
+git-semver-plugin = "0.13.0"
+jgit = "7.1.0.202411261347-r"
+kotlin = "1.9.10"
+plugin-publish = "1.2.1"
+slf4j = "1.7.36"
+
+[plugins]
+git-semver = { id = "com.github.jmongard.git-semver-plugin", version.ref = "git-semver-plugin" }
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+plugin-publish = { id = "com.gradle.plugin-publish", version.ref = "plugin-publish" }
+
+[libraries]
+assertj-core = { module = "org.assertj:assertj-core", version.ref = "assertj" }
+jgit-core = { module = "org.eclipse.jgit:org.eclipse.jgit", version.ref = "jgit" }
+jgit-gpg = { module = "org.eclipse.jgit:org.eclipse.jgit.gpg.bc", version.ref = "jgit" }
+junit-jupiter-params = { module = "org.junit.jupiter:junit-jupiter-params" }
+kotlin-stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib" }
+kotlin-test-junit5 = { module = "org.jetbrains.kotlin:kotlin-test-junit5" }
+slf4j-api = { module = "org.slf4j:slf4j-api", version.ref = "slf4j" }

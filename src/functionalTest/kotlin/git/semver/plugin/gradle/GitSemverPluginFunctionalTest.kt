@@ -5,6 +5,7 @@ import org.eclipse.jgit.api.Git
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.GradleRunner
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.io.TempDir
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.CsvSource
@@ -18,6 +19,9 @@ import java.io.File
 class GitSemverPluginFunctionalTest {
 
     companion object {
+        @TempDir
+        lateinit var tempDir: File
+
         @JvmStatic
         fun gradleVersions(): List<Arguments> {
             return listOf(
@@ -125,7 +129,7 @@ class GitSemverPluginFunctionalTest {
         """.trimIndent();
 
         // Setup the test build
-        val projectDir = File("build/functionalTest")
+        val projectDir = tempDir.resolve("build/functionalTest")
         projectDir.mkdirs()
         projectDir.resolve(".gitignore").writeText(".gradle")
         projectDir.resolve("settings.gradle").writeText("include ':sub1'")

@@ -4,7 +4,7 @@ git-semver-plugin = "0.16.1"
 jgit = "7.3.0.202506031305-r"
 kotlin = "1.9.10"
 plugin-publish = "1.2.1"
-slf4j = "1.7.36"
+slf4j = "2.0.17"
 
 [plugins]
 git-semver = { id = "com.github.jmongard.git-semver-plugin", version.ref = "git-semver-plugin" }

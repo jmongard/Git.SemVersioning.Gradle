@@ -21,7 +21,7 @@ object ChangeLogFormat {
         }
 
         // Fixes and then Features from typesOrder
-        withType(types = constants.typesOrder.toTypedArray()) {
+        withType(*constants.typesOrder.toTypedArray()) {
             filterEmptyHeader(constants.headerTexts[groupKey]) {
                 appendLine(groupKey)
                 formatChanges {
@@ -75,7 +75,7 @@ object ChangeLogFormat {
             }
             appendLine()
         }
-        withType(types = constants.typesOrder.toTypedArray()) {
+        withType(*constants.typesOrder.toTypedArray()) {
             appendLine(constants.headerTexts[groupKey])
             formatChanges {
                 append("- ").append(scope()).appendLine(header())

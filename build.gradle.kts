@@ -1,3 +1,7 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 plugins {
     // Apply the Java Gradle plugin development plugin to add support for developing Gradle plugins
     `java-gradle-plugin`
@@ -61,6 +65,23 @@ val functionalTest by tasks.registering(Test::class) {
 }
 
 gradlePlugin.testSourceSets.add(functionalTestSourceSet)
+
+tasks.named<JavaCompile>("compileJava") {
+    targetCompatibility = JvmTarget.JVM_17.target
+}
+
+tasks.named<KotlinCompile>("compileKotlin") {
+    compilerOptions {
+        optIn = listOf("kotlin.io.path.ExperimentalPathApi")
+
+        // See https://docs.gradle.org/current/userguide/compatibility.html#java_runtime.
+        jvmTarget = JvmTarget.JVM_17
+
+        // See https://docs.gradle.org/current/userguide/compatibility.html#kotlin.
+        languageVersion = @Suppress("DEPRECATION") KotlinVersion.KOTLIN_1_4
+        apiVersion = @Suppress("DEPRECATION") KotlinVersion.KOTLIN_1_4
+    }
+}
 
 tasks.named<Task>("check") {
     // Run the functional tests as part of `check`

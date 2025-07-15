@@ -143,7 +143,7 @@ class VersionFinder(private val settings: SemverSettings, private val tags: Map<
         return when {
             parentSemVersions.isEmpty() -> versionZero()
             parentSemVersions.size == 1 -> parentSemVersions[0]
-            else -> parentSemVersions.max().mergeChanges(parentSemVersions)
+            else -> checkNotNull(parentSemVersions.maxOrNull()).mergeChanges(parentSemVersions)
         }
     }
 

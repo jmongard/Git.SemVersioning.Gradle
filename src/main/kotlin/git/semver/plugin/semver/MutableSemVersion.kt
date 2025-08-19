@@ -42,7 +42,7 @@ internal class MutableSemVersion(
                     getIntValue("Major"),
                     getIntValue("Minor"),
                     getIntValue("Patch"),
-                    parsePreRelease(getValue("PreRelease"))
+                    PreRelease.parse(getValue("PreRelease"))
                 ),
                 getIntValue("Revision")
             )
@@ -50,26 +50,13 @@ internal class MutableSemVersion(
             return version
         }
 
-        internal fun parsePreRelease(value: String?): PreRelease {
-            if (value == null) {
-                return PreRelease.noPreRelease
-            }
-
-            val prefix = value.trimEnd { it.isDigit() }
-            return PreRelease(prefix,
-                if (prefix.length < value.length)
-                    value.substring(prefix.length).toInt()
-                else
-                    null)
-        }
-
         fun isRelease(commit: IRefInfo, settings: SemverSettings): Boolean {
             return settings.releaseRegex.containsMatchIn(commit.text)
         }
     }
 
-    internal fun setPreRelease(value: String?) {
-        preRelease = parsePreRelease(value)
+    internal fun setPreRelease(release: PreRelease) {
+        preRelease = release
     }
 
     override fun compareTo(other: MutableSemVersion): Int {
@@ -253,4 +240,13 @@ internal class MutableSemVersion(
     fun toSemVersion(): SemInfoVersion {
         return SemInfoVersion(sha, major, minor, patch, preRelease, commitCount, initialVersion)
     }
+
+    override fun toString(): String {
+        return "MutableSemVersion(sha='$sha', initialVersion=$initialVersion," +
+                " major=$major, minor=$minor, patch=$patch, preRelease=$preRelease," +
+                " bumpMajor=$bumpMajor, bumpMinor=$bumpMinor, bumpPatch=$bumpPatch, bumpPre=$bumpPre," +
+                " commitCount=$commitCount)"
+    }
+
+
 }

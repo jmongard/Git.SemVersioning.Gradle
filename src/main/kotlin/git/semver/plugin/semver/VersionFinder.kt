@@ -14,7 +14,7 @@ class VersionFinder(private val settings: SemverSettings, private val tags: Map<
         val updated = semVersion.applyPendingChanges(isModified && !settings.noAutoBump, settings.groupVersionIncrements)
 
         if (!semVersion.isPreRelease && updated) {
-            semVersion.setPreRelease(defaultPreRelease)
+            semVersion.setPreRelease(PreRelease.parse(defaultPreRelease))
         }
         return semVersion.toSemVersion()
     }
@@ -25,7 +25,7 @@ class VersionFinder(private val settings: SemverSettings, private val tags: Map<
         semVersion.applyPendingChanges(!semVersion.isPreRelease || "" != newPreRelease, settings.groupVersionIncrements)
 
         if (newPreRelease != null) {
-            semVersion.setPreRelease(newPreRelease)
+            semVersion.setPreRelease(PreRelease.parse(newPreRelease))
         }
         return semVersion.toSemVersion()
     }

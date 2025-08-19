@@ -237,7 +237,7 @@ internal class MutableSemVersion(
         bumpPre = 0
     }
 
-    fun toSemVersion(): SemInfoVersion {
+    fun toSemInfoVersion(): SemInfoVersion {
         return SemInfoVersion(sha, major, minor, patch, preRelease, commitCount, initialVersion)
     }
 

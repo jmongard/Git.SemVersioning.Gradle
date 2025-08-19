@@ -16,7 +16,7 @@ class VersionFinder(private val settings: SemverSettings, private val tags: Map<
         if (!semVersion.isPreRelease && updated) {
             semVersion.setPreRelease(PreRelease.parse(defaultPreRelease))
         }
-        return semVersion.toSemVersion()
+        return semVersion.toSemInfoVersion()
     }
 
     fun getReleaseVersion(commit: Commit, newPreRelease: String?): SemInfoVersion {
@@ -27,7 +27,7 @@ class VersionFinder(private val settings: SemverSettings, private val tags: Map<
         if (newPreRelease != null) {
             semVersion.setPreRelease(PreRelease.parse(newPreRelease))
         }
-        return semVersion.toSemVersion()
+        return semVersion.toSemInfoVersion()
     }
 
     fun getChangeLog(commit: Commit): List<Commit> {

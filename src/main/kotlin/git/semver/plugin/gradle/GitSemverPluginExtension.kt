@@ -14,12 +14,15 @@ import org.gradle.api.tasks.Internal
 
 
 abstract class GitSemverPluginExtension(project: Project, providerFactory: ProviderFactory) : BaseSettings() {
+    init {
+        gitDirectory.convention(project.layout.projectDirectory)
+    }
+
     private val defaultPreReleaseProperty = project.findProperty("defaultPreRelease")
     private val noDirtyCheckProperty = project.findProperty("noDirtyCheck")
-    private val projectDir = project.layout.projectDirectory;
 
     /**
-     * Directory where to find the git project. If the git directory is a parent of this directory it will be found.
+     * Directory where to find the git project. If the git directory is a parent of this directory, it will be found.
      * Default: project dir.
      */
     abstract val gitDirectory: DirectoryProperty
@@ -113,21 +116,17 @@ abstract class GitSemverPluginExtension(project: Project, providerFactory: Provi
     val version: String by lazy { versionValue.toString() }
 
     private var semInfoVersionValueSource = project.providers.of(SemInfoVersionValueSource::class.java) {
-        it.parameters.getGitDir().set(gitDir);
+        it.parameters.getGitDir().set(gitDirectory);
         it.parameters.getSettings().set(providerFactory.provider {
             createSettings()
         })
     }
     private var semVersionValueSource = project.providers.of(SemVersionValueSource::class.java) {
-        it.parameters.getGitDir().set(gitDir);
+        it.parameters.getGitDir().set(gitDirectory);
         it.parameters.getSettings().set(providerFactory.provider {
             createSettings()
         })
     }
-
-    @get:Internal
-    internal val gitDir: Provider<Directory>
-        get() = gitDirectory.orElse(projectDir)
 
     internal fun createSettings(): SemverSettings {
         return SemverSettings(this).apply {

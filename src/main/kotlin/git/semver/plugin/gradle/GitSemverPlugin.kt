@@ -23,7 +23,7 @@ class GitSemverPlugin: Plugin<Project> {
         if (project == project.rootProject) {
             project.tasks.register("printChangeLog", PrintTask::class.java, {
                 val settings = extension.createSettings()
-                val changeLog = GitProvider(settings).getChangeLog(extension.gitDir.get().asFile)
+                val changeLog = GitProvider(settings).getChangeLog(extension.gitDirectory.get().asFile)
 
                 extension.changeLogFormat.formatLog(
                     changeLog,

@@ -13,6 +13,10 @@ plugins {
     id("jacoco")
 }
 
+kotlin {
+    jvmToolchain(17)
+}
+
 semver {
     releaseTagNameFormat = "v%s"
     createReleaseTag = false

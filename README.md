@@ -1,11 +1,11 @@
-# Semantic versioning for Gradle using Git 
+# Git Semantic Versioning Plugin for Gradle
 [![Gradle Build](https://github.com/jmongard/Git.SemVersioning.Gradle/workflows/Gradle%20Build/badge.svg)](https://github.com/jmongard/Git.SemVersioning.Gradle/actions/workflows/gradle-push.yml)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=jmongard_Git.SemVersioning.Gradle&metric=alert_status)](https://sonarcloud.io/dashboard?id=jmongard_Git.SemVersioning.Gradle)
 [![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=jmongard_Git.SemVersioning.Gradle&metric=ncloc)](https://sonarcloud.io/summary/new_code?id=jmongard_Git.SemVersioning.Gradle)
 [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=jmongard_Git.SemVersioning.Gradle&metric=coverage)](https://sonarcloud.io/summary/new_code?id=jmongard_Git.SemVersioning.Gradle)
 [![GitHub tag (with filter)](https://img.shields.io/github/v/tag/jmongard/Git.SemVersioning.Gradle?logo=gradle&label=Release)](https://plugins.gradle.org/plugin/com.github.jmongard.git-semver-plugin)
 
-Gradle plugin for automatically versioning a project using semantic versioning and conventional commits with change log support based on git commit messages.
+A Gradle plugin that automatically versions your project using semantic versioning and conventional commits. It analyzes Git commit messages to determine version increments and generates change logs based on your commit history.
 
 
 ## Usage
@@ -38,18 +38,13 @@ The plugin requires java version 17 to run. (Use version `0.13.0` if Java 8 is r
 
 ## Versioning
 
-The versioning system is designed to follow semantic versioning as described by https://semver.org/.
+The versioning system follows semantic versioning as described at [semver.org](https://semver.org/).
 
-It works by recursively traversing the commit tree until it finds a version tag or release commit and then calculating 
-the new version using from there using commit messages.
+The plugin works by traversing the Git commit history backwards from HEAD until it finds a version tag or release commit, then calculates the new version based on conventional commit messages since that point.
 
-The plugin will look for [conventional commit](https://www.conventionalcommits.org/) messages (`fix:`, `feat:`, `refactor!:`, ...) 
-and will increase the corresponding version number.
+The plugin recognizes [conventional commit](https://www.conventionalcommits.org/) messages (`fix:`, `feat:`, `refactor!:`, etc.) and increments the corresponding version number accordingly.
 
-The plugin has the opinion that you want to group several fixes/features or breaking changes into a single release. 
-Therefore, the major, minor or patch number will be increases by at most one compared to the previous release that is 
-not a pre-release version. Set property `groupVersionIncrements = false` if you don't want the version changes to be combined.
-(See [Configuration](#Configuration) reference below.)
+By default, the plugin groups multiple fixes/features or breaking changes into a single release. This means the major, minor, or patch number will increase by at most one compared to the previous release (excluding pre-releases). Set `groupVersionIncrements = false` if you prefer each commit to increment the version individually.
 
 ### Releases
 
@@ -62,12 +57,11 @@ The version number should consist of three numbers separated by a dot e.g. `1.0.
 be at the start of the message e.g. `release: v1.2.3` will be matched.
 
 
-### Uncommited changes or non release commits
+### Uncommitted Changes
 
-If no version changed has been triggered by any commit messages since the last release 
-then the patch number will be increased by one.
+If no version increment has been triggered by conventional commit messages since the last release, the patch number will be increased by one to indicate development progress.
 
-If the current version is not a pre-release then `-SNAPSHOT` will be added.
+If the current version is not already a pre-release, `-SNAPSHOT` will be appended to indicate this is a development version.
 
 
 ## Version format
@@ -138,10 +132,6 @@ When `useTwoDigitVersion` is enabled, the standard version properties automatica
 * `semver.infoVersion` - Returns the 2-digit version with commit count (e.g., `5.2+001`)
 * `semver.semVersion.toString()` - Returns the 2-digit version with SHA (e.g., `5.2+001.sha.1c792d5`)
 
-You can also access the 2-digit version explicitly using:
-
-* `semver.twoDigitVersion` - Always returns the 2-digit format regardless of the setting
-
 ## Tasks
 
 ## `printVersion`
@@ -168,7 +158,7 @@ $ gradlew printInfoVersion
 
 ## `printSemVersion`
 This plugin adds a printSemVersion task, which will echo the project's calculated version
-to standard-out includning commit count and sha.
+to standard-out including commit count and SHA.
 
 ````shell
 $ gradlew printSemVersion
@@ -178,13 +168,12 @@ $ gradlew printSemVersion
 ````
 
 ## `printChangeLog`
-This plugin adds a printChangeLog task, which will format the commit message for the current version
-and output them to standard-out. To avoid enoding problem in the console the change log can be outputed 
-to an UTF-8 encoded file using `--file <filename>` e.g. `./gradlew printChangeLog --file build/changelog.md`
-Note: Use an absolute path for filename as the working directory might not be the one you expect if running 
-using gradle deamon. 
+This plugin adds a printChangeLog task, which will format the commit messages for the current version
+and output them to standard-out. To avoid encoding problems in the console, the change log can be output
+to a UTF-8 encoded file using `--file <filename>`, e.g. `./gradlew printChangeLog --file build/changelog.md`.
 
-Note: The `printChangeLog` task is currently only registered on the root project given that the plugin is applied there.
+**Note:** Use an absolute path for the filename as the working directory might not be what you expect when running
+using the Gradle daemon. The `printChangeLog` task is currently only registered on the root project when the plugin is applied there.
 
 ````shell
 $ gradlew printChangeLog
@@ -202,19 +191,17 @@ $ gradlew printChangeLog
 [Configuring the changelog](/ChangeLog.md)
 
 ## `releaseVersion`
-The `releaseVersion` task will by default create both a release commit, and a release tag. The releaseVersion task will 
-fail with an error if there exists local modification. It is possible to change this behaviour with the following options:
+The `releaseVersion` task creates both a release commit and a release tag by default. The task will fail with an error if there are uncommitted local modifications. You can modify this behavior using the following options:
 
- * **--no-tag**: skip creating a tag. (Can also be set in settings using `createReleaseTag=false`.)
- * **--tag**: create a tag (If this has been disabled by the `createReleaseTag=false` option otherwise this is the default.)
- * **--no-commit**: skip creating a commit. (Can also be set in settings using `createReleaseCommit=false`.)
- * **--commit**: create a commit (If this has been disabled by the `createReleaseCommit=false` option otherwise this is the default.)
- * **--no-dirty**: skip dirty check. (Can also be set in settings using `noDirtyCheck=true`.)
- * **--message**="a message": Add a message text to the tag and/or commit
- * **--preRelease**="pre-release": Change the current pre-release e.g. `--preRelease=alpha.1`.
-   Set the pre-release to "-" e.g. `--preRelease=-` to promote a pre-release to a release.
+* **--no-tag**: Skip creating a tag (can also be set in settings using `createReleaseTag=false`)
+* **--tag**: Create a tag (default behavior, unless disabled in settings)
+* **--no-commit**: Skip creating a commit (can also be set in settings using `createReleaseCommit=false`)
+* **--commit**: Create a commit (default behavior, unless disabled in settings)
+* **--no-dirty**: Skip the dirty working directory check (can also be set in settings using `noDirtyCheck=true`)
+* **--message**="message": Add a custom message to the tag and/or commit
+* **--preRelease**="version": Set the pre-release identifier (e.g., `--preRelease=alpha.1`). Use `--preRelease=-` to promote a pre-release to a full release
 
-Note: The `releaseVersion` task is currently only registered on the root project given that the plugin is applied there.
+**Note:** The `releaseVersion` task is currently only registered on the root project when the plugin is applied there.
 
 ## Example of how version is calculated 
 With setting: `groupVersionIncrements = true` (default)
@@ -320,7 +307,7 @@ version = semver.version
   version tags with "v".
 * **groupVersionIncrements**: Used to disable grouping of version increments so that each commit message counts.
 * **noDirtyCheck**: Can be used to ignore all local modifications when calculating the version.
-  Disabling dirty check can also be donne from the command line e.g. `gradlew -PnoDirtyCheck=true someOtherTask`.
+  Disabling dirty check can also be done from the command line e.g. `gradlew -PnoDirtyCheck=true someOtherTask`.
 * **noAutoBump**: If set only commits matching majorPattern, minorPattern or patchPattern will increase the version.
   The default behaviour for the plugin is to assume you have begun the work on the next release for any commit you do
   after the last release. The patch level (or pre-release level, if the last release was a pre-release) of the version
@@ -340,7 +327,7 @@ with IGNORE_CASE and MULTILINE options enabled.
 
 This plugin has been tested on Gradle 7.x and 8.x. (Version 0.4.3 and older should work on gradle 6.x and probably 5.x)
 
-## Continues Integration
+## Continuous Integration
 The plugin calculates the version using the commit tree. Make sure you check out all commits relevant and not just
 a shallow copy.
 

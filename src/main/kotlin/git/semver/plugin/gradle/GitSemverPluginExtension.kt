@@ -6,11 +6,8 @@ import git.semver.plugin.semver.SemInfoVersion
 import git.semver.plugin.semver.SemVersion
 import git.semver.plugin.semver.SemverSettings
 import org.gradle.api.Project
-import org.gradle.api.file.Directory
 import org.gradle.api.file.DirectoryProperty
-import org.gradle.api.provider.Provider
 import org.gradle.api.provider.ProviderFactory
-import org.gradle.api.tasks.Internal
 
 
 abstract class GitSemverPluginExtension(project: Project, providerFactory: ProviderFactory) : BaseSettings() {
@@ -102,7 +99,7 @@ abstract class GitSemverPluginExtension(project: Project, providerFactory: Provi
     /**
      * The semantic version for the project with commit info excluding sha as a string e.g. "1.2.3-Alpha.4+005"
      */
-    val infoVersion: String by lazy { semVersion.toInfoVersionString() }
+    val infoVersion: String by lazy { semVersion.toInfoVersionString(useTwoDigitVersion = useTwoDigitVersion) }
 
     /**
      * The semantic version for the project e.g. 1.2.3-Alpha.4
@@ -113,7 +110,7 @@ abstract class GitSemverPluginExtension(project: Project, providerFactory: Provi
     /**
      * The semantic version for the project as a string e.g. "1.2.3-Alpha.4"
      */
-    val version: String by lazy { versionValue.toString() }
+    val version: String by lazy { versionValue.toString(useTwoDigitVersion) }
 
     private var semInfoVersionValueSource = project.providers.of(SemInfoVersionValueSource::class.java) {
         it.parameters.getGitDir().set(gitDirectory);

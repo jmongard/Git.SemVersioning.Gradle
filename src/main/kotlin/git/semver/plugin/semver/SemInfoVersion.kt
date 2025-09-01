@@ -23,9 +23,13 @@ data class SemInfoVersion(
         commitCountStringFormat: String = "%03d",
         shaLength: Int = 0,
         v2: Boolean = true,
-        appendPreReleaseLast: Boolean = false
+        appendPreReleaseLast: Boolean = false,
+        useTwoDigitVersion: Boolean = false
     ): String {
-        val builder = StringBuilder().append(major).append('.').append(minor).append('.').append(patch)
+        val builder = StringBuilder().append(major).append('.').append(minor)
+        if (!useTwoDigitVersion) {
+            builder.append('.').append(patch)
+        }
         if (v2) {
             if (isPreRelease && !appendPreReleaseLast) {
                 builder.append('-').append(preRelease)
@@ -52,6 +56,10 @@ data class SemInfoVersion(
 
     override fun toString(): String {
         return toInfoVersionString(shaLength = 7)
+    }
+
+    fun toString(useTwoDigitVersion: Boolean): String {
+        return toInfoVersionString(useTwoDigitVersion = useTwoDigitVersion, shaLength = 7)
     }
 
     fun revisionString(): String {

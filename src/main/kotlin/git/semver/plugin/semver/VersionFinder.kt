@@ -11,7 +11,7 @@ class VersionFinder(private val settings: SemverSettings, private val tags: Map<
     fun getVersion(commit: Commit, isClean: Boolean, defaultPreRelease: String?): SemInfoVersion {
         val semVersion = findVersion(commit)
         val isModified = semVersion.commitCount > 0 || !isClean
-        val updated = semVersion.applyPendingChanges(isModified && !settings.noAutoBump, settings.groupVersionIncrements)
+        val updated = semVersion.applyPendingChanges(isModified && !settings.noAutoBump, settings.groupVersionIncrements, settings.useTwoDigitVersion)
 
         if (!semVersion.isPreRelease && updated) {
             semVersion.setPreRelease(PreRelease.parse(defaultPreRelease))
@@ -22,7 +22,7 @@ class VersionFinder(private val settings: SemverSettings, private val tags: Map<
     fun getReleaseVersion(commit: Commit, newPreRelease: String?): SemInfoVersion {
         val semVersion = findVersion(commit)
         semVersion.commitCount = 0
-        semVersion.applyPendingChanges(!semVersion.isPreRelease || "" != newPreRelease, settings.groupVersionIncrements)
+        semVersion.applyPendingChanges(!semVersion.isPreRelease || "" != newPreRelease, settings.groupVersionIncrements, settings.useTwoDigitVersion)
 
         if (newPreRelease != null) {
             semVersion.setPreRelease(PreRelease.parse(newPreRelease))

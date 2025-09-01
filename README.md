@@ -97,6 +97,50 @@ string will not be semver compliant.
 * semver.infoVersion == semver.semVersion.toInfoVersionString("%03d", 0, true, false)
 * semver.semVersion.toString() == semver.semVersion.toInfoVersionString("%03d", 7, true, false)
 
+### Two-Digit Versioning
+
+The plugin supports 2-digit versioning (major.minor) in addition to the standard 3-digit semantic versioning (major.minor.patch). 
+This can be useful for projects that follow a simpler versioning scheme.
+
+To enable 2-digit versioning, set `useTwoDigitVersion = true` in your configuration:
+
+```groovy
+semver {
+    useTwoDigitVersion = true
+}
+```
+
+#### How 2-Digit Versioning Works
+
+When `useTwoDigitVersion` is enabled:
+
+* **Version Format**: Versions are formatted as `major.minor` (e.g., `5.2` instead of `5.2.0`)
+* **Patch Changes**: Fix commits (`fix:`) are treated as minor version changes instead of patch changes
+* **Version Bumping**: When no specific version changes are triggered, the minor version is incremented instead of the patch version
+* **Pre-releases**: Pre-release versions work the same way (e.g., `5.2-alpha.1`)
+
+#### Example with 2-Digit Versioning
+
+| Command                                       | Commit Text               | Calculated version  |
+| --------------------------------------------- | ------------------------- | ------------------- |
+| git commit -m "Initial commit"                | Initial commit            | 0.1-SNAPSHOT+001    |
+| git commit -m "fix: a bug fix"                | fix: a bug fix            | 0.2-SNAPSHOT+001    |
+| gradle releaseVersion                         | release: v0.2             | 0.2                 |
+| git commit -m "feat: new feature"             | feat: new feature         | 0.3-SNAPSHOT+001    |
+| git commit -m "feat!: breaking change"        | feat!: breaking change    | 1.0-SNAPSHOT+002    |
+| gradle releaseVersion --preRelease="alpha.1"  | release: v1.0-alpha.1     | 1.0-alpha.1         |
+
+#### Accessing 2-Digit Versions
+
+When `useTwoDigitVersion` is enabled, the standard version properties automatically use the 2-digit format:
+
+* `semver.version` - Returns the 2-digit version (e.g., `5.2`)
+* `semver.infoVersion` - Returns the 2-digit version with commit count (e.g., `5.2+001`)
+* `semver.semVersion.toString()` - Returns the 2-digit version with SHA (e.g., `5.2+001.sha.1c792d5`)
+
+You can also access the 2-digit version explicitly using:
+
+* `semver.twoDigitVersion` - Always returns the 2-digit format regardless of the setting
 
 ## Tasks
 
@@ -259,6 +303,7 @@ semver {
     gitDirectory = project.projectDir
     createReleaseCommit = true
     createReleaseTag = true
+    useTwoDigitVersion = false
 }
 
 //Remember to retrieve the version after plugin has been configured
@@ -286,6 +331,7 @@ version = semver.version
   has the same effect as the --no-tag flag.
 * **createReleaseCommit**: If a release commit should be created when running the release task. Setting this to false
   has the same effect as the --no-commit flag.
+* **useTwoDigitVersion**: If the version should be two digits instead of three.
 
 Patterns is matched using [java regular expressions](https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html) 
 with IGNORE_CASE and MULTILINE options enabled.

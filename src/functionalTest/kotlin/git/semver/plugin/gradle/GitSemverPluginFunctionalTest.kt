@@ -25,9 +25,10 @@ class GitSemverPluginFunctionalTest {
         @JvmStatic
         fun gradleVersions(): List<Arguments> {
             return listOf(
+//                Arguments.of("9.0.0"),
+                Arguments.of("8.14.3"),
 //                Arguments.of("8.6"),
-                Arguments.of("8.7"),
-                Arguments.of("7.6.4"),
+//                Arguments.of("7.6.4"),
 //                Arguments.of("6.9.4"),
 //                Arguments.of("5.6.4")
             )
@@ -85,24 +86,21 @@ class GitSemverPluginFunctionalTest {
 
     @ParameterizedTest
     @CsvSource(value = [
+        "printChangeLog, added test files",
         "printVersion, \\d+\\.\\d+\\.\\d+",
         "printInfoVersion, \\d+\\.\\d+\\.\\d+-SNAPSHOT\\+\\d{3}",
         "printSemVersion, \\d+\\.\\d+\\.\\d+-SNAPSHOT\\+\\d{3}\\.sha"])
-    fun `can run printVersion task`(printTask: String, pattern: String) {
+    fun `can run print task`(printTask: String, pattern: String) {
         val projectDir = setupTestProject()
 
-        val result = run(projectDir, null, printTask, "-q")
+        val result = run(projectDir, null, printTask, "--configuration-cache",  "-q")
 
         assertThat(result.output).containsPattern(pattern)
-    }
 
-    @Test
-    fun `can run printChangeLog task`() {
-        val projectDir = setupTestProject()
+        //Run it again to make sure configuration cache don't break it
+        val result2 = run(projectDir, null, printTask, "--configuration-cache",  "-q")
 
-        val result = run(projectDir, null, "printChangeLog", "-q")
-
-        assertThat(result.output).containsPattern("added test files")
+        assertThat(result2.output).containsPattern(pattern)
     }
 
     @Test

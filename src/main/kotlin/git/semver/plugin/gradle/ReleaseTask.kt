@@ -32,22 +32,22 @@ open class ReleaseTask @Inject constructor(private val settings: GitSemverPlugin
 
     @Option(option = "no-commit", description = "Don't create a release commit")
     fun setNoCommit(noCommit: Boolean) {
-        this.commit = !noCommit
+        this.commit.set(!noCommit)
     }
 
     @Option(option = "commit", description = "Create a release commit even if it is disabled in the settings")
     fun setCommit(commit: Boolean) {
-        this.commit = commit
+        this.commit.set(commit)
     }
 
     @Option(option = "no-tag", description = "Don't create a release tag")
     fun setNoTag(noTag: Boolean) {
-        this.tag = !noTag
+        this.tag.set(!noTag)
     }
 
     @Option(option = "tag", description = "Create a release tag even if it is disabled in the settings")
     fun setTag(tag: Boolean) {
-        this.tag = tag
+        this.tag.set(tag)
     }
 
     @Option(option = "no-dirty", description = "Don't check if repository is dirty")
@@ -61,5 +61,5 @@ open class ReleaseTask @Inject constructor(private val settings: GitSemverPlugin
     }
 
     @Internal
-    internal fun getReleaseParams() = GitProvider.ReleaseParams(tag, commit, preRelease, message, noDirtyCheck)
+    internal fun getReleaseParams() = GitProvider.ReleaseParams(tag.get(), commit.get(), preRelease, message, noDirtyCheck)
 }

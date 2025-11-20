@@ -78,8 +78,8 @@ tasks.named<KotlinCompile>("compileKotlin") {
         jvmTarget = JvmTarget.JVM_17
 
         // See https://docs.gradle.org/current/userguide/compatibility.html#kotlin.
-        languageVersion = @Suppress("DEPRECATION") KotlinVersion.KOTLIN_1_4
-        apiVersion = @Suppress("DEPRECATION") KotlinVersion.KOTLIN_1_4
+        languageVersion = @Suppress("DEPRECATION") KotlinVersion.KOTLIN_1_8
+        apiVersion = @Suppress("DEPRECATION") KotlinVersion.KOTLIN_1_8
     }
 }
 

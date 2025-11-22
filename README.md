@@ -27,14 +27,14 @@ def ver = semver.version
 allprojects {
     version = ver
 }
-// Note: Using `allprojects` with configuration cache is currently not supported by Gradle.
-// If you plan to use configuration cache, apply the plugin to each subproject separately.
 
 ```
 
 [For the latest published version see the plugins page at Gradle.org](https://plugins.gradle.org/plugin/com.github.jmongard.git-semver-plugin)
 
-The plugin requires java version 17 to run. (Use version `0.13.0` if Java 8 is required.)
+The plugin requires Gradle 8 and Java version 17 to run.
+(Use version `0.16.1` if Gradle 7 is required.)
+(Use version `0.13.0` if Java 8 is required.)
 
 ## Versioning
 
@@ -259,6 +259,7 @@ semver {
     gitDirectory = project.projectDir
     createReleaseCommit = true
     createReleaseTag = true
+    metaSeparator = '+'
 }
 
 //Remember to retrieve the version after plugin has been configured
@@ -286,6 +287,7 @@ version = semver.version
   has the same effect as the --no-tag flag.
 * **createReleaseCommit**: If a release commit should be created when running the release task. Setting this to false
   has the same effect as the --no-commit flag.
+* **metaSeparator**: The character to use to separate build metadata from the version when printing info version.
 
 Patterns is matched using [java regular expressions](https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html) 
 with IGNORE_CASE and MULTILINE options enabled.

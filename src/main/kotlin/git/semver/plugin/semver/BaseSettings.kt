@@ -13,11 +13,13 @@ abstract class BaseSettings(
     var groupVersionIncrements: Boolean = true,
     var noDirtyCheck: Boolean = false,
     var noAutoBump: Boolean = false,
-    var gitSigning: Boolean? = null // null means use the jgit default
+    var gitSigning: Boolean? = null, // null means use the jgit default
+    var metaSeparator: Char = '+'
 ) : Serializable {
     constructor(settings: BaseSettings) : this(
         settings.defaultPreRelease, settings.releasePattern, settings.patchPattern, settings.minorPattern,
         settings.majorPattern, settings.releaseCommitTextFormat, settings.releaseTagNameFormat,
-        settings.groupVersionIncrements, settings.noDirtyCheck, settings.noAutoBump
+        settings.groupVersionIncrements, settings.noDirtyCheck, settings.noAutoBump,
+        settings.gitSigning, settings.metaSeparator
     )
 }

@@ -124,4 +124,10 @@ class MutableSemVersionTest {
             .isEqualTo("1.2.3+sha.8727a3e-SNAPSHOT")
     }
 
+    @Test
+    fun toInfoVersionString_customMetaSeparator() {
+        val version = MutableSemVersion.tryParse(Tag("1.2.3-SNAPSHOT", SHA))
+        assertThat(version?.toSemInfoVersion()?.toInfoVersionString(shaLength = 7, metaSeparator = '#'))
+            .isEqualTo("1.2.3-SNAPSHOT#sha.8727a3e")
+    }
 }

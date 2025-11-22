@@ -104,7 +104,7 @@ abstract class GitSemverPluginExtension(project: Project, providerFactory: Provi
     /**
      * The semantic version for the project with commit info excluding sha as a string e.g. "1.2.3-Alpha.4+005"
      */
-    val infoVersion: String by lazy { semVersion.toInfoVersionString() }
+    val infoVersion: String by lazy { semVersion.toInfoVersionString(metaSeparator = metaSeparator) }
 
     /**
      * The semantic version for the project e.g. 1.2.3-Alpha.4

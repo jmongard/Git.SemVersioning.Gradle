@@ -70,7 +70,7 @@ internal class GitProvider(private val settings: SemverSettings) {
             getHeadCommit(it.repository),
             params.preRelease?.trimStart('-')
         )
-        val versionString = version.toInfoVersionString()
+        val versionString = version.toInfoVersionString(metaSeparator = settings.metaSeparator)
         logger.info("Saving new version: {}", versionString)
 
         val isCommit = isFormatEnabled(params.commit, settings.releaseCommitTextFormat)

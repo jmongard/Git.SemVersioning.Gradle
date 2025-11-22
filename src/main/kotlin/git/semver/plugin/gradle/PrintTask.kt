@@ -10,13 +10,16 @@ import javax.inject.Inject
 import kotlin.io.path.createDirectories
 import kotlin.io.path.writeText
 
-open class PrintTask @Inject constructor(private val printout: () -> Any, desc: String) : DefaultTask() {
+open class PrintTask @Inject constructor(private val printout: () -> Any, desc: String, reason: String) : DefaultTask() {
     private var file:String? = null
     private val logger = LoggerFactory.getLogger(PrintTask::class.java)
 
     init {
         group = GitSemverPlugin.VERSIONING_GROUP
         description = desc
+        if (reason.isNotEmpty()) {
+            notCompatibleWithConfigurationCache(reason)
+        }
     }
 
     @Option(option = "file", description = "Print to a file ")

@@ -7,12 +7,15 @@ import git.semver.plugin.semver.SemVersion
 import git.semver.plugin.semver.SemverSettings
 import org.gradle.api.Project
 import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.provider.Property
 import org.gradle.api.provider.ProviderFactory
 
 
 abstract class GitSemverPluginExtension(project: Project, providerFactory: ProviderFactory) : BaseSettings() {
     init {
         gitDirectory.convention(project.layout.projectDirectory)
+        createReleaseCommit.convention(true)
+        createReleaseTag.convention(true)
     }
 
     private val defaultPreReleaseProperty = project.findProperty("defaultPreRelease")
@@ -29,14 +32,14 @@ abstract class GitSemverPluginExtension(project: Project, providerFactory: Provi
      * This parameter can be overridden by command line argument to the release task.
      * Default: true.
      */
-    var createReleaseCommit = true
+    abstract val createReleaseCommit: Property<Boolean>
 
     /**
      * Should a release tag be created when running the release task.
      * This parameter can be overridden by command line argument to the release task.
      * Default: true.
      */
-    var createReleaseTag = true
+    abstract val createReleaseTag: Property<Boolean>
 
     /**
      * Format used when producing change log. Used to configure any predefined logging format.
@@ -47,6 +50,7 @@ abstract class GitSemverPluginExtension(project: Project, providerFactory: Provi
      * </ul>
      * The format can also be set using a builder.
      */
+    @Transient
     var changeLogFormat = ChangeLogFormat.defaultChangeLog
 
     /**
@@ -77,6 +81,7 @@ abstract class GitSemverPluginExtension(project: Project, providerFactory: Provi
      * </ul>
      * The text can also be set using a builder.
      */
+    @Transient
     var changeLogTexts: ChangeLogTexts = DefaultChangeLogTexts
 
     /**
@@ -99,7 +104,9 @@ abstract class GitSemverPluginExtension(project: Project, providerFactory: Provi
     /**
      * The semantic version for the project with commit info excluding sha as a string e.g. "1.2.3-Alpha.4+005"
      */
-    val infoVersion: String by lazy { semVersion.toInfoVersionString(useTwoDigitVersion = useTwoDigitVersion) }
+    val infoVersion: String by lazy { semVersion.toInfoVersionString(
+        metaSeparator = metaSeparator,
+        useTwoDigitVersion = useTwoDigitVersion) }
 
     /**
      * The semantic version for the project e.g. 1.2.3-Alpha.4

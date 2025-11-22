@@ -125,6 +125,13 @@ class MutableSemVersionTest {
     }
 
     @Test
+    fun toInfoVersionString_customMetaSeparator() {
+        val version = MutableSemVersion.tryParse(Tag("1.2.3-SNAPSHOT", SHA))
+        assertThat(version?.toSemInfoVersion()?.toInfoVersionString(shaLength = 7, metaSeparator = '#'))
+            .isEqualTo("1.2.3-SNAPSHOT#sha.8727a3e")
+    }
+    
+    @Test
     fun `test two digit version parsing`() {
         val version = MutableSemVersion.tryParse(Tag("5.2", SHA))
         assertThat(version).isNotNull()

@@ -167,10 +167,14 @@ internal class MutableSemVersion(
             return true
         }
 
-        if (!forceBumpIfNoChanges) {
-            return false
+        if (forceBumpIfNoChanges) {
+            forceBump(useTwoDigitVersion)
+            return true
         }
+        return false
+    }
 
+    private fun forceBump(useTwoDigitVersion: Boolean) {
         val preReleaseNumber = preRelease.number
         if (preReleaseNumber != null) {
             preRelease = preRelease.copy(number = preReleaseNumber + 1)
@@ -179,7 +183,6 @@ internal class MutableSemVersion(
         } else {
             patch += 1
         }
-        return true
     }
 
     private fun applyChangesNotGrouped() {

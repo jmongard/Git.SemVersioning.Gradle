@@ -98,32 +98,6 @@ This can be useful for projects that follow a simpler versioning scheme.
 
 To enable 2-digit versioning, set `useTwoDigitVersion = true` in your configuration:
 
-```groovy
-semver {
-    useTwoDigitVersion = true
-}
-```
-
-#### How 2-Digit Versioning Works
-
-When `useTwoDigitVersion` is enabled:
-
-* **Version Format**: Versions are formatted as `major.minor` (e.g., `5.2` instead of `5.2.0`)
-* **Patch Changes**: Fix commits (`fix:`) are treated as minor version changes instead of patch changes
-* **Version Bumping**: When no specific version changes are triggered, the minor version is incremented instead of the patch version
-* **Pre-releases**: Pre-release versions work the same way (e.g., `5.2-alpha.1`)
-
-#### Example with 2-Digit Versioning
-
-| Command                                       | Commit Text               | Calculated version  |
-| --------------------------------------------- | ------------------------- | ------------------- |
-| git commit -m "Initial commit"                | Initial commit            | 0.1-SNAPSHOT+001    |
-| git commit -m "fix: a bug fix"                | fix: a bug fix            | 0.2-SNAPSHOT+001    |
-| gradle releaseVersion                         | release: v0.2             | 0.2                 |
-| git commit -m "feat: new feature"             | feat: new feature         | 0.3-SNAPSHOT+001    |
-| git commit -m "feat!: breaking change"        | feat!: breaking change    | 1.0-SNAPSHOT+002    |
-| gradle releaseVersion --preRelease="alpha.1"  | release: v1.0-alpha.1     | 1.0-alpha.1         |
-
 #### Accessing 2-Digit Versions
 
 When `useTwoDigitVersion` is enabled, the standard version properties automatically use the 2-digit format:
@@ -204,7 +178,8 @@ The `releaseVersion` task creates both a release commit and a release tag by def
 **Note:** The `releaseVersion` task is currently only registered on the root project when the plugin is applied there.
 
 ## Example of how version is calculated 
-With setting: `groupVersionIncrements = true` (default)
+
+### With setting: `groupVersionIncrements = true` (default)
 
 | Command                                       | Commit Text               | Calculated version  |
 | --------------------------------------------- | ------------------------- | ------------------- |
@@ -236,7 +211,7 @@ With setting: `groupVersionIncrements = true` (default)
 | git commit -m "feat!: breaking feature"       | feat!: breaking feature   | 2.0.0-alpha.1+002   |
 | gradle releaseVersion --preRelease="-"        | release: v2.0.0           | 2.0.0               |
 
-With setting: `groupVersionIncrements = false`
+### With setting: `groupVersionIncrements = false`
 
 | Command                                       | Commit Text               | Calculated version |
 | --------------------------------------------- | ------------------------- | ------------------- |
@@ -267,7 +242,6 @@ With setting: `groupVersionIncrements = false`
 | git commit -m "feat: another feature"         | feat: another feature     | 1.3.0-alpha.2+001  |
 | git commit -m "feat!: breaking feature"       | feat!: breaking feature   | 2.0.0-alpha.1+002  |
 | gradle releaseVersion --preRelease="-"        | release: v2.0.0           | 2.0.0              |
-
 
 ## Configuration
 
@@ -327,7 +301,7 @@ with IGNORE_CASE and MULTILINE options enabled.
 
 ## Supported Gradle version
 
-This plugin has been tested on Gradle 7.x and 8.x. (Version 0.4.3 and older should work on gradle 6.x and probably 5.x)
+This plugin has been tested on Gradle 8.x and 9.x. (Version 0.4.3 and older should work on gradle 6.x and probably 5.x)
 
 ## Continuous Integration
 The plugin calculates the version using the commit tree. Make sure you check out all commits relevant and not just

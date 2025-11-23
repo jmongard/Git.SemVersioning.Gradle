@@ -130,4 +130,40 @@ class MutableSemVersionTest {
         assertThat(version?.toSemInfoVersion()?.toInfoVersionString(shaLength = 7, metaSeparator = '#'))
             .isEqualTo("1.2.3-SNAPSHOT#sha.8727a3e")
     }
+    
+    @Test
+    fun `test two digit version parsing`() {
+        val version = MutableSemVersion.tryParse(Tag("5.2", SHA))
+        assertThat(version).isNotNull()
+        assertThat(version?.major).isEqualTo(5)
+        assertThat(version?.minor).isEqualTo(2)
+        assertThat(version?.patch).isEqualTo(0)
+        assertThat(version?.toSemInfoVersion()?.toSemVersion()?.toString(true)).isEqualTo("5.2")
+    }
+
+    @Test
+    fun `test two digit version with pre-release`() {
+        val version = MutableSemVersion.tryParse(Tag("5.2-alpha.1", SHA))
+        assertThat(version).isNotNull()
+        assertThat(version?.major).isEqualTo(5)
+        assertThat(version?.minor).isEqualTo(2)
+        assertThat(version?.patch).isEqualTo(0)
+        assertThat(version?.toSemInfoVersion()?.toSemVersion()?.toString(true)).isEqualTo("5.2-alpha.1")
+    }
+
+    @Test
+    fun `test two digit version bumping`() {
+        val settings = SemverSettings()
+        settings.useTwoDigitVersion = true
+        
+        val semver = MutableSemVersion.tryParse(Tag("5.2", SHA))!!
+        val commit = Commit("fix: a fix", SHA, 0, emptySequence())
+        
+        // In 2-digit mode, fix commits should bump minor version
+        semver.updateFromCommit(commit, settings, null)
+        semver.applyPendingChanges(false, true, true)
+        
+        assertThat(semver.toSemInfoVersion().toSemVersion().toString(true)).isEqualTo("5.3")
+    }
+
 }

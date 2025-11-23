@@ -113,19 +113,21 @@ internal class MutableSemVersion(
     ) {
         when {
             major > 0 && settings.majorRegex.containsMatchIn(text) ->
-                if (!isPreRelease || major == initialVersion.major) {
-                    bumpMajor += 1
-                    bumpMinor = 0
-                    bumpPatch = 0
-                    bumpPre = 0
+                bumpMajor()
+
+            settings.useTwoDigitVersion ->
+                if (settings.minorRegex.containsMatchIn(text) ||
+                    settings.patchRegex.containsMatchIn(text)
+                ) {
+                    if (preRelease.number == null) {
+                        bumpMinor()
+                    } else {
+                        bumpPre += 1
+                    }
                 }
 
             settings.minorRegex.containsMatchIn(text) ->
-                if (!isPreRelease || major == initialVersion.major && minor == initialVersion.minor) {
-                    bumpMinor += 1
-                    bumpPatch = 0
-                    bumpPre = 0
-                }
+                bumpMinor()
 
             settings.patchRegex.containsMatchIn(text) ->
                 if (preRelease.number == null) {
@@ -137,7 +139,24 @@ internal class MutableSemVersion(
         }
     }
 
-    internal fun applyPendingChanges(forceBumpIfNoChanges: Boolean, groupChanges: Boolean): Boolean {
+    private fun bumpMajor() {
+        if (!isPreRelease || major == initialVersion.major) {
+            bumpMajor += 1
+            bumpMinor = 0
+            bumpPatch = 0
+            bumpPre = 0
+        }
+    }
+
+    private fun bumpMinor() {
+        if (!isPreRelease || major == initialVersion.major && minor == initialVersion.minor) {
+            bumpMinor += 1
+            bumpPatch = 0
+            bumpPre = 0
+        }
+    }
+
+    internal fun applyPendingChanges(forceBumpIfNoChanges: Boolean, groupChanges: Boolean, useTwoDigitVersion: Boolean = false): Boolean {
         if (hasPendingChanges) {
             if (groupChanges) {
                 applyChangesGrouped()
@@ -148,17 +167,22 @@ internal class MutableSemVersion(
             return true
         }
 
-        if (!forceBumpIfNoChanges) {
-            return false
+        if (forceBumpIfNoChanges) {
+            forceBump(useTwoDigitVersion)
+            return true
         }
+        return false
+    }
 
+    private fun forceBump(useTwoDigitVersion: Boolean) {
         val preReleaseNumber = preRelease.number
         if (preReleaseNumber != null) {
             preRelease = preRelease.copy(number = preReleaseNumber + 1)
+        } else if (useTwoDigitVersion) {
+            minor += 1
         } else {
             patch += 1
         }
-        return true
     }
 
     private fun applyChangesNotGrouped() {

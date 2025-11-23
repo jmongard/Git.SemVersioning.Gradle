@@ -17,7 +17,7 @@ open class PrintTask @Inject constructor(private val printout: () -> Any, desc: 
     init {
         group = GitSemverPlugin.VERSIONING_GROUP
         description = desc
-        if (!reason.isEmpty()) {
+        if (reason.isNotEmpty()) {
             notCompatibleWithConfigurationCache(reason)
         }
     }

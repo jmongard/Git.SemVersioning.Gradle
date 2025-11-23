@@ -10,7 +10,14 @@ data class SemVersion(
 ) : Serializable, Version {
 
     override fun toString(): String {
-        val builder = StringBuilder().append(major).append('.').append(minor).append('.').append(patch)
+        return toString(false)
+    }
+
+    fun toString(useTwoDigitVersion: Boolean): String {
+        val builder = StringBuilder().append(major).append('.').append(minor)
+        if (!useTwoDigitVersion) {
+            builder.append('.').append(patch)
+        }
         if (isPreRelease) {
             builder.append('-').append(preRelease)
         }

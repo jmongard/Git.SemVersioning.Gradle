@@ -49,18 +49,21 @@ data class SemInfoVersion(
         shaLength: Int = 0,
         v2: Boolean = true,
         appendPreReleaseLast: Boolean = false,
-        metaSeparator: Char = '+'
+        metaSeparator: Char = '+',
+        useTwoDigitVersion: Boolean = false
     ): String {
         if (!v2) {
-            return toVersionString(false);
+            return toVersionString(false, useTwoDigitVersion);
         }
         if (appendPreReleaseLast) {
             return VersionBuilder()
+                .appendVersion(useTwoDigitVersion)
                 .appendBuildMetadata(commitCountStringFormat, shaLength, metaSeparator)
                 .appendPrerelease()
                 .toString();
         }
         return VersionBuilder()
+            .appendVersion(useTwoDigitVersion)
             .appendPrerelease()
             .appendBuildMetadata(commitCountStringFormat, shaLength, metaSeparator)
             .toString();
@@ -72,8 +75,12 @@ data class SemInfoVersion(
      * @param v2 Whether to use v2 formatting (default: true)
      * @return The formatted version string
      */
-    fun toVersionString(v2: Boolean = true): String {
-        return VersionBuilder().appendPrerelease(v2).toString();
+    fun toVersionString(v2: Boolean = true,
+                        useTwoDigitVersion: Boolean = false): String {
+        return VersionBuilder()
+            .appendVersion(useTwoDigitVersion)
+            .appendPrerelease(v2)
+            .toString();
     }
 
     /**
@@ -94,7 +101,14 @@ data class SemInfoVersion(
 
     private inner class VersionBuilder() {
         private val builder: StringBuilder = StringBuilder()
-            .append(major).append('.').append(minor).append('.').append(patch)
+
+        fun appendVersion(useTwoDigitVersion: Boolean = false): VersionBuilder {
+            builder.append(major).append('.').append(minor)
+            if (!useTwoDigitVersion) {
+                builder.append('.').append(patch)
+            }
+            return this
+        }
 
         fun appendPrerelease(v2: Boolean = true): VersionBuilder {
             if (isPreRelease) {

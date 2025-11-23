@@ -104,7 +104,9 @@ abstract class GitSemverPluginExtension(project: Project, providerFactory: Provi
     /**
      * The semantic version for the project with commit info excluding sha as a string e.g. "1.2.3-Alpha.4+005"
      */
-    val infoVersion: String by lazy { semVersion.toInfoVersionString(metaSeparator = metaSeparator) }
+    val infoVersion: String by lazy { semVersion.toInfoVersionString(
+        metaSeparator = metaSeparator,
+        useTwoDigitVersion = useTwoDigitVersion) }
 
     /**
      * The semantic version for the project e.g. 1.2.3-Alpha.4
@@ -115,7 +117,7 @@ abstract class GitSemverPluginExtension(project: Project, providerFactory: Provi
     /**
      * The semantic version for the project as a string e.g. "1.2.3-Alpha.4"
      */
-    val version: String by lazy { versionValue.toString() }
+    val version: String by lazy { versionValue.toString(useTwoDigitVersion) }
 
     private var semInfoVersionValueSource = project.providers.of(SemInfoVersionValueSource::class.java) {
         it.parameters.getGitDir().set(gitDirectory);

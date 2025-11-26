@@ -130,6 +130,36 @@ class SemVersionFinderTest {
     }
 
     @Test
+    fun multiple_release_tags_branching_two_digit_version() {
+        // given
+        val tags = listOf(
+            Tag("v0.4.0", "SHA0")
+        )
+
+        val a0 = Commit("a msg1", "SHA0", 0, sequenceOf())
+        val a1 = Commit("feat: a feature", "SHA1", 1, sequenceOf(a0))
+        val a2 = Commit("a msg3", "SHA2", 2, sequenceOf(a1))
+
+        val b0 = Commit("fix: test 11", "SHA11", 3, sequenceOf(a2))
+        val b1 = Commit("fix: test 12", "SHA12", 4, sequenceOf(b0))
+        val b2 = Commit("fix: test 13", "SHA13", 5, sequenceOf(b1))
+
+        val c0 = Commit("feat: test 21", "SHA21", 6, sequenceOf(a2))
+        val c1 = Commit("feat: test 22", "SHA22", 7, sequenceOf(c0))
+
+        val d0 = Commit("merge msg", "SHA31", 8, sequenceOf(b2, c1))
+        val d1 = Commit("fix: msg", "SHA32", 9, sequenceOf(d0))
+
+        // when
+        val versions = getVersion(tags, d1, twoDigitVersion = false)
+
+        // then
+        assertEquals("0.5-SNAPSHOT", versions.toVersionString(useTwoDigitVersion = true))
+        assertEquals("0.5-SNAPSHOT+009", versions.toInfoVersionString(useTwoDigitVersion = true))
+        assertEquals("0.5-SNAPSHOT", versions.toSemVersion().toString(useTwoDigitVersion = true))
+    }
+
+    @Test
     fun prerelease_no_grouping() {
         // given
         val tags = listOf(
@@ -521,11 +551,13 @@ class SemVersionFinderTest {
         commit: Commit,
         dirty: Boolean = false,
         groupVersions: Boolean = true,
-        disableAutoBump: Boolean = false
+        disableAutoBump: Boolean = false,
+        twoDigitVersion: Boolean = false
     ): SemInfoVersion {
         val settings = SemverSettings().apply {
             groupVersionIncrements = groupVersions
             noAutoBump = disableAutoBump
+            useTwoDigitVersion = twoDigitVersion
         }
         return VersionFinder(settings, tags.groupBy { it.sha }).getVersion(commit, !dirty, "SNAPSHOT")
     }

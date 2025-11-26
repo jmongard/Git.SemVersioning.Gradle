@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory
 import java.io.File
 import java.util.*
 
-internal class GitProvider(private val settings: SemverSettings) {
+internal class GitProvider(internal val settings: SemverSettings) {
     companion object {
         private const val REF_PREFIX = "refs/tags/"
         private val logger = LoggerFactory.getLogger(GitProvider::class.java)

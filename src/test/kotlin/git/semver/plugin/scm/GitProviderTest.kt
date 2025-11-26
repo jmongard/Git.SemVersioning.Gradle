@@ -6,9 +6,12 @@ import org.assertj.core.api.Assertions.*
 import org.eclipse.jgit.api.Git
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.TestInfo
+import org.junit.jupiter.api.io.TempDir
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
 import java.io.File
+import java.nio.file.Files
+import java.nio.file.Path
 import kotlin.test.*
 
 class GitProviderTest {
@@ -16,12 +19,18 @@ class GitProviderTest {
     private val tableSeparator = "| ${"-".repeat(45)} | ${"-".repeat(25)} | ${"-".repeat(20)} |"
     private val builder = StringBuilder()
 
+    companion object {
+        @TempDir
+        lateinit var tempDir: Path
+    }
+
     @BeforeEach
     fun setUp(testInfo: TestInfo) {
         builder.appendLine().appendLine(testInfo.displayName)
     }
 
-    private fun printHead() {
+    private fun printHead(gitDir: File) {
+        builder.appendLine(gitDir)
         builder.appendLine(tableSeparator).appendLine(
             tableStringFormat.format(
                 "Command",
@@ -44,14 +53,13 @@ class GitProviderTest {
 
     @Test
     fun testCommits_group() {
-        val gitDir = File("build/integrationTest21")
-        gitDir.mkdirs()
+        val gitDir = getGitDir("integrationTest21")
 
-        printHead()
+        printHead(gitDir)
 
         val gitProvider = GitProvider(SemverSettings().apply { groupVersionIncrements = true })
         Git.init().setDirectory(gitDir).call().use {
-            lotsOfCommits(it, gitProvider)
+            lotsOfCommits(it, gitProvider, "release: 1.0.0")
 
             val actual = release(gitProvider, it, "-")
 
@@ -63,18 +71,37 @@ class GitProviderTest {
 
     @Test
     fun testCommits_no_grouping() {
-        val gitDir = File("build/integrationTest22")
-        gitDir.mkdirs()
+        val gitDir = getGitDir("integrationTest22")
 
-        printHead()
+        printHead(gitDir)
 
         val gitProvider = GitProvider(SemverSettings().apply { groupVersionIncrements = false })
         Git.init().setDirectory(gitDir).call().use {
-            lotsOfCommits(it, gitProvider)
+            lotsOfCommits(it, gitProvider, "release: 1.0.0")
 
             val actual = release(gitProvider, it, "-")
 
             assertEquals("3.0.0", actual.toVersionString())
+        }
+        printFoot()
+    }
+
+    @Test
+    fun testCommits_two_digit_version() {
+        val gitDir = getGitDir("integrationTest23")
+
+        printHead(gitDir)
+
+        val gitProvider = GitProvider(SemverSettings().apply {
+            useTwoDigitVersion = true
+            groupVersionIncrements = false
+        })
+        Git.init().setDirectory(gitDir).call().use {
+            lotsOfCommits(it, gitProvider, "release: 1.0")
+
+            val actual = release(gitProvider, it, "-")
+
+            assertEquals("3.0", actual.toVersionString(useTwoDigitVersion = true))
         }
         printFoot()
     }
@@ -88,12 +115,11 @@ class GitProviderTest {
 
     @Test
     fun changeLog_before_release() {
-        val gitDir = File("build/integrationTest31")
-        gitDir.mkdirs()
+        val gitDir = getGitDir("integrationTest31")
 
         val gitProvider = GitProvider(SemverSettings())
         Git.init().setDirectory(gitDir).call().use {
-            lotsOfCommits(it, gitProvider)
+            lotsOfCommits(it, gitProvider, "release: 1.0.0")
 
             val actual = gitProvider().changeLog(it)
 
@@ -104,14 +130,19 @@ class GitProviderTest {
         }
     }
 
+    private fun getGitDir(name: String): File {
+        val path = tempDir.resolve(name)
+        Files.createDirectories(path)
+        return path.toFile()
+    }
+
     @Test
     fun changeLog_after_release() {
-        val gitDir = File("build/integrationTest32")
-        gitDir.mkdirs()
+        val gitDir = getGitDir("integrationTest32")
 
         val gitProvider = GitProvider(SemverSettings())
         Git.init().setDirectory(gitDir).call().use {
-            lotsOfCommits(it, gitProvider)
+            lotsOfCommits(it, gitProvider, "release: 1.0.0")
             release(gitProvider, it, "-")
 
             val actual = gitProvider().changeLog(it)
@@ -127,7 +158,6 @@ class GitProviderTest {
     @Test
     fun changeLog_stops_at_prerelease() {
         val gitDir = File("build/integrationTest33")
-        gitDir.mkdirs()
 
         val gitProvider = GitProvider(SemverSettings())
         Git.init().setDirectory(gitDir).call().use {
@@ -149,9 +179,9 @@ class GitProviderTest {
         }
     }
 
-    private fun lotsOfCommits(it: Git, gitProvider: GitProvider) {
+    private fun lotsOfCommits(it: Git, gitProvider: GitProvider, start: String) {
         initOrReset(it, gitProvider)
-        commit(it, "release: 1.0.0", gitProvider)
+        commit(it, start, gitProvider)
         commit(it, "build: some changes", gitProvider)
         release(gitProvider, it)
         commit(it, "docs: updated readme", gitProvider)
@@ -181,10 +211,9 @@ class GitProviderTest {
 
     @Test
     fun testNoAutoBumpAndNoGroupingCommits_modified() {
-        val gitDir = File("build/integrationTest7")
-        gitDir.mkdirs()
-
-        printHead()
+        val gitDir = getGitDir("integrationTest7")
+        
+        printHead(gitDir)
 
         val gitProvider = GitProvider(SemverSettings().apply { groupVersionIncrements = false; noAutoBump = true })
         Git.init().setDirectory(gitDir).call().use {
@@ -201,10 +230,9 @@ class GitProviderTest {
 
     @Test
     fun testNoAutoBumpAndNoGroupingCommits_not_modified() {
-        val gitDir = File("build/integrationTest8")
-        gitDir.mkdirs()
+        val gitDir = getGitDir("integrationTest8")
 
-        printHead()
+        printHead(gitDir)
 
         val gitProvider = GitProvider(SemverSettings().apply { groupVersionIncrements = false; noAutoBump = true })
         Git.init().setDirectory(gitDir).call().use {
@@ -220,10 +248,9 @@ class GitProviderTest {
 
     @Test
     fun test_semver_snapshot_comparison_no_group() {
-        val gitDir = File("build/integrationTest9")
-        gitDir.mkdirs()
+        val gitDir = getGitDir("integrationTest9")
 
-        printHead()
+        printHead(gitDir)
 
         val gitProvider = GitProvider(SemverSettings().apply { groupVersionIncrements = false; noAutoBump = true })
         Git.init().setDirectory(gitDir).call().use {
@@ -241,10 +268,9 @@ class GitProviderTest {
 
     @Test
     fun test_semver_snapshot_comparison_group() {
-        val gitDir = File("build/integrationTest10")
-        gitDir.mkdirs()
+        val gitDir = getGitDir("integrationTest10")
 
-        printHead()
+        printHead(gitDir)
 
         val gitProvider = GitProvider(SemverSettings().apply { groupVersionIncrements = true; noAutoBump = true })
         Git.init().setDirectory(gitDir).call().use {
@@ -290,15 +316,15 @@ class GitProviderTest {
         msg: String
     ): SemInfoVersion {
         val semVersion = gitProvider.semVersion(it)
-        builder.appendLine(tableStringFormat.format(cmd, msg, semVersion.toInfoVersionString()))
+        builder.appendLine(tableStringFormat.format(cmd, msg,
+            semVersion.toInfoVersionString(useTwoDigitVersion = gitProvider.settings.useTwoDigitVersion)))
         return semVersion
     }
 
     @Test
     fun testCreateReleaseCommit() {
-        printHead()
-        val gitDir = File("build/integrationTest")
-        gitDir.mkdirs()
+        val gitDir = getGitDir("integrationTest")
+        printHead(gitDir)
 
         val gitProvider = gitProvider()
 
@@ -334,9 +360,8 @@ class GitProviderTest {
 
     @Test
     fun testCreateReleaseCommit3() {
-        printHead()
-        val gitDir = File("build/integrationTest3")
-        gitDir.mkdirs()
+        val gitDir = getGitDir("integrationTest3")
+        printHead(gitDir)
 
         val gitProvider = gitProvider()
 
@@ -358,8 +383,7 @@ class GitProviderTest {
 
     @Test
     fun testEmptyRepo() {
-        val gitDir = File("build/integrationTest4")
-        gitDir.mkdirs()
+        val gitDir = getGitDir("integrationTest4")
 
         val gitProvider = gitProvider()
 
@@ -370,8 +394,7 @@ class GitProviderTest {
 
     @Test
     fun testNoDirtyCheck() {
-        val gitDir = File("build/integrationTest5")
-        gitDir.mkdirs()
+        val gitDir = getGitDir("integrationTest5")
 
         val gitProvider = GitProvider(SemverSettings().apply { noDirtyCheck = true })
 
@@ -381,12 +404,10 @@ class GitProviderTest {
         }
     }
 
-
     @Test
     fun testCreateReleaseCommit3_no_tag_or_commit() {
-        printHead()
-        val gitDir = File("build/integrationTest6")
-        gitDir.mkdirs()
+        val gitDir = getGitDir("integrationTest6")
+        printHead(gitDir)
 
         val gitProvider = GitProvider(SemverSettings().apply {
             releaseCommitTextFormat = ""

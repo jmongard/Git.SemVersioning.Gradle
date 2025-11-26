@@ -28,6 +28,7 @@ class GitSemverPluginTest {
         project.plugins.apply("com.github.jmongard.git-semver-plugin")
         val c = project.extensions.findByName("semver") as GitSemverPluginExtension
         c.defaultPreRelease = "XYZ"
+        c.metaSeparator = '¤'
 
         val task = project.tasks.findByName(name) as PrintTask
 
@@ -36,9 +37,12 @@ class GitSemverPluginTest {
         task.setFile(outFile.toString())
         task.print()
 
-        if (name.endsWith("Version"))
-            assertThat(outFile).exists().isNotEmptyFile().content().doesNotContain("SNAPSHOT").contains(c.version)
-        else
+        if (name.endsWith("Version")) {
+            assertThat(outFile).exists().isNotEmptyFile().content()
+                .doesNotContain("SNAPSHOT")
+                .contains(c.version)
+                .doesNotContain("+")
+        } else
             assertThat(outFile).exists().isNotEmptyFile().content().startsWith("#")
     }
 

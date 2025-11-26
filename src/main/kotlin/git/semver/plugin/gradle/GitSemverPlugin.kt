@@ -8,7 +8,7 @@ import org.gradle.api.Project
 /**
  * The plugin entry point
  */
-class GitSemverPlugin: Plugin<Project> {
+class GitSemverPlugin : Plugin<Project> {
     companion object {
         const val VERSIONING_GROUP = "Versioning"
     }
@@ -16,9 +16,28 @@ class GitSemverPlugin: Plugin<Project> {
     override fun apply(project: Project) {
         val extension = project.extensions.create("semver", GitSemverPluginExtension::class.java, project)
 
-        project.tasks.register("printVersion", PrintTask::class.java, extension::versionValue, "Prints the current project version", "")
-        project.tasks.register("printSemVersion", PrintTask::class.java, extension::semVersion, "Prints the current project semantic version", "")
-        project.tasks.register("printInfoVersion", PrintTask::class.java, extension::infoVersion, "Prints the current project info version", "")
+        project.tasks.register(
+            "printVersion", PrintTask::class.java, {
+                extension.versionValue.toString(extension.useTwoDigitVersion)
+            }, "Prints the current project version", ""
+        )
+        project.tasks.register(
+            "printSemVersion", PrintTask::class.java, {
+                extension.semVersion.toInfoVersionString(
+                    shaLength = 7,
+                    useTwoDigitVersion = extension.useTwoDigitVersion,
+                    metaSeparator = extension.metaSeparator
+                )
+            }, "Prints the current project semantic version", ""
+        )
+        project.tasks.register(
+            "printInfoVersion", PrintTask::class.java, {
+                extension.semVersion.toInfoVersionString(
+                    metaSeparator = extension.metaSeparator,
+                    useTwoDigitVersion = extension.useTwoDigitVersion
+                )
+            }, "Prints the current project info version", ""
+        )
 
         if (project == project.rootProject) {
             project.tasks.register("printChangeLog", PrintTask::class.java, {

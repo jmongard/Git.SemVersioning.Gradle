@@ -100,15 +100,7 @@ string will not be semver compliant.
 The plugin supports 2-digit versioning (major.minor) in addition to the standard 3-digit semantic versioning (major.minor.patch). 
 This can be useful for projects that follow a simpler versioning scheme.
 
-To enable 2-digit versioning, set `useTwoDigitVersion = true` in your configuration:
-
-#### Accessing 2-Digit Versions
-
-When `useTwoDigitVersion` is enabled, the standard version properties automatically use the 2-digit format:
-
-* `semver.version` - Returns the 2-digit version (e.g., `5.2`)
-* `semver.infoVersion` - Returns the 2-digit version with commit count (e.g., `5.2+001`)
-* `semver.semVersion.toString()` - Returns the 2-digit version with SHA (e.g., `5.2+001.sha.1c792d5`)
+To enable 2-digit versioning, set `useTwoDigitVersion = true` in your configuration.
 
 ## Tasks
 

@@ -32,9 +32,13 @@ allprojects {
 
 [For the latest published version see the plugins page at Gradle.org](https://plugins.gradle.org/plugin/com.github.jmongard.git-semver-plugin)
 
-The plugin requires Gradle 8 and Java version 17 to run.
-(Use version `0.16.1` if Gradle 7 is required.)
-(Use version `0.13.0` if Java 8 is required.)
+## Supported Gradle version
+
+This plugin has been tested on Gradle 8.x and 9.x and requires Java version 17 to run.
+
+* Use version `0.16.1` if Gradle 7 is required.
+* Use version `0.13.0` if Java 8 is required.
+* Version `0.4.3` and older should work on Gradle 6.x and probably 5.x.
 
 ## Versioning
 
@@ -298,10 +302,6 @@ version = semver.version
 
 Patterns is matched using [java regular expressions](https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html) 
 with IGNORE_CASE and MULTILINE options enabled.
-
-## Supported Gradle version
-
-This plugin has been tested on Gradle 8.x and 9.x. (Version 0.4.3 and older should work on gradle 6.x and probably 5.x)
 
 ## Continuous Integration
 The plugin calculates the version using the commit tree. Make sure you check out all commits relevant and not just

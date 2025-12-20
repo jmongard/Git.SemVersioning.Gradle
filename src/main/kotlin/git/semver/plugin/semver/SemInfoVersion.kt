@@ -102,7 +102,7 @@ data class SemInfoVersion(
     private inner class VersionBuilder() {
         private val builder: StringBuilder = StringBuilder()
 
-        fun appendVersion(useTwoDigitVersion: Boolean = false): VersionBuilder {
+        fun appendVersion(useTwoDigitVersion: Boolean): VersionBuilder {
             builder.append(major).append('.').append(minor)
             if (!useTwoDigitVersion) {
                 builder.append('.').append(patch)

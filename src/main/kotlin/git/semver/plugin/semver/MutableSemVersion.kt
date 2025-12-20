@@ -251,7 +251,7 @@ internal class MutableSemVersion(
         return this
     }
 
-    private val hasPendingChanges
+    internal val hasPendingChanges
         get() = bumpMajor + bumpMinor + bumpPatch + bumpPre > 0
 
     private fun resetPendingChanges() {

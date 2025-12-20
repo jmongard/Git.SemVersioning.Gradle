@@ -70,6 +70,10 @@ internal class GitProvider(internal val settings: SemverSettings) {
             getHeadCommit(it.repository),
             params.preRelease?.trimStart('-')
         )
+        if (version == null) {
+            println("No changes detected")
+            return;
+        }
         val versionString = version.toInfoVersionString(
             metaSeparator = settings.metaSeparator,
             useTwoDigitVersion =  settings.useTwoDigitVersion)

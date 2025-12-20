@@ -12,7 +12,7 @@ import org.junit.jupiter.params.provider.CsvSource
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.Path
-import kotlin.test.*
+import kotlin.test.Test
 
 class GitProviderTest {
     private val tableStringFormat = "| %-45s | %-25s | %-20s |"
@@ -48,7 +48,7 @@ class GitProviderTest {
     fun testGetSemVersion() {
         val actual = gitProvider().getSemVersion(File("."))
 
-        assertNotNull(actual)
+        assertThat(actual).isNotNull()
     }
 
     @Test
@@ -63,7 +63,7 @@ class GitProviderTest {
 
             val actual = release(gitProvider, it, "-")
 
-            assertEquals("3.0.0", actual.toVersionString())
+            assertThat(actual.toVersionString()).isEqualTo("3.0.0")
         }
 
         printFoot()
@@ -81,7 +81,7 @@ class GitProviderTest {
 
             val actual = release(gitProvider, it, "-")
 
-            assertEquals("3.0.0", actual.toVersionString())
+            assertThat(actual.toVersionString()).isEqualTo("3.0.0")
         }
         printFoot()
     }
@@ -101,7 +101,29 @@ class GitProviderTest {
 
             val actual = release(gitProvider, it, "-")
 
-            assertEquals("3.0", actual.toVersionString(useTwoDigitVersion = true))
+            assertThat(actual.toVersionString(useTwoDigitVersion = true))
+                .isEqualTo("3.0")
+        }
+        printFoot()
+    }
+
+    @Test
+    fun `when noReleaseAutoBump true calling release without changes should not bump version`() {
+        val gitDir = getGitDir("integrationTest23")
+
+        printHead(gitDir)
+
+        val gitProvider = GitProvider(SemverSettings().apply {
+            noReleaseAutoBump = true
+        })
+        Git.init().setDirectory(gitDir).call().use {
+            initOrReset(it, gitProvider)
+            commit(it, "release: 1.0", gitProvider)
+
+            val actual = release(gitProvider, it, "-")
+
+            assertThat(actual.toVersionString())
+                .isEqualTo("1.0.0")
         }
         printFoot()
     }
@@ -110,7 +132,7 @@ class GitProviderTest {
     fun testGetChangeLog() {
         val actual = gitProvider().getChangeLog(File("."))
 
-        assertNotNull(actual)
+        assertThat(actual).isNotNull()
     }
 
     @Test
@@ -223,7 +245,7 @@ class GitProviderTest {
             val actual = commit(it, "test13", gitProvider)
 
 
-            assertEquals("0.0.11-SNAPSHOT", actual.toVersionString())
+            assertThat(actual.toVersionString()).isEqualTo("0.0.11-SNAPSHOT")
         }
         printFoot()
     }
@@ -240,8 +262,7 @@ class GitProviderTest {
             commit(it, "release: 0.0.10", gitProvider)
             val actual = commit(it, "test13", gitProvider)
 
-
-            assertEquals("0.0.10", actual.toVersionString())
+            assertThat(actual.toVersionString()).isEqualTo("0.0.10")
         }
         printFoot()
     }
@@ -261,7 +282,7 @@ class GitProviderTest {
             commit(it, "fix: update semver plugin", gitProvider)
             val actual = release(gitProvider, it, "-")
 
-            assertEquals("0.0.3", actual.toVersionString())
+            assertThat(actual.toVersionString()).isEqualTo("0.0.3")
         }
         printFoot()
     }
@@ -281,7 +302,7 @@ class GitProviderTest {
             commit(it, "fix: update semver plugin", gitProvider)
             val actual = release(gitProvider, it, "-")
 
-            assertEquals("0.0.3", actual.toVersionString())
+            assertThat(actual.toVersionString()).isEqualTo("0.0.3")
         }
         printFoot()
     }
@@ -352,7 +373,7 @@ class GitProviderTest {
         gitProvider.createRelease(gitDir, GitProvider.ReleaseParams(false, commit = true, preRelease = "", noDirtyCheck = false))
 
         Git.open(gitDir).use {
-            assertTrue(gitProvider.getHeadCommit(it.repository).text.startsWith("release: v0."))
+            assertThat(gitProvider.getHeadCommit(it.repository).text).startsWith("release: v0.")
         }
 
         printFoot()
@@ -376,7 +397,7 @@ class GitProviderTest {
 
 
         Git.open(gitDir).use {
-            assertTrue(gitProvider.getHeadCommit(it.repository).text.startsWith("release: v0."))
+            assertThat(gitProvider.getHeadCommit(it.repository).text).startsWith("release: v0.")
         }
         printFoot()
     }
@@ -388,7 +409,7 @@ class GitProviderTest {
         val gitProvider = gitProvider()
 
         Git.init().setDirectory(gitDir).call().use {
-            assertEquals("0.0.0", gitProvider.getSemVersion(gitDir).toString())
+            assertThat(gitProvider.getSemVersion(gitDir)).hasToString("0.0.0")
         }
     }
 
@@ -424,7 +445,8 @@ class GitProviderTest {
         }
 
         Git.open(gitDir).use {
-            assertFalse(gitProvider.getHeadCommit(it.repository).text.startsWith("release: v0."))
+            assertThat(gitProvider.getHeadCommit(it.repository).text)
+                .doesNotStartWith("release: v0.")
         }
         printFoot()
     }

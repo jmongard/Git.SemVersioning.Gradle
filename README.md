@@ -279,11 +279,12 @@ version = semver.version
 * **groupVersionIncrements**: Used to disable grouping of version increments so that each commit message counts.
 * **noDirtyCheck**: Can be used to ignore all local modifications when calculating the version.
   Disabling dirty check can also be done from the command line e.g. `gradlew -PnoDirtyCheck=true someOtherTask`.
-* **noAutoBump**: If set only commits matching majorPattern, minorPattern or patchPattern will increase the version.
-  The default behaviour for the plugin is to assume you have begun the work on the next release for any commit you do
+* **noAutoBump**: If enabled only commits matching majorPattern, minorPattern or patchPattern will increase the version.
+  The default behavior for the plugin is to assume you have begun the work on the next release for any commit you do
   after the last release. The patch level (or pre-release level, if the last release was a pre-release) of the version
   will be incremented by one if not already incremented by **majorPattern,  minorPattern or patchPattern**.
   (This option does not apply to the release task.)
+* **noReleaseAutoBump**: If enabled, and no commit matches majorPattern, minorPattern, or patchPattern, then the release task will not increase the version. No 
 * **gitDirectory**: The directory where the git repo can be found. 
 * **createReleaseTag**: If a release tag should be created when running the release task. Setting this to false
   has the same effect as the --no-tag flag.

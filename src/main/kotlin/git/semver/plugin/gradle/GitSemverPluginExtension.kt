@@ -8,10 +8,9 @@ import git.semver.plugin.semver.SemverSettings
 import org.gradle.api.Project
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.provider.Property
-import org.gradle.api.provider.ProviderFactory
 
 
-abstract class GitSemverPluginExtension(project: Project, providerFactory: ProviderFactory) : BaseSettings() {
+abstract class GitSemverPluginExtension(project: Project) : BaseSettings() {
     init {
         gitDirectory.convention(project.layout.projectDirectory)
         createReleaseCommit.convention(true)
@@ -121,13 +120,14 @@ abstract class GitSemverPluginExtension(project: Project, providerFactory: Provi
 
     private var semInfoVersionValueSource = project.providers.of(SemInfoVersionValueSource::class.java) {
         it.parameters.getGitDir().set(gitDirectory);
-        it.parameters.getSettings().set(providerFactory.provider {
+        it.parameters.getSettings().set(project.provider {
             createSettings()
         })
     }
+
     private var semVersionValueSource = project.providers.of(SemVersionValueSource::class.java) {
         it.parameters.getGitDir().set(gitDirectory);
-        it.parameters.getSettings().set(providerFactory.provider {
+        it.parameters.getSettings().set(project.provider {
             createSettings()
         })
     }

@@ -71,7 +71,7 @@ internal class GitProvider(internal val settings: SemverSettings) {
             params.preRelease?.trimStart('-')
         )
         if (version == null) {
-            println("No changes detected")
+            logger.info("No changes detected")
             return;
         }
         val versionString = version.toInfoVersionString(

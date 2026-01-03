@@ -145,8 +145,8 @@ class VersionFinder(private val settings: SemverSettings, private val tags: Map<
     private fun getCombinedParentVersion(parentSemVersions: List<MutableSemVersion>): MutableSemVersion {
         return when {
             parentSemVersions.isEmpty() -> versionZero()
-            parentSemVersions.size == 1 -> parentSemVersions[0]
-            else -> checkNotNull(parentSemVersions.maxOrNull()).mergeChanges(parentSemVersions)
+            parentSemVersions.size == 1 -> parentSemVersions.first()
+            else -> parentSemVersions.max().combineChanges(parentSemVersions)
         }
     }
 

@@ -24,9 +24,10 @@ jobs:
 
     - name: Get version from commit message
       id: commitversion
+      env:
+        COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
       run: |
-        commit_message="${{github.event.head_commit.message}}"
-        if [[ $commit_message == release:* && $commit_message =~ ([0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9\.]+)?) ]]; then
+        if [[ $COMMIT_MESSAGE == release:* && $COMMIT_MESSAGE =~ ([0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9\.]+)?) ]]; then
           release_version="v${BASH_REMATCH[1]}"
           echo "release_version=$release_version" >> $GITHUB_OUTPUT
           echo "is_release=True" >> $GITHUB_OUTPUT

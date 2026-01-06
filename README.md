@@ -257,6 +257,7 @@ semver {
     groupVersionIncrements = true
     noDirtyCheck = false
     noAutoBump = false
+    noReleaseAutoBump = false
     gitDirectory = project.projectDir
     createReleaseCommit = true
     createReleaseTag = true
@@ -284,7 +285,7 @@ version = semver.version
   after the last release. The patch level (or pre-release level, if the last release was a pre-release) of the version
   will be incremented by one if not already incremented by **majorPattern,  minorPattern or patchPattern**.
   (This option does not apply to the release task.)
-* **noReleaseAutoBump**: If enabled, and no commit matches majorPattern, minorPattern, or patchPattern, then the release task will not increase the version. No 
+* **noReleaseAutoBump**: If enabled, and no commit matches majorPattern, minorPattern, or patchPattern, then the release task will not increase the version. 
 * **gitDirectory**: The directory where the git repo can be found. 
 * **createReleaseTag**: If a release tag should be created when running the release task. Setting this to false
   has the same effect as the --no-tag flag.

@@ -1,5 +1,6 @@
 package git.semver.plugin.scm
 
+import git.semver.plugin.semver.MutableSemVersion
 import git.semver.plugin.semver.SemInfoVersion
 import git.semver.plugin.semver.SemverSettings
 import git.semver.plugin.semver.VersionFinder
@@ -10,6 +11,9 @@ import org.eclipse.jgit.lib.Repository
 import org.eclipse.jgit.lib.RepositoryBuilder
 import org.eclipse.jgit.revwalk.RevCommit
 import org.eclipse.jgit.revwalk.RevWalk
+import org.eclipse.jgit.treewalk.filter.AndTreeFilter
+import org.eclipse.jgit.treewalk.filter.PathFilter
+import org.eclipse.jgit.treewalk.filter.TreeFilter
 import org.eclipse.jgit.util.FS
 import org.slf4j.LoggerFactory
 import java.io.File
@@ -30,9 +34,9 @@ internal class GitProvider(internal val settings: SemverSettings) {
     }
 
     internal fun semVersion(it: Git): SemInfoVersion {
-        val versionFinder = VersionFinder(settings, getTags(it.repository))
-        return versionFinder.getVersion(
-            getHeadCommit(it.repository),
+        val tags = getTags(it.repository)
+        return VersionFinder(settings, tags).getVersion(
+            getHeadCommit(it.repository, tags),
             isClean(it),
             settings.defaultPreRelease
         )
@@ -45,9 +49,8 @@ internal class GitProvider(internal val settings: SemverSettings) {
     }
 
     internal fun changeLog(it: Git): List<Commit> {
-        val versionFinder = VersionFinder(settings, getTags(it.repository))
-        return versionFinder.getChangeLog(
-            getHeadCommit(it.repository))
+        val tags = getTags(it.repository)
+        return VersionFinder(settings, tags).getChangeLog(getHeadCommit(it.repository, tags))
     }
 
     internal fun createRelease(
@@ -65,9 +68,9 @@ internal class GitProvider(internal val settings: SemverSettings) {
     ) {
         checkDirty(params.noDirtyCheck, isClean(it))
 
-        val versionFinder = VersionFinder(settings, getTags(it.repository))
-        val version = versionFinder.getReleaseVersion(
-            getHeadCommit(it.repository),
+        val tags = getTags(it.repository)
+        val version = VersionFinder(settings, tags).getReleaseVersion(
+            getHeadCommit(it.repository, tags),
             params.preRelease?.trimStart('-')
         )
         if (version == null) {
@@ -134,26 +137,85 @@ internal class GitProvider(internal val settings: SemverSettings) {
     }
 
     private fun getTags(repository: Repository): Map<String, List<Tag>> {
-        return repository.refDatabase.getRefsByPrefix(REF_PREFIX).map {
-            Tag(it.name.removePrefix(REF_PREFIX), getObjectIdFromRef(repository, it).name)
-        }.groupBy { it.sha }
+        val tagPrefix = settings.releaseTagNameFormat
+            .takeIf { it.contains("%s") }
+            ?.substringBefore("%s")
+            .orEmpty()
+        return repository.refDatabase.getRefsByPrefix(REF_PREFIX)
+            .map { Tag(it.name.removePrefix(REF_PREFIX), getObjectIdFromRef(repository, it).name) }
+            .filter { tagPrefix.isEmpty() || it.text.startsWith(tagPrefix) }
+            .groupBy { it.sha }
     }
 
-    internal fun getHeadCommit(it: Repository): Commit {
-        val revWalk = RevWalk(it)
-        val head = it.resolve("HEAD") ?: return Commit("", "", 0, emptySequence())
-        val revCommit = revWalk.parseCommit(head)
-        revWalk.markStart(revCommit)
-        return getCommit(revCommit, revWalk)
+    internal fun getHeadCommit(repo: Repository, tags: Map<String, List<Tag>> = emptyMap()): Commit {
+        val revWalk = RevWalk(repo)
+        val head = repo.resolve("HEAD") ?: return Commit("", "", 0, emptySequence())
+        val headCommit = revWalk.parseCommit(head)
+
+        val relevantShas = computeRelevantShas(repo, head, tags)
+
+        revWalk.markStart(headCommit)
+        return getCommit(headCommit, revWalk, relevantShas)
     }
 
-    private fun getCommit(commit: RevCommit, revWalk: RevWalk): Commit {
+    private fun computeRelevantShas(repo: Repository, head: ObjectId, tags: Map<String, List<Tag>>): Set<String>? {
+        if (settings.pathFilter.isEmpty()) return null
+
+        val versionTagIds = getVersionTagObjectIds(tags)
+        val releaseMsgIds = findReleaseMessageCommits(repo, head, versionTagIds)
+        val boundaryIds = versionTagIds + releaseMsgIds
+
+        return filterCommitsByPath(repo, head, boundaryIds)
+    }
+
+    private fun getVersionTagObjectIds(tags: Map<String, List<Tag>>): List<ObjectId> {
+        return tags.entries
+            .filter { (_, tagList) -> tagList.any { MutableSemVersion.tryParse(it) != null } }
+            .mapNotNull { (sha, _) ->
+                try { ObjectId.fromString(sha) } catch (_: Exception) { null }
+            }
+    }
+
+    private fun findReleaseMessageCommits(repo: Repository, head: ObjectId, boundaryIds: List<ObjectId>): List<ObjectId> {
+        return RevWalk(repo).use { preWalk ->
+            preWalk.markStart(preWalk.parseCommit(head))
+            for (oid in boundaryIds) {
+                try { preWalk.markUninteresting(preWalk.parseCommit(oid)) } catch (_: Exception) {}
+            }
+            buildList {
+                for (rc in preWalk) {
+                    val ref = object : IRefInfo { override val text = rc.fullMessage; override val sha = rc.name }
+                    if (MutableSemVersion.isRelease(ref, settings) && MutableSemVersion.tryParse(ref) != null) {
+                        add(rc.id)
+                    }
+                }
+            }
+        }
+    }
+
+    private fun filterCommitsByPath(repo: Repository, head: ObjectId, boundaryIds: List<ObjectId>): Set<String> {
+        return RevWalk(repo).use { filterWalk ->
+            filterWalk.markStart(filterWalk.parseCommit(head))
+            for (oid in boundaryIds) {
+                try { filterWalk.markUninteresting(filterWalk.parseCommit(oid)) } catch (_: Exception) {}
+            }
+            filterWalk.treeFilter = AndTreeFilter.create(
+                PathFilter.create(settings.pathFilter),
+                TreeFilter.ANY_DIFF
+            )
+            filterWalk.map { it.name }.toHashSet()
+        }
+    }
+
+    private fun getCommit(commit: RevCommit, revWalk: RevWalk, relevantShas: Set<String>?): Commit {
+        val ignored = relevantShas != null && commit.name !in relevantShas
         return Commit(commit.fullMessage, commit.name, commit.commitTime, sequence {
             for (parent in commit.parents) {
                 revWalk.parseHeaders(parent)
-                yield(getCommit(parent, revWalk))
+                yield(getCommit(parent, revWalk, relevantShas))
             }
-        }, commit.authorIdent.name, commit.authorIdent.emailAddress, Date.from(commit.authorIdent.whenAsInstant))
+        }, commit.authorIdent.name, commit.authorIdent.emailAddress, Date.from(commit.authorIdent.whenAsInstant),
+            ignored)
     }
 
     internal fun checkDirty(noDirtyCheck: Boolean, isClean: Boolean) {

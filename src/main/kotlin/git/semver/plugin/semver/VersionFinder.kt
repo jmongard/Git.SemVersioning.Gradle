@@ -46,7 +46,7 @@ class VersionFinder(private val settings: SemverSettings, private val tags: Map<
     }
 
     private fun getChangeLog(commitData: List<CommitData>): MutableList<Commit> = commitData.asReversed()
-        .filter { it.parents.size <= 1 }
+        .filter { it.parents.size <= 1 && !it.commit.ignored }
         .map { it.commit }
         .toMutableList()
 
@@ -68,7 +68,9 @@ class VersionFinder(private val settings: SemverSettings, private val tags: Map<
                 .mapNotNull { result.visitedCommits.remove(it) }
                 .toList()
             val maxVersionFromParents = getCombinedParentVersion(parentSemVersions)
-            maxVersionFromParents.updateFromCommit(commitData.commit, settings, preReleaseVersion)
+            if (!commitData.commit.ignored) {
+                maxVersionFromParents.updateFromCommit(commitData.commit, settings, preReleaseVersion)
+            }
             result.visitedCommits[commitData.commit.sha] = maxVersionFromParents
             lastFoundVersion = maxVersionFromParents
         }

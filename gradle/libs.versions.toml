@@ -1,10 +1,11 @@
 [versions]
-assertj = "3.27.6"
+assertj = "3.27.7"
 git-semver-plugin = "0.17.0"
-jgit = "7.4.0.202509020913-r"
+jgit = "7.6.0.202603022253-r"
 kotlin = "2.2.21"
 plugin-publish = "2.0.0"
 slf4j = "2.0.17"
+bc = "1.84"
 
 [plugins]
 git-semver = { id = "com.github.jmongard.git-semver-plugin", version.ref = "git-semver-plugin" }
@@ -18,3 +19,4 @@ jgit-gpg = { module = "org.eclipse.jgit:org.eclipse.jgit.gpg.bc", version.ref = 
 junit-jupiter-params = { module = "org.junit.jupiter:junit-jupiter-params" }
 kotlin-test-junit5 = { module = "org.jetbrains.kotlin:kotlin-test-junit5" }
 slf4j-api = { module = "org.slf4j:slf4j-api", version.ref = "slf4j" }
+bcpg = { module = "org.bouncycastle:bcpg-jdk18on", version.ref = "bc"}

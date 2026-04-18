@@ -263,6 +263,7 @@ semver {
     createReleaseTag = true
     metaSeparator = '+'
     useTwoDigitVersion = false
+    pathFilter = ""
 }
 
 //Remember to retrieve the version after plugin has been configured
@@ -293,6 +294,7 @@ version = semver.version
   has the same effect as the --no-commit flag.
 * **metaSeparator**: The character to use to separate build metadata from the version when printing info version.
 * **useTwoDigitVersion**: If the version should be two digits instead of three.
+* **pathFilter**: Filter commits to only include those touching the specified path prefix. Useful for monorepos where you want version bumps based only on changes in a subdirectory (e.g., `"lib"` or `"api"`). Commits outside the filter don't affect version calculation but release commits and tags outside the filter are still found as the base version.
 
 Patterns is matched using [java regular expressions](https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html) 
 with IGNORE_CASE and MULTILINE options enabled.

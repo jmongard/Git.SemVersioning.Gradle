@@ -30,10 +30,8 @@ repositories {
 }
 
 dependencies {
-    implementation(libs.jgit.core)
-    implementation(libs.jgit.gpg)
+    implementation(libs.bundles.jgit)
     implementation(libs.slf4j.api)
-    implementation(libs.bcpg)
 
     testImplementation(libs.kotlin.test.junit5)
     testImplementation(libs.junit.jupiter.params)

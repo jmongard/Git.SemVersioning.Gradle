@@ -19,4 +19,11 @@ jgit-gpg = { module = "org.eclipse.jgit:org.eclipse.jgit.gpg.bc", version.ref = 
 junit-jupiter-params = { module = "org.junit.jupiter:junit-jupiter-params" }
 kotlin-test-junit5 = { module = "org.jetbrains.kotlin:kotlin-test-junit5" }
 slf4j-api = { module = "org.slf4j:slf4j-api", version.ref = "slf4j" }
+
 bcpg = { module = "org.bouncycastle:bcpg-jdk18on", version.ref = "bc"}
+bcprov = { module = "org.bouncycastle:bcprov-jdk18on", version.ref = "bc"}
+bcutil = { module = "org.bouncycastle:bcutil-jdk18on", version.ref = "bc"}
+bcpkix = { module = "org.bouncycastle:bcpkix-jdk18on", version.ref = "bc"}
+
+[bundles]
+jgit = ["jgit-core", "jgit-gpg", "bcpg", "bcprov", "bcutil", "bcpkix"]

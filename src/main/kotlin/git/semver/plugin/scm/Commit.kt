@@ -3,7 +3,8 @@ package git.semver.plugin.scm
 import java.util.Date
 
 class Commit(override val text: String, override val sha: String, val commitTime: Int, val parents: Sequence<Commit>,
-    val authorName:String = "", val authorEmail:String = "", val authorWhen:Date = Date()) : IRefInfo {
+    val authorName:String = "", val authorEmail:String = "", val authorWhen:Date = Date(),
+    val ignored: Boolean = false) : IRefInfo {
     override fun toString(): String = text
 }
 

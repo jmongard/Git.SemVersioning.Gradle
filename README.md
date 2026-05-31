@@ -171,7 +171,8 @@ The `releaseVersion` task creates both a release commit and a release tag by def
 * **--message**="message": Add a custom message to the tag and/or commit
 * **--preRelease**="version": Set the pre-release identifier (e.g., `--preRelease=alpha.1`). Use `--preRelease=-` to promote a pre-release to a full release
 
-**Note:** The `releaseVersion` task is currently only registered on the root project when the plugin is applied there.
+> [!IMPORTANT]
+> The `releaseVersion` task is currently registered only on the root project when the plugin is applied there. To use it in another project, you need to register the task explicitly in that project e.g: `tasks.register<ReleaseTask>("release", ReleaseTask::class.java, semver)`
 
 ## Example of how version is calculated 
 

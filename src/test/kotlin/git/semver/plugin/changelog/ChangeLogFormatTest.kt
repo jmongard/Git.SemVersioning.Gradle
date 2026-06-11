@@ -175,7 +175,49 @@ class ChangeLogFormatTest {
             "0080000" to "test: Added some tests",
             "0090000" to "ci: A CI change",
             "0100000" to "xyz: Some other change",
-            "0110000" to "An uncategorized change"
+            "0110000" to "An uncategorized change",
+            "0200000" to """
+                fix(gradle-plugin): Fix-up the caching mechanism
+
+                The previous caching mechanism assumed that all tree nodes with a
+                particular component identifier have identical subtrees. In some cases
+                this does not seem to hold.
+
+                In a some real world Android project, a dependency `A`, did not have
+                chilren within the `releaseRuntimeClasspath` scope, while its `pom.xml`
+                declared multiple dependencies limited to the `runtime` scope via [1].
+                Running `./gradlew dependencies` revealed that the subtree of `A`
+                actually has children in any `*RuntimeClassPath` scope, but has none in
+                the `*CompileClasspath` scope. However, `GradleInspector` cached the
+                subtree without children (as it first processed a Gradle configuration
+                where the children are not resolved), and re-used that cached subtree
+                for all scopes in which `A` appears. As result, the children of `A`
+                were missing accidentally.
+
+                Adjust the caching mechanism to only de-duplicate identical subtrees by
+                using the same instance of `OrtComponentReference` for any identical
+                subtree. While this new approach does not speed-up execution time, it
+                does (compared to no caching) reduce main memory consumption, which was
+                the primary goal of the introduction of the previous caching mechanism
+                introduced by [2] and one of the goals of [3]. Compared to before, the
+                memory consumption increases a bit, because the now removed incorrect
+                "de-duplication" did reduce memory consumption. Together with the
+                preceeding commit, which reduced main memory consumption, it should be
+                ok overall.
+
+                Note: Previously, `globalDependencySubtrees` and `ortComponentCache`
+                      were used, which was redundant, because `ortComponentCache` also
+                      caches subtrees, as the entries of type `OrtComponentReference`
+                      are recursive data structures containing a subtree. This is why
+                      the new approach uses only one `Map` for the caching.
+                      Furthermore, `OrtComponentReferenceImpl` becomes a `data` class
+                      now, because the `OrtComponentReference` interface is being used
+                      as the key for a map.
+
+                [1]: `<scope>runtime</scope>`
+                [2]: https://github.com/oss-review-toolkit/ort/commit/9ccccf6b86b0f3aaf16add5067d8011b4511e33a
+                [3]: https://github.com/oss-review-toolkit/ort/commit/7c63104aec5c4bfdfcb618558c4bddb7790df4ac
+            """.trimIndent()
         )
         return changeLog.map { Commit(it.value, it.key, 0, emptySequence()) }
     }

@@ -63,7 +63,7 @@ open class ChangeLogTexts(
 
     var sortByText: Boolean = true
 
-    var changeLogPattern: String = "\\A(?<Type>\\w+)(?:\\((?<Scope>[^()]+)\\))?!?:\\s*(?<Message>(?:.|\n)*)"
+    var changeLogPattern: String = "(?m)^(?<Type>\\w+)(?:\\((?<Scope>[^()]+)\\))?!?:\\s*(?<Message>.*)$"
 
 
     var headerFormat: (ChangeLogFormatter.CommitInfo) -> String = { commitInfo ->

@@ -9,7 +9,7 @@ data class ChangeLogFormatter(
     companion object {
         private const val SCOPE = "Scope"
         private const val TYPE = "Type"
-        private const val MESSAGE = "Message"
+        private const val DESCRIPTION = "Description"
     }
 
     fun formatLog(changeLog: List<Commit>, settings: SemverSettings, changeLogTexts: ChangeLogTexts): String {
@@ -57,7 +57,7 @@ data class ChangeLogFormatter(
                 isBreakingChange,
                 it.groupValue(TYPE),
                 it.groupValue(SCOPE),
-                it.groupValue(MESSAGE)
+                it.groupValue(DESCRIPTION)
             )
         } ?: CommitInfo(commits, text, isBreakingChange)
     }
@@ -70,7 +70,7 @@ data class ChangeLogFormatter(
         val isBreaking: Boolean,
         val type: String? = null,
         val scope: String? = null,
-        val message: String? = null
+        val description: String? = null
     )
 
     class Context {

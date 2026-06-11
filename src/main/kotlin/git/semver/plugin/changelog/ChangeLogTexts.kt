@@ -63,11 +63,11 @@ open class ChangeLogTexts(
 
     var sortByText: Boolean = true
 
-    var changeLogPattern: String = "(?m)^(?<Type>\\w+)(?:\\((?<Scope>[^()]+)\\))?!?:\\s*(?<Message>.*)$"
+    var changeLogPattern: String = "(?m)^(?<Type>\\w+)(?:\\((?<Scope>[^()]+)\\))?!?:\\s*(?<Description>.*)$"
 
 
     var headerFormat: (ChangeLogFormatter.CommitInfo) -> String = { commitInfo ->
-        (commitInfo.message ?: commitInfo.text).lineSequence().first()
+        (commitInfo.description ?: commitInfo.text).lineSequence().first()
     }
     var fullHeaderFormat: (ChangeLogFormatter.CommitInfo) -> String = { commitInfo ->
         commitInfo.text.lineSequence().first()

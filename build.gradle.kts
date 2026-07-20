@@ -61,7 +61,7 @@ configurations["functionalTestImplementation"].extendsFrom(configurations["testI
 configurations["functionalTestRuntimeOnly"].extendsFrom(configurations["testRuntimeOnly"])
 
 // Add a task to run the functional tests
-val functionalTest by tasks.registering(Test::class) {
+tasks.register<Test>("functionalTest") {
     testClassesDirs = functionalTestSourceSet.output.classesDirs
     classpath = functionalTestSourceSet.runtimeClasspath
     useJUnitPlatform()
@@ -88,7 +88,7 @@ tasks.named<KotlinCompile>("compileKotlin") {
 
 tasks.named<Task>("check") {
     // Run the functional tests as part of `check`
-    dependsOn(functionalTest)
+    dependsOn("functionalTest")
 }
 
 tasks.named<Test>("test") {
@@ -97,7 +97,7 @@ tasks.named<Test>("test") {
 }
 
 tasks.jacocoTestReport {
-    dependsOn(functionalTest)
+    dependsOn("functionalTest")
     // Aggregate all execution data into a single XML report.
     executionData(fileTree(project.layout.buildDirectory).include("/jacoco/*.exec"))
     reports {

@@ -93,12 +93,12 @@ class GitSemverPluginFunctionalTest {
     fun `can run print task`(printTask: String, pattern: String) {
         val projectDir = setupTestProject()
 
-        val result = run(projectDir, null, printTask, "--configuration-cache",  "-q")
+        val result = run(projectDir, null, printTask, "--configuration-cache", "-q")
 
         assertThat(result.output).containsPattern(pattern)
 
-        //Run it again to make sure configuration cache don't break it
-        val result2 = run(projectDir, null, printTask, "--configuration-cache",  "-q")
+        // Run it again to make sure the configuration cache does not break it.
+        val result2 = run(projectDir, null, printTask, "--configuration-cache", "-q", "--rerun")
 
         assertThat(result2.output).containsPattern(pattern)
     }

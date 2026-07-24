@@ -3,6 +3,7 @@ package git.semver.plugin.scm
 import git.semver.plugin.semver.SemverSettings
 import org.assertj.core.api.Assertions.assertThat
 import org.eclipse.jgit.api.Git
+import org.eclipse.jgit.revwalk.RevCommit
 import org.junit.jupiter.api.io.TempDir
 import java.io.File
 import java.nio.file.Files
@@ -21,12 +22,12 @@ class GitProviderPathFilterTest {
         return path.toFile()
     }
 
-    private fun commitFile(git: Git, relPath: String, message: String) {
+    private fun commitFile(git: Git, relPath: String, message: String): RevCommit {
         val file = File(git.repository.workTree, relPath)
         file.parentFile?.mkdirs()
         file.writeText(message)
         git.add().addFilepattern(relPath).call()
-        git.commit().setMessage(message).call()
+        return git.commit().setMessage(message).call()
     }
 
     @Test
@@ -166,6 +167,58 @@ class GitProviderPathFilterTest {
 
             assertThat(messages).contains("feat: add B in lib")
             assertThat(messages).doesNotContain("feat: add service outside lib")
+        }
+    }
+
+    @Test
+    fun `a release tag on a descendant commit does not hide pending changes on an earlier commit`() {
+        val gitDir = getGitDir("pathFilterDescendantTag")
+        val provider = GitProvider(SemverSettings().apply {
+            pathFilter = "lib"
+            releaseTagNameFormat = "v%s"
+        })
+
+        Git.init().setDirectory(gitDir).call().use { git ->
+            commitFile(git, "README.md", "Initial commit")
+            commitFile(git, "lib/A.kt", "release: 1.0.0")
+            git.tag().setName("v1.0.0").call()
+
+            // Pending change, not yet released.
+            val pendingCommit = commitFile(git, "lib/B.kt", "fix: patch pending in lib")
+
+            // A later commit lands and gets released first (descendant of pendingCommit).
+            commitFile(git, "lib/C.kt", "feat: a later feature also in lib")
+            git.tag().setName("v1.1.0").call()
+
+            // Compute version as of the earlier, still-pending commit.
+            git.checkout().setName(pendingCommit.name).call()
+
+            assertThat(provider.semVersion(git).toVersionString()).isEqualTo("1.0.1-SNAPSHOT")
+        }
+    }
+
+    @Test
+    fun `changelog for an earlier commit is not hidden by a later release tag`() {
+        val gitDir = getGitDir("pathFilterDescendantTagChangelog")
+        val provider = GitProvider(SemverSettings().apply {
+            pathFilter = "lib"
+            releaseTagNameFormat = "v%s"
+        })
+
+        Git.init().setDirectory(gitDir).call().use { git ->
+            commitFile(git, "README.md", "Initial commit")
+            commitFile(git, "lib/A.kt", "release: 1.0.0")
+            git.tag().setName("v1.0.0").call()
+
+            val pendingCommit = commitFile(git, "lib/B.kt", "fix: patch pending in lib")
+
+            commitFile(git, "lib/C.kt", "feat: a later feature also in lib")
+            git.tag().setName("v1.1.0").call()
+
+            git.checkout().setName(pendingCommit.name).call()
+
+            val messages = provider.changeLog(git).map { it.text }
+            assertThat(messages).contains("fix: patch pending in lib")
         }
     }
 }

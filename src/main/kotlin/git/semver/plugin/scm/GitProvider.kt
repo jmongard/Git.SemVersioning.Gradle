@@ -158,19 +158,35 @@ internal class GitProvider(internal val settings: SemverSettings) {
     private fun computeRelevantShas(repo: Repository, head: ObjectId, tags: Map<String, List<Tag>>): Set<String>? {
         if (settings.pathFilter.isEmpty()) return null
 
-        val versionTagIds = getVersionTagObjectIds(tags)
+        val versionTagIds = getVersionTagObjectIds(repo, head, tags)
         val releaseMsgIds = findReleaseMessageCommits(repo, head, versionTagIds)
         val boundaryIds = versionTagIds + releaseMsgIds
 
         return filterCommitsByPath(repo, head, boundaryIds)
     }
 
-    private fun getVersionTagObjectIds(tags: Map<String, List<Tag>>): List<ObjectId> {
-        return tags.entries
+    private fun getVersionTagObjectIds(repo: Repository, head: ObjectId, tags: Map<String, List<Tag>>): List<ObjectId> {
+        val candidateIds = tags.entries
             .filter { (_, tagList) -> tagList.any { MutableSemVersion.tryParse(it) != null } }
             .mapNotNull { (sha, _) ->
                 try { ObjectId.fromString(sha) } catch (_: Exception) { null }
             }
+        // Only tags reachable from `head` may bound the walk below.
+        return filterAncestorsOf(repo, head, candidateIds)
+    }
+
+    private fun filterAncestorsOf(repo: Repository, head: ObjectId, candidateIds: List<ObjectId>): List<ObjectId> {
+        if (candidateIds.isEmpty()) return candidateIds
+        return RevWalk(repo).use { walk ->
+            val headCommit = walk.parseCommit(head)
+            candidateIds.filter { oid ->
+                try {
+                    walk.isMergedInto(walk.parseCommit(oid), headCommit)
+                } catch (_: Exception) {
+                    false
+                }
+            }
+        }
     }
 
     private fun findReleaseMessageCommits(repo: Repository, head: ObjectId, boundaryIds: List<ObjectId>): List<ObjectId> {

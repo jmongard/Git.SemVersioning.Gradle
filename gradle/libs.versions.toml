@@ -1,6 +1,6 @@
 [versions]
 assertj = "3.27.7"
-git-semver-plugin = "0.17.0"
+git-semver-plugin = "0.19.3"
 jgit = "7.6.0.202603022253-r"
 kotlin = "2.2.21"
 plugin-publish = "2.0.0"

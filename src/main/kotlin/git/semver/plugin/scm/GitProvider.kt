@@ -137,10 +137,7 @@ internal class GitProvider(internal val settings: SemverSettings) {
     }
 
     private fun getTags(repository: Repository): Map<String, List<Tag>> {
-        val tagPrefix = settings.releaseTagNameFormat
-            .takeIf { it.contains("%s") }
-            ?.substringBefore("%s")
-            .orEmpty()
+        val tagPrefix = settings.releaseTagNameFormat.substringBefore("%s", "")
         return repository.refDatabase.getRefsByPrefix(REF_PREFIX)
             .map { Tag(it.name.removePrefix(REF_PREFIX), getObjectIdFromRef(repository, it).name) }
             .filter { tagPrefix.isEmpty() || it.text.startsWith(tagPrefix) }

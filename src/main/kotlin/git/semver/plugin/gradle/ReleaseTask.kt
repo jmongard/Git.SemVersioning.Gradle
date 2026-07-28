@@ -2,13 +2,13 @@ package git.semver.plugin.gradle
 
 import git.semver.plugin.scm.GitProvider
 import org.gradle.api.DefaultTask
-import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.options.Option
+import org.gradle.work.DisableCachingByDefault
 import javax.inject.Inject
 
-@CacheableTask
+@DisableCachingByDefault
 open class ReleaseTask @Inject constructor(private val settings: GitSemverPluginExtension) : DefaultTask() {
     private var preRelease: String? = null
     private var message: String? = null

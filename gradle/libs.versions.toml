@@ -1,11 +1,11 @@
 [versions]
 assertj = "3.27.7"
-git-semver-plugin = "0.19.3"
-jgit = "7.6.0.202603022253-r"
+git-semver-plugin = "0.19.5"
+jgit = "7.8.0.202609011348-r"
 kotlin = "2.2.21"
-plugin-publish = "2.0.0"
-slf4j = "2.0.17"
-bc = "1.84"
+plugin-publish = "2.2.1"
+slf4j = "2.0.20"
+bc = "1.86"
 
 [plugins]
 git-semver = { id = "com.github.jmongard.git-semver-plugin", version.ref = "git-semver-plugin" }

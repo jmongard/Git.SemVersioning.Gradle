@@ -27,9 +27,9 @@ internal class GitProvider(internal val settings: SemverSettings) {
         internal fun isFormatEnabled(flag: Boolean, format: String) = flag && format.isNotEmpty()
     }
 
-    internal fun getSemVersion(startingPath: File): SemInfoVersion {
+    internal fun getSemVersion(startingPath: File): SemInfoVersion = NoSystemConfigReader.use {
         getRepository(startingPath).use {
-            return semVersion(Git(it))
+            semVersion(Git(it))
         }
     }
 

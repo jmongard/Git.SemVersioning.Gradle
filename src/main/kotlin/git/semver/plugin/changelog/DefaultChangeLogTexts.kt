@@ -19,7 +19,7 @@ internal object DefaultHeaderTexts {
     const val TOP_HEADER = "## What's Changed"
     const val BREAKING_CHANGES = "### \uD83D\uDEE0 Breaking Changes"
     const val OTHER_CHANGES = "### \uD83D\uDCA1 Other Changes"
-    const val BUG_FIXES = "### \uD83D\uDC1E Bug Fixes "
+    const val BUG_FIXES = "### \uD83D\uDC1E Bug Fixes"
     const val NEW_FEATURE = "### \uD83C\uDF89 New Features"
     const val TESTS = "### ✅ Tests"
     const val DOCUMENTATION = "### \uD83D\uDCD6 Documentation"

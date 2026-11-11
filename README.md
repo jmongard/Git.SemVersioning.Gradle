@@ -168,6 +168,7 @@ The `releaseVersion` task creates both a release commit and a release tag by def
 * **--no-commit**: Skip creating a commit (can also be set in settings using `createReleaseCommit=false`)
 * **--commit**: Create a commit (default behavior, unless disabled in settings)
 * **--no-dirty**: Skip the dirty working directory check (can also be set in settings using `noDirtyCheck=true`)
+* **--check-remote**: Fail if the commit to tag is not yet available on any remote-tracking branch, to avoid pushing a tag that refers to local-only commits (might require a fetch beforehand, and cannot be combined with creating a release commit)
 * **--message**="message": Add a custom message to the tag and/or commit
 * **--preRelease**="version": Set the pre-release identifier (e.g., `--preRelease=alpha.1`). Use `--preRelease=-` to promote a pre-release to a full release
 

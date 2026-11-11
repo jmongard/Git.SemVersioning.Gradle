@@ -93,6 +93,12 @@ class GitSemverPluginTest {
         task.setNoDirty(true)
         assertThat(task.getReleaseParams().noDirtyCheck).isTrue()
 
+        assertThat(task.getReleaseParams().checkRemote).isFalse()
+        task.setCheckRemote(true)
+        assertThat(task.getReleaseParams().checkRemote).isTrue()
+        task.setCheckRemote(false)
+        assertThat(task.getReleaseParams().checkRemote).isFalse()
+
         task.setNoCommit(true)
         assertThat(task.getReleaseParams().commit).isFalse()
         task.setNoCommit(false)

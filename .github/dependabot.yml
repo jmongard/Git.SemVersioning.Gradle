@@ -1,0 +1,35 @@
+version: 2
+updates:
+  - package-ecosystem: "gradle"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    commit-message:
+      prefix: "build"
+      include: "scope"          # -> "build(deps): ..."
+    open-pull-requests-limit: 5
+    groups:
+      bouncycastle:
+        patterns: ["org.bouncycastle:*"]
+      jgit:
+        patterns: ["org.eclipse.jgit:*"]
+      test-libs:
+        patterns: ["org.assertj:*", "org.junit*"]
+    ignore:
+      # Kotlin is pinned to language/api 1.8 for Gradle compatibility - bump consciously
+      - dependency-name: "org.jetbrains.kotlin*"
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
+      # JGit majors may raise the minimum Java version for plugin users
+      - dependency-name: "org.eclipse.jgit:*"
+        update-types: ["version-update:semver-major"]
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "monthly"
+    commit-message:
+      prefix: "ci"
+      include: "scope"          # -> "ci(deps): ..."
+    groups:
+      actions:
+        patterns: ["*"]

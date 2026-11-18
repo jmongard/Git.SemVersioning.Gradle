@@ -1,7 +1,7 @@
 [versions]
 assertj = "3.27.7"
 git-semver-plugin = "0.19.6"
-jgit = "7.8.0.202609011348-r"
+jgit = "7.8.1.202611041320-r"
 kotlin = "2.2.21"
 plugin-publish = "2.2.1"
 slf4j = "2.0.20"

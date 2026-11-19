@@ -322,7 +322,10 @@ class GitProviderTest {
     }
 
     private fun release(gitProvider: GitProvider, it: Git, preRelease: String? = null): SemInfoVersion {
-        gitProvider.createRelease(it, GitProvider.ReleaseParams(false, commit = true, preRelease = preRelease, noDirtyCheck = false))
+        val params = GitProvider.ReleaseParams(
+            tag = false, commit = true, preRelease = preRelease, noDirtyCheck = false, checkRemote = false
+        )
+        gitProvider.createRelease(it, params)
         return getSemVersionAndPrint(
             gitProvider, it,
             "gradle releaseVersion " + if (preRelease == null) "" else "--preRelease=\"$preRelease\"",
@@ -352,25 +355,37 @@ class GitProviderTest {
         Git.init().setDirectory(gitDir).call().use {
             commit(it, "some changes", gitProvider)
         }
-        gitProvider.createRelease(gitDir, GitProvider.ReleaseParams(true, commit = false, preRelease = "alpha.1", noDirtyCheck = false))
+        gitProvider.createRelease(
+            gitDir,
+            GitProvider.ReleaseParams(true, commit = false, preRelease = "alpha.1", noDirtyCheck = false, checkRemote = false)
+        )
 
         Git.open(gitDir).use {
             commit(it, "feat: some feature", gitProvider)
             commit(it, "docs: some documentation", gitProvider)
         }
-        gitProvider.createRelease(gitDir, GitProvider.ReleaseParams(false, commit = true, "beta.1", "some message", false))
+        gitProvider.createRelease(
+            gitDir,
+            GitProvider.ReleaseParams(false, commit = true, "beta.1", "some message", false, checkRemote = false)
+        )
 
         Git.open(gitDir).use {
             commit(it, "fix: some fixes", gitProvider)
             commit(it, "docs: some documentation", gitProvider)
         }
-        gitProvider.createRelease(gitDir, GitProvider.ReleaseParams(true, commit = true, preRelease = null, noDirtyCheck = false))
+        gitProvider.createRelease(
+            gitDir,
+            GitProvider.ReleaseParams(true, commit = true, preRelease = null, noDirtyCheck = false, checkRemote = false)
+        )
 
         Git.open(gitDir).use {
             commit(it, "some changes", gitProvider)
             commit(it, "docs: some documentation", gitProvider)
         }
-        gitProvider.createRelease(gitDir, GitProvider.ReleaseParams(false, commit = true, preRelease = "", noDirtyCheck = false))
+        gitProvider.createRelease(
+            gitDir,
+            GitProvider.ReleaseParams(false, commit = true, preRelease = "", noDirtyCheck = false, checkRemote = false)
+        )
 
         Git.open(gitDir).use {
             assertThat(gitProvider.getHeadCommit(it.repository).text).startsWith("release: v0.")
@@ -469,6 +484,69 @@ class GitProviderTest {
 
         assertThatThrownBy { provider.checkDirty(noDirtyCheck = false, isClean = false) }
             .isInstanceOf(IllegalStateException::class.java)
+    }
+
+    @ParameterizedTest
+    @CsvSource(value = [
+        "false, false",
+        "false, true",
+        "true, true"
+    ])
+    fun checkRemote(checkRemoteParam: Boolean, isOnRemote: Boolean) {
+        val provider = GitProvider(SemverSettings())
+
+        assertThatCode { provider.checkRemote(checkRemoteParam, isOnRemote) }
+            .doesNotThrowAnyException()
+    }
+
+    @Test
+    fun checkRemote_throws() {
+        val provider = GitProvider(SemverSettings())
+
+        assertThatThrownBy { provider.checkRemote(checkRemote = true, isOnRemote = false) }
+            .isInstanceOf(IllegalStateException::class.java)
+    }
+
+    @Test
+    fun testCheckRemote() {
+        val remoteDir = getGitDir("integrationTest11")
+        val localDir = getGitDir("integrationTest12")
+
+        val gitProvider = gitProvider()
+
+        Git.init().setDirectory(remoteDir).call().use {
+            it.commit().setMessage("Initial commit").call()
+        }
+
+        Git.cloneRepository().setURI(remoteDir.toURI().toString()).setDirectory(localDir).call().use {
+            assertThat(gitProvider.isOnRemote(it)).isTrue()
+
+            assertThatCode {
+                val params = GitProvider.ReleaseParams(tag = true, commit = false, preRelease = null, noDirtyCheck = false, checkRemote = true)
+                gitProvider.createRelease(it, params)
+            }.doesNotThrowAnyException()
+
+            it.commit().setMessage("fix: local only").call()
+            assertThat(gitProvider.isOnRemote(it)).isFalse()
+
+            assertThatThrownBy {
+                val params = GitProvider.ReleaseParams(tag = true, commit = false, preRelease = null, noDirtyCheck = false, checkRemote = true)
+                gitProvider.createRelease(it, params)
+            }.isInstanceOf(IllegalStateException::class.java)
+
+            it.push().call()
+            assertThat(gitProvider.isOnRemote(it)).isTrue()
+
+            assertThatCode {
+                val params = GitProvider.ReleaseParams(tag = true, commit = false, preRelease = null, noDirtyCheck = false, checkRemote = true)
+                gitProvider.createRelease(it, params)
+            }.doesNotThrowAnyException()
+
+            assertThatThrownBy {
+                val params = GitProvider.ReleaseParams(tag = true, commit = true, preRelease = null, noDirtyCheck = false, checkRemote = true)
+                gitProvider.createRelease(it, params)
+            }.isInstanceOf(IllegalStateException::class.java)
+        }
     }
 
     @ParameterizedTest

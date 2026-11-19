@@ -15,6 +15,7 @@ open class ReleaseTask @Inject constructor(private val settings: GitSemverPlugin
     private var tag = settings.createReleaseTag
     private var commit = settings.createReleaseCommit
     private var noDirtyCheck = false
+    private var checkRemote = false
 
     init {
         group = GitSemverPlugin.VERSIONING_GROUP
@@ -56,11 +57,17 @@ open class ReleaseTask @Inject constructor(private val settings: GitSemverPlugin
         this.noDirtyCheck = noDirtyCheck
     }
 
+    @Option(option = "check-remote", description = "Check remotes to contain the tagged commit")
+    fun setCheckRemote(checkRemote: Boolean) {
+        this.checkRemote = checkRemote
+    }
+
     @TaskAction
     fun createRelease() {
         GitProvider(settings.createSettings()).createRelease(settings.gitDirectory.get().asFile, getReleaseParams())
     }
 
     @Internal
-    internal fun getReleaseParams() = GitProvider.ReleaseParams(tag.get(), commit.get(), preRelease, message, noDirtyCheck)
+    internal fun getReleaseParams() =
+        GitProvider.ReleaseParams(tag.get(), commit.get(), preRelease, message, noDirtyCheck, checkRemote)
 }

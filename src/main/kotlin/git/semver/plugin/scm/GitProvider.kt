@@ -5,6 +5,7 @@ import git.semver.plugin.semver.SemInfoVersion
 import git.semver.plugin.semver.SemverSettings
 import git.semver.plugin.semver.VersionFinder
 import org.eclipse.jgit.api.Git
+import org.eclipse.jgit.lib.Constants
 import org.eclipse.jgit.lib.ObjectId
 import org.eclipse.jgit.lib.Ref
 import org.eclipse.jgit.lib.Repository
@@ -68,6 +69,10 @@ internal class GitProvider(internal val settings: SemverSettings) {
     ) {
         checkDirty(params.noDirtyCheck, isClean(it))
 
+        // A newly created release commit is never available on the remote yet.
+        val isCommit = isFormatEnabled(params.commit, settings.releaseCommitTextFormat)
+        checkRemote(params.checkRemote, params.checkRemote && !isCommit && isOnRemote(it))
+
         val tags = getTags(it.repository)
         val version = VersionFinder(settings, tags).getReleaseVersion(
             getHeadCommit(it.repository, tags),
@@ -82,7 +87,6 @@ internal class GitProvider(internal val settings: SemverSettings) {
             useTwoDigitVersion =  settings.useTwoDigitVersion)
         logger.info("Saving new version: {}", versionString)
 
-        val isCommit = isFormatEnabled(params.commit, settings.releaseCommitTextFormat)
         if (isCommit) {
             val commitMessage = settings.releaseCommitTextFormat.format(versionString, params.message.orEmpty())
             val commitCommand = it.commit().setMessage(commitMessage.trim())
@@ -134,6 +138,22 @@ internal class GitProvider(internal val settings: SemverSettings) {
         logger.debug("modified: {}", status.modified)
         logger.debug("untracked: {}", status.untracked)
         return settings.noDirtyCheck
+    }
+
+    internal fun isOnRemote(git: Git): Boolean {
+        val repo = git.repository
+        val head = repo.resolve("HEAD") ?: return false
+        val remoteRefs = repo.refDatabase.getRefsByPrefix(Constants.R_REMOTES)
+
+        return RevWalk(repo).use { walk ->
+            val headCommit = walk.parseCommit(head)
+            remoteRefs.any { ref ->
+                val remoteCommit = walk.parseCommit(getObjectIdFromRef(repo, ref))
+                walk.isMergedInto(headCommit, remoteCommit).also {
+                    if (it) logger.info("Commit {} is available on remote branch {}", headCommit.name, ref.name)
+                }
+            }
+        }
     }
 
     private fun getTags(repository: Repository): Map<String, List<Tag>> {
@@ -235,6 +255,10 @@ internal class GitProvider(internal val settings: SemverSettings) {
         check(noDirtyCheck || isClean) { "Local modifications exists" }
     }
 
+    internal fun checkRemote(checkRemote: Boolean, isOnRemote: Boolean) {
+        check(!checkRemote || isOnRemote) { "The commit to tag is not available on any remote" }
+    }
+
     private fun getObjectIdFromRef(repository: Repository, ref: Ref): ObjectId =
         repository.refDatabase.peel(ref).peeledObjectId ?: ref.objectId
 
@@ -243,5 +267,7 @@ internal class GitProvider(internal val settings: SemverSettings) {
         val commit: Boolean,
         val preRelease: String?,
         val message: String? = null,
-        val noDirtyCheck: Boolean)
+        val noDirtyCheck: Boolean,
+        val checkRemote: Boolean
+    )
 }

@@ -5,7 +5,7 @@ jgit = "7.8.1.202611041320-r"
 kotlin = "2.2.21"
 plugin-publish = "2.2.1"
 slf4j = "2.0.20"
-bc = "1.86"
+bc = "1.87"
 
 [plugins]
 git-semver = { id = "com.github.jmongard.git-semver-plugin", version.ref = "git-semver-plugin" }
